@@ -6,9 +6,9 @@
 
 ## Sobre o projeto
 
-O mercado de tecnologia enfrenta um paradoxo: empresas com vagas abertas e estudantes qualificados que não conseguem se encontrar. O problema não está na falta de talento nem na falta de oportunidades — está na ausência de uma ponte eficiente entre os dois lados.
+O mercado de tecnologia enfrenta um paradoxo: empresas com vagas abertas e estudantes qualificados que não conseguem se encontrar. O problema não está na falta de talento nem na falta de oportunidades, está na ausência de uma ponte eficiente entre os dois lados.
 
-O **Porto Connect** resolve isso. A plataforma analisa o perfil técnico de cada estudante — suas hard skills, projetos práticos e nível de maturidade — e gera um ranking de compatibilidade com as vagas disponíveis nas empresas parceiras do Porto Digital. O resultado é um processo seletivo mais ágil, mais justo e baseado em evidências reais de capacidade técnica, e não apenas em currículos tradicionais.
+O **Porto Connect** resolve isso. A plataforma analisa o perfil técnico de cada estudante, suas hard skills, projetos práticos e nível de maturidade, e gera um ranking de compatibilidade com as vagas disponíveis nas empresas parceiras do Porto Digital. O resultado é um processo seletivo mais ágil, mais justo e baseado em evidências reais de capacidade técnica, e não apenas em currículos tradicionais.
 
 A solução beneficia três perfis:
 
@@ -20,7 +20,7 @@ A solução beneficia três perfis:
 
 ## Este repositório
 
-Este repositório contém o **front-end** do Porto Connect, desenvolvido com **HTML, CSS e JavaScript puro** — sem frameworks, sem dependências externas, sem etapa de build.
+Este repositório contém o **Front-end** do Porto Connect, desenvolvido com **HTML, CSS e JavaScript**.
 
 A interface cobre os principais fluxos da plataforma: cadastro e edição de perfil, portfólio de projetos, descoberta e filtragem de vagas, candidatura e acompanhamento de processos seletivos.
 
