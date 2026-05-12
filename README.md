@@ -77,7 +77,7 @@ Com a pasta aberta no VS Code, clique com o botão direito no arquivo `index.htm
 
 ## Equipe — Squad 41
 
-Alexciane Lima · Alycia Maia · Alysson Rodrigo · Amanda Estephany · Caio Esdras · Clarice Couto · Christiano Victor · Cristiano Alves · Daniel de Melo · Débora Rafaelle · Fernanda Melo · Yasmin Alvarez
+Alexciane Lima · Alycia Maia · Alysson Rodrigo · Amanda Estephany · Caio Esdras · Clarice Couto · Christiano Victor · Cristiano Alves · Daniel de Melo · Débora Rafaelle · Fernanda Mello · Yasmin Alvarez
 
 ---
 
