@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Porto Connect - Perfil do Aluno</title>
+<link rel="stylesheet" href="../css/style_dashboard.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Lucide icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <header class="navbar">
+    <div class="nav-inner">
+      <a href="#" class="brand" aria-label="Porto Connect">
+        <img src="../assets/images/Sem Título-3.png" alt="Porto Connect" width="34" height="34" class="brand-logo" />
+        <div class="brand-text">
+          <span>Porto</span>
+          <span>Connect</span>
+        </div>
+      </a>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="#" class="active">Dashboard</a>
+        <a href="./portfolio.html">Portfólio</a>
+        <a href="./vagas.html">Vagas</a>
+        <a href="./perfilAluno.html">Perfil</a>
+        <a href="../index.html" class="logout"><i data-lucide="log-out"></i> Sair</a>
+      </nav>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Olá, Ana! <span class="wave">👋</span></h1>
+      <p>Aqui está um resumo da sua jornada</p>
+    </section>
+
+    <section class="stats">
+      <article class="card stat">
+        <div class="stat-head">
+          <span>Prontidão</span>
+          <i data-lucide="trending-up" class="icon-blue"></i>
+        </div>
+        <div class="stat-value">78%</div>
+        <div class="progress"><span style="width:78%"></span></div>
+      </article>
+
+      <article class="card stat">
+        <div class="stat-head">
+          <span>Projetos</span>
+          <i data-lucide="folder-git-2" class="icon-blue"></i>
+        </div>
+        <div class="stat-value">2</div>
+        <div class="stat-sub">Projetos no portfólio</div>
+      </article>
+
+      <article class="card stat">
+        <div class="stat-head">
+          <span>Candidaturas</span>
+          <i data-lucide="briefcase" class="icon-blue"></i>
+        </div>
+        <div class="stat-value">2</div>
+        <div class="stat-sub">Vagas aplicadas</div>
+      </article>
+
+      <article class="card stat">
+        <div class="stat-head">
+          <span>Habilidades</span>
+          <i data-lucide="check-circle-2" class="icon-green"></i>
+        </div>
+        <div class="stat-value">5</div>
+        <div class="stat-sub">Tecnologias dominadas</div>
+      </article>
+    </section>
+
+    <section class="grid-main">
+      <div class="col">
+        <div class="section-head">
+          <h2>Projetos recentes</h2>
+          <a href="./portfolio.html" class="link">Ver todos</a>
+        </div>
+
+        <div class="cards-row">
+          <article class="card project">
+            <div class="project-head">
+              <h3>Sistema de Gestão de Tarefas</h3>
+              <button class="icon-btn" aria-label="Ver no GitHub"><i data-lucide="github"></i></button>
+            </div>
+            <p>Aplicativo web para gerenciar tarefas com autenticação de usuários, categorização e filtros avançados.</p>
+            <div class="tags">
+              <span>React</span><span>TypeScript</span><span>Node.js</span><span>MongoDB</span>
+            </div>
+          </article>
+
+          <article class="card project">
+            <div class="project-head">
+              <h3>API RESTful de E-Commerce</h3>
+              <button class="icon-btn" aria-label="Ver no GitHub"><i data-lucide="github"></i></button>
+            </div>
+            <p>Backend escalável para plataforma de e-commerce com suporte a pagamento, avaliações e carrinho de compras.</p>
+            <div class="tags">
+              <span>Node.js</span><span>Express</span><span>PostgreSQL</span>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="col sidebar">
+        <div class="section-head">
+          <h2>Oportunidades</h2>
+          <a href="./vagas.html" class="link">Ver todas</a>
+        </div>
+
+        <div class="cards-col">
+          <article class="card job">
+            <span class="badge">Frontend</span>
+            <h3>Desenvolvedor React Jr.</h3>
+            <p>TechCorp - Porto</p>
+            <p class="small-text">Remoto • Full-time</p>
+          </article>
+
+          <article class="card job">
+            <span class="badge">Backend</span>
+            <h3>Desenvolvedor Node.js</h3>
+            <p>StartupXYZ - Lisboa</p>
+            <p class="small-text">Presencial • Full-time</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="applications">
+      <div class="section-head">
+        <h2>Minhas Candidaturas</h2>
+        <a href="#" class="link">Ver todas</a>
+      </div>
+
+      <div class="apps-row">
+        <article class="card application">
+          <div class="app-head">
+            <div>
+              <h3>Desenvolvedor React Jr.</h3>
+              <p>TechCorp • Porto</p>
+            </div>
+            <span class="status status-pending">Pendente</span>
+          </div>
+          <p class="small-text">Candidatura enviada há 5 dias</p>
+        </article>
+
+        <article class="card application">
+          <div class="app-head">
+            <div>
+              <h3>Desenvolvedor Full Stack</h3>
+              <p>WebDev Solutions • Lisboa</p>
+            </div>
+            <span class="status status-accepted">Aceito</span>
+          </div>
+          <p class="small-text">Entrevista agendada para 20 de maio</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/script_dashboard.js"></script>
+</body>
+</html>
