@@ -37,8 +37,13 @@ porto-connect/
 │   ├── perfil.html
 │   ├── vagas.html
 │   └── portfolio.html
-├── css/
-│   └── style.css        # Estilos globais
+├── css/                 # Estilos das páginas
+│   ├── perfil.css       # Estilos do perfil do aluno
+│   ├── login_aluno.css
+│   ├── login_empresa.css
+│   ├── home_aluno.css
+│   ├── style_empresa.css
+│   └── style_principal.css
 ├── js/
 │   └── script.js        # Scripts compartilhados
 └── assets/
