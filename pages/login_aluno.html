@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="../css/login_aluno.css">
+    <title>Login do Aluno</title>
+</head>
+<body>
+    <header class="topo">
+        <div class="logo">
+            <img src="../assets/images/logo.png" alt="Logo Porto Connect">
+        </div>
+
+        <div class="acoes">
+            <a href="login_aluno.html" class="btn-entrar">Entrar</a>
+            <a href="home_aluno.html" class="btn-comecar">Começar</a>
+        </div>
+    </header>
+    
+    <a href="../login1.html" class="voltar">
+        <i class='bx bx-arrow-back'></i>
+        Voltar
+    </a>
+
+    <main>
+        <div class="container">
+            <form action="home_aluno.html" method="get">
+                <h1>Login do Aluno</h1>
+                <p class="subtitle">Acesse sua conta</p>
+
+                <div class="input-box">
+                    <label for="email">Email</label>
+                    <input id="email" placeholder="Seu email" type="email" required>
+                    <i class="bx bxs-envelope"></i>
+                </div>
+
+                <div class="input-box">
+                    <label for="senha">Senha</label>
+                    <input id="senha" placeholder="Senha" type="password" required>
+                    <i class="bx bxs-lock-alt"></i>
+                </div>
+
+                <div class="lembrar-esqueceu">
+                    <label>
+                        <input type="checkbox">
+                        Lembrar-me
+                    </label>
+                    <a href="#">Esqueci minha senha</a>
+                </div>
+
+                <button type="submit">Entrar</button>
+
+                <div class="criar-conta">
+                    <p>Não tem uma conta? <a href="#">Criar conta</a></p>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>
