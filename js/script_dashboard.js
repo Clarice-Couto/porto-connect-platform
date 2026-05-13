@@ -1,14 +1,11 @@
-// Inicializa ícones Lucide
 if (window.lucide) lucide.createIcons();
 
-// Toggle do menu mobile
 const menuToggle = document.getElementById('menuToggle');
 const navLinks = document.getElementById('navLinks');
 menuToggle?.addEventListener('click', () => {
   navLinks.classList.toggle('open');
 });
 
-// Navegação ativa
 document.querySelectorAll('.nav-links a').forEach(link => {
   link.addEventListener('click', (e) => {
     if (link.classList.contains('logout')) {
@@ -23,12 +20,10 @@ document.querySelectorAll('.nav-links a').forEach(link => {
   });
 });
 
-// Botão "Ver todas as vagas"
 document.getElementById('seeAllJobs')?.addEventListener('click', () => {
   alert('Carregando todas as vagas disponíveis...');
 });
 
-// Cliques nos cards de projetos / vagas / candidaturas
 document.querySelectorAll('.icon-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -45,7 +40,6 @@ document.querySelectorAll('.project, .job, .application').forEach(card => {
   });
 });
 
-// Link "Ver todos"
 document.querySelectorAll('.link').forEach(l => {
   l.addEventListener('click', e => {
     e.preventDefault();
@@ -53,7 +47,6 @@ document.querySelectorAll('.link').forEach(l => {
   });
 });
 
-// Animação inicial da barra de progresso
 window.addEventListener('load', () => {
   const bar = document.querySelector('.progress span');
   if (bar) {
