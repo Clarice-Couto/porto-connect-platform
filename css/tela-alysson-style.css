@@ -1,0 +1,278 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background: #f5f7fb;
+  color: #1f2937;
+}
+
+.topbar {
+  width: 100%;
+  height: 80px;
+  background: #ffffff;
+  border-bottom: 1px solid #dbe4ff;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 70px;
+}
+
+.logo img {
+  width: 120px;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 30px;
+}
+
+.topbar nav a {
+  text-decoration: none;
+  color: #4b5563;
+  font-size: 15px;
+  transition: 0.3s;
+}
+
+.topbar nav a:hover,
+.topbar nav .active {
+  color: #2563eb;
+}
+
+.container {
+  width: 90%;
+  margin: 40px auto;
+}
+
+.hero h1 {
+  font-size: 48px;
+  margin-bottom: 10px;
+  color: #111827;
+}
+
+.hero p {
+  color: #6b7280;
+  margin-bottom: 35px;
+}
+
+.cards-resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 25px;
+
+  margin-bottom: 35px;
+}
+
+.card-info {
+  background: #ffffff;
+  border: 1px solid #dbe4ff;
+  border-radius: 18px;
+
+  padding: 28px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  transition: 0.3s;
+}
+
+.card-info:hover {
+  transform: translateY(-4px);
+}
+
+.card-info span {
+  color: #4b5563;
+  font-size: 15px;
+}
+
+.card-info h2 {
+  color: #2563eb;
+  font-size: 42px;
+  margin: 10px 0;
+}
+
+.card-info p {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.card-info i {
+  color: #2563eb;
+  font-size: 26px;
+}
+
+.filtros {
+  background: #ffffff;
+  border: 1px solid #dbe4ff;
+  border-radius: 20px;
+
+  padding: 30px;
+  margin-bottom: 35px;
+}
+
+.titulo-filtro {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-bottom: 25px;
+}
+
+.titulo-filtro i {
+  color: #2563eb;
+}
+
+.inputs {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+.input-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-box label {
+  margin-bottom: 8px;
+  color: #374151;
+}
+
+.input-box input,
+.input-box select {
+  height: 50px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+
+  padding: 0 15px;
+  font-size: 15px;
+
+  outline: none;
+}
+
+.input-box input:focus,
+.input-box select:focus {
+  border-color: #2563eb;
+}
+
+.lista-vagas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 25px;
+}
+
+.vaga-card {
+  background: #ffffff;
+  border: 1px solid #dbe4ff;
+  border-radius: 20px;
+
+  padding: 25px;
+
+  transition: 0.3s;
+}
+
+.vaga-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.08);
+}
+
+.topo-vaga {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+
+  margin-bottom: 15px;
+}
+
+.topo-vaga h3 {
+  font-size: 22px;
+  color: #111827;
+  margin-bottom: 5px;
+}
+
+.empresa {
+  color: #2563eb;
+  font-weight: bold;
+}
+
+.status {
+  padding: 7px 14px;
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.ativa {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.vaga-card p {
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+.infos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  margin-bottom: 22px;
+}
+
+.infos span {
+  color: #374151;
+  font-size: 14px;
+}
+
+.infos i {
+  color: #2563eb;
+  margin-right: 8px;
+}
+
+.vaga-card button {
+  width: 100%;
+  height: 48px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #2563eb;
+  color: white;
+
+  font-size: 15px;
+  font-weight: bold;
+
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.vaga-card button:hover {
+  background: #1d4ed8;
+}
+
+@media (max-width: 768px) {
+
+  .topbar {
+    padding: 20px;
+    flex-direction: column;
+    height: auto;
+    gap: 15px;
+  }
+
+  .inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1 {
+    font-size: 36px;
+  }
+}

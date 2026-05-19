@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vagas da Empresas</title>
+
+  <link rel="stylesheet" href="../css/tela-alysson-style.css">
+
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+   
+  <header class="topbar">
+    <div class="logo">
+      <img src="../assets/images/tela-alysson-logo.png" alt="Logo">
+    </div>
+
+    <nav>
+     <a href="#">Dashboard</a>
+     <a href="#" class="active">Minhas Vagas</a>
+     <a href="#">Candidatos</a>
+     <a href="#"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
+    </nav>
+  </header>
+
+  <main class="container">
+
+  <section class="hero">
+    <h1>Vagas da Empresa</h1>
+    <p>Gerencie e acompanhe todas as vagas disponíveis em Recife - PE</p>
+    </section>
+
+  <section class="cards-resumo">
+
+    <div class="card-info">
+    <div>
+    <span>Total de Vagas</span>
+    <h2>7</h2>
+    <p>Publicadas</p>
+    </div>
+
+  <i class="fa-solid fa-briefcase"></i>
+    </div>
+
+    <div class="card-info">
+    <div>
+    <span>Empresas Parceiras</span>
+    <h2>4</h2>
+    <p>Ativas</p>
+    </div>
+
+    <i class="fa-solid fa-building"></i>
+    </div>
+
+    <div class="card-info">
+    <div>
+    <span>Candidaturas</span>
+    <h2>126</h2>
+    <p>Recebidas</p>
+    </div>
+
+    <i class="fa-solid fa-users"></i>
+    </div>
+
+    </section>
+
+    <section class="filtros">
+
+    <div class="titulo-filtro">
+    <i class="fa-solid fa-sliders"></i>
+    <h2>Filtros</h2>
+    </div>
+
+    <div class="inputs">
+
+    <div class="input-box">
+    <label>Buscar vaga</label>
+    <input type="text" id="buscar"
+      placeholder="Digite o nome da vaga...">
+    </div>
+
+    <div class="input-box">
+    <label>Empresa</label>
+
+    <select id="empresa">
+    <option value="Todas">Todas</option>
+    <option value="Kairos">Kairos</option>
+    <option value="Connect TI">Connect TI</option>
+    <option value="NordSoft">NordSoft</option>
+    <option value="Porto Digital">Porto Digital</option>
+     </select>
+     </div>
+
+     </div>
+
+   </section>
+
+  <section class="lista-vagas" id="listaVagas">
+
+  <div class="vaga-card">
+  <div class="topo-vaga">
+  <div>
+  <h3>Desenvolvedor Front-end Júnior</h3>
+  <span class="empresa">Kairos</span>
+  </div>
+
+  <span class="status ativa">Ativa</span>
+  </div>
+
+  <p>
+    Desenvolvimento de interfaces modernas utilizando HTML,
+    CSS, JavaScript e React.
+  </p>
+
+  <div class="infos">
+  <span><i class="fa-solid fa-location-dot"></i> Recife - PE</span>
+  <span><i class="fa-solid fa-money-bill"></i> R$ 3.000</span>
+  <span><i class="fa-solid fa-clock"></i> CLT</span>
+  </div>
+
+  <button>Ver detalhes</button>
+  </div>
+
+  <div class="vaga-card">
+  <div class="topo-vaga">
+  <div>
+  <h3>Analista de Suporte</h3>
+  <span class="empresa">Kairos</span>
+  </div>
+
+  <span class="status ativa">Ativa</span>
+  </div>
+
+  <p>
+    Atendimento e suporte técnico para sistemas internos
+    e usuários corporativos.
+  </p>
+
+  <div class="infos">
+  <span><i class="fa-solid fa-location-dot"></i> Recife - PE</span>
+  <span><i class="fa-solid fa-money-bill"></i> R$ 2.500</span>
+  <span><i class="fa-solid fa-clock"></i> Híbrido</span>
+  </div>
+
+  <button>Ver detalhes</button>
+  </div>
+
+  <div class="vaga-card">
+  <div class="topo-vaga">
+  <div>
+  <h3>UX/UI Designer</h3>
+  <span class="empresa">Kairos</span>
+  </div>
+
+  <span class="status ativa">Ativa</span>
+  </div>
+
+  <p>
+    Criação de protótipos, experiências digitais
+    e interfaces intuitivas.
+  </p>
+
+  <div class="infos">
+  <span><i class="fa-solid fa-location-dot"></i> Recife - PE</span>
+  <span><i class="fa-solid fa-money-bill"></i> R$ 4.200</span>
+  <span><i class="fa-solid fa-clock"></i> Presencial</span>
+  </div>
+
+  <button>Ver detalhes</button>
+  </div>
+
+  <div class="vaga-card">
+  <div class="topo-vaga">
+  <div>
+  <h3>Desenvolvedor Back-end</h3>
+  <span class="empresa">Connect TI</span>
+  </div>
+
+  <span class="status ativa">Ativa</span>
+  </div>
+
+  <p>
+    Desenvolvimento de APIs e integração de sistemas
+    utilizando Node.js.
+  </p>
+
+  <div class="infos">
+  <span><i class="fa-solid fa-location-dot"></i> Recife - PE</span>
+  <span><i class="fa-solid fa-money-bill"></i> R$ 5.000</span>
+  <span><i class="fa-solid fa-clock"></i> Remoto</span>
+  </div>
+
+  <button>Ver detalhes</button>
+  </div>
+
+  <div class="vaga-card">
+
+  <div class="topo-vaga">
+  <div>
+  <h3>QA Tester</h3>
+  <span class="empresa">NordSoft</span>
+  </div>
+
+  <span class="status ativa">Ativa</span>
+  </div>
+
+  <p>
+    Testes manuais e automatizados para aplicações web
+    e mobile.
+  </p>
+
+  <div class="infos">
+  <span><i class="fa-solid fa-location-dot"></i> Recife - PE</span>
+  <span><i class="fa-solid fa-money-bill"></i> R$ 3.700</span>
+  <span><i class="fa-solid fa-clock"></i> CLT</span>
+  </div>
+
+  <button>Ver detalhes</button>
+  </div>
+
+  <div class="vaga-card">
+
+  <div class="topo-vaga">
+  <div>
+  <h3>Desenvolvedor Full Stack</h3>
+  <span class="empresa">Porto Digital</span>
+  </div>
+
+  <span class="status ativa">Ativa</span>
+  </div>
+
+  <p>
+    Desenvolvimento de aplicações web completas utilizando
+    React, Node.js e banco de dados SQL.
+  </p>
+
+  <div class="infos">
+  <span><i class="fa-solid fa-location-dot"></i> Recife - PE</span>
+  <span><i class="fa-solid fa-money-bill"></i> R$ 6.200</span>
+  <span><i class="fa-solid fa-clock"></i> Híbrido</span>
+  </div>
+
+  <button>Ver detalhes</button>
+  </div>
+  
+  <div class="vaga-card">
+
+  <div class="topo-vaga">
+  <div>
+  <h3>Analista de Dados</h3>
+  <span class="empresa">Porto Digital</span>
+  </div>
+
+  <span class="status ativa">Ativa</span>
+  </div>
+
+  <p>
+    Análise de dados corporativos, dashboards e relatórios
+    estratégicos utilizando Power BI e Python.
+  </p>
+
+  <div class="infos">
+  <span><i class="fa-solid fa-location-dot"></i> Recife - PE</span>
+  <span><i class="fa-solid fa-money-bill"></i> R$ 5.400</span>
+  <span><i class="fa-solid fa-clock"></i> Presencial</span>
+  </div>
+
+  <button>Ver detalhes</button>
+  </div>
+
+  </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
