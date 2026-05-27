@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Meu Portfólio</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../css/home_aluno.css">
+  <link rel="stylesheet" href="../css/portfolio.css">
+
+  <!-- ICONES -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <a href="./home_aluno.html" class="brand" aria-label="Porto Connect">
+        <img src="../assets/images/logo.png" alt="Porto Connect" height="34" class="brand-logo" />
+      </a>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="./home_aluno.html">Dashboard</a>
+        <a href="./portfolio.html" class="active">Portfólio</a>
+        <a href="./vagas.html">Vagas</a>
+        <a href="./perfil_aluno.html">Perfil</a>
+        <a href="./login_aluno.html" class="logout"><i data-lucide="log-out"></i> Sair</a>
+      </nav>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO -->
+  <main class="container">
+
+    <div class="top-content">
+
+      <div>
+        <h1>Meu Portfólio</h1>
+        <p>2 projetos adicionados</p>
+      </div>
+
+      <button class="btn-add" onclick="window.location.href='novo_projeto.html'">
+        <i class="fa-solid fa-plus"></i>
+        Adicionar projeto
+      </button>
+
+    </div>
+
+    <!-- CARDS -->
+    <div class="cards">
+
+      <!-- CARD 1 -->
+      <div class="card">
+
+        <div class="card-top">
+          <h2>Sistema de Gestão de Tarefas</h2>
+
+          <i class="fa-regular fa-bookmark"></i>
+        </div>
+
+        <p>
+          Aplicativo web para gerenciar tarefas com autenticação
+          de usuários, categorização e filtros...
+        </p>
+
+        <div class="tags">
+          <span>React</span>
+          <span>TypeScript</span>
+          <span>Node.js</span>
+          <span>MongoDB</span>
+        </div>
+
+      </div>
+
+      <!-- CARD 2 -->
+      <div class="card">
+
+        <div class="card-top">
+          <h2>Landing Page Responsiva</h2>
+
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        </div>
+
+        <p>
+          Landing page moderna e responsiva para startup de
+          tecnologia, com animações suaves e design...
+        </p>
+
+        <div class="tags">
+          <span>React</span>
+          <span>Tailwind CSS</span>
+          <span>Framer Motion</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    lucide.createIcons();
+    document.getElementById('menuToggle')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
+    });
+  </script>
+</body>
+</html>

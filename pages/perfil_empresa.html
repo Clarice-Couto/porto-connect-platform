@@ -5,42 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Perfil da Empresa</title>
 
+  <link rel="stylesheet" href="../css/home_aluno.css">
   <link rel="stylesheet" href="../css/perfil.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
   <header class="navbar">
-    <div class="logo">
-      <a href="home_empresa.html"><img src="../assets/images/logo.png" alt="Logo Porto Connect"></a>
-    </div>
-
-    <nav class="nav-links">
-      <a href="home_empresa.html">Dashboard</a>
-      <a href="vagas.html">Vagas</a>
-      <a href="perfil_empresa.html">Perfil</a>
-      <a href="login_empresa.html" id="logoutBtn">
-        <i class="fa-solid fa-right-from-bracket"></i>
-        Sair
+    <div class="nav-inner">
+      <a href="./home_empresa.html" class="brand" aria-label="Porto Connect">
+        <img src="../assets/images/logo.png" alt="Porto Connect" height="34" class="brand-logo" />
       </a>
-    </nav>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="./home_empresa.html">Candidatos</a>
+        <a href="./vagas_empresa.html">Minhas Vagas</a>
+        <a href="./perfil_empresa.html" class="active">Perfil</a>
+        <a href="./login_empresa.html" class="logout" id="logoutBtn"><i data-lucide="log-out"></i> Sair</a>
+      </nav>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
   </header>
 
   <div class="container">
     <div class="card">
       <div class="profile-top">
         <div class="profile-left">
-          <div class="avatar" id="avatarText"></div>
+          <div class="avatar" id="avatarText">TB</div>
 
           <div class="profile-info">
-            <h1 id="nomePerfil"></h1>
+            <h1 id="nomePerfil">TechCorp Brasil</h1>
             <div class="info-item">
               <i class="fa-regular fa-envelope"></i>
-              <span id="emailPerfil"></span>
+              <span id="emailPerfil">contato@techcorp.com.br</span>
             </div>
             <div class="info-item">
               <i class="fa-solid fa-location-dot"></i>
-              <span id="cidadePerfil"></span>
+              <span id="cidadePerfil">São Paulo, SP</span>
             </div>
           </div>
         </div>
@@ -50,15 +55,7 @@
         </button>
       </div>
 
-      <div class="progress-box">
-        <div class="progress-header">
-          <span></span>
-          <span id="porcentagemText"></span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress" id="progressBar"></div>
-        </div>
-      </div>
+
 
       <div class="tags">
         <div class="tag green"></div>
@@ -67,17 +64,16 @@
 
     <div class="card">
       <div class="section-title">Sobre mim</div>
-      <p id="sobrePerfil"></p>
+      <p id="sobrePerfil">Empresa focada no desenvolvimento de software de ponta para fintechs e saúde. Buscamos inovação constante e profissionais engajados.</p>
     </div>
 
     <div class="card">
       <div class="section-title">Habilidades</div>
       <div class="skills" id="skillsContainer">
-        <div class="skill"></div>
-        <div class="skill"></div>
-        <div class="skill"></div>
-        <div class="skill"></div>
-        <div class="skill"></div>
+        <div class="skill">React</div>
+        <div class="skill">Node.js</div>
+        <div class="skill">Python</div>
+        <div class="skill">AWS</div>
       </div>
     </div>
   </div>
@@ -129,9 +125,6 @@
     const sobrePerfil = document.getElementById("sobrePerfil");
     const avatarText = document.getElementById("avatarText");
 
-    const porcentagemText = document.getElementById("porcentagemText");
-    const progressBar = document.getElementById("progressBar");
-
     const skillsContainer = document.getElementById("skillsContainer");
 
     const inputNome = document.getElementById("inputNome");
@@ -177,8 +170,6 @@
       });
 
       avatarText.innerText = iniciais.substring(0,2).toUpperCase();
-      const porcentagem = parseInt(porcentagemText.innerText) || 0;
-      progressBar.style.width = porcentagem + "%";
 
       skillsContainer.innerHTML = "";
       const skills = inputSkills.value.split(",");
@@ -193,7 +184,6 @@
         nome: inputNome.value,
         email: inputEmail.value,
         cidade: inputCidade.value,
-        porcentagem: porcentagem,
         sobre: inputSobre.value,
         skills: inputSkills.value
       };
@@ -204,7 +194,19 @@
     });
 
     function carregarPerfil(){
-      const dados = localStorage.getItem("perfilEmpresa");
+      let dados = localStorage.getItem("perfilEmpresa");
+      if(!dados){
+        const mockPerfil = {
+          nome: "TechCorp Brasil",
+          email: "contato@techcorp.com.br",
+          cidade: "São Paulo, SP",
+          sobre: "Empresa focada no desenvolvimento de software de ponta para fintechs e saúde. Buscamos inovação constante e profissionais engajados.",
+          skills: "React, Node.js, Python, AWS"
+        };
+        localStorage.setItem("perfilEmpresa", JSON.stringify(mockPerfil));
+        dados = localStorage.getItem("perfilEmpresa");
+      }
+
       if(dados){
         const perfil = JSON.parse(dados);
         nomePerfil.innerText = perfil.nome;
@@ -212,8 +214,6 @@
         cidadePerfil.innerText = perfil.cidade;
         sobrePerfil.innerText = perfil.sobre;
 
-        porcentagemText.innerText = perfil.porcentagem + "%";
-        progressBar.style.width = perfil.porcentagem + "%";
 
         const partesNome = perfil.nome.split(" ");
         let iniciais = "";
@@ -240,8 +240,13 @@
       e.preventDefault();
       const confirmar = confirm("Deseja sair da plataforma?");
       if(confirmar){
-        window.location.href = "../login1.html";
+        window.location.href = "login_empresa.html";
       }
+    });
+    
+    lucide.createIcons();
+    document.getElementById('menuToggle')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
     });
   </script>
 </body>
