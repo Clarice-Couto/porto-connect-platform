@@ -37,7 +37,7 @@ A interface cobre os principais fluxos da plataforma:
 ```text
 porto-connect/
 ├── index.html                 # Ponto de entrada (Landing Page)
-├── login1.html                # Escolha de perfil (Estudante/Empresa)
+├── login.html                 # Escolha de perfil (Estudante/Empresa)
 ├── pages/                     # Telas da aplicação
 │   ├── cadastro_aluno.html
 │   ├── cadastro_empresa.html
