@@ -5,54 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Perfil do Aluno</title>
 
+  <link rel="stylesheet" href="../css/home_aluno.css">
   <link rel="stylesheet" href="../css/perfil.css">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
   <header class="navbar">
-    <div class="logo">
-      <a href="home_aluno.html"><img src="../assets/images/logo.png" alt="Logo Porto Connect"></a>
+    <div class="nav-inner">
+      <a href="./home_aluno.html" class="brand" aria-label="Porto Connect">
+        <img src="../assets/images/logo.png" alt="Porto Connect" height="34" class="brand-logo" />
+      </a>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="./home_aluno.html">Dashboard</a>
+        <a href="./portfolio.html">Portfólio</a>
+        <a href="./vagas.html">Vagas</a>
+        <a href="./perfil_aluno.html" class="active">Perfil</a>
+        <a href="./login_aluno.html" class="logout" id="logoutBtn"><i data-lucide="log-out"></i> Sair</a>
+      </nav>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
+        <i data-lucide="menu"></i>
+      </button>
     </div>
-
-    <nav class="nav-links">
-      <a href="home_aluno.html">Dashboard</a>
- <a href="portfolio.html">Portfólio</a>
- <a href="vagas.html">Vagas</a>
- <a href="perfil_aluno.html">Perfil</a>
-
- <a href="login_aluno.html" id="logoutBtn">
- <i class="fa-solid fa-right-from-bracket"></i>
- Sair
- </a>
- </nav>
-
   </header>
 
  <div class="container">
  <div class="card">
  <div class="profile-top">
  <div class="profile-left">
- <div class="avatar" id="avatarText">
+          <div class="avatar" id="avatarText">JS</div>
 
- </div>
-
- <div class="profile-info">
-
- <h1 id="nomePerfil"></h1>
- <div class="info-item">
- <i class="fa-regular fa-envelope"></i>
- <span id="emailPerfil"></span>
- </div>
-
- <div class="info-item">
- <i class="fa-solid fa-location-dot"></i>
- <span id="cidadePerfil"></span>
- </div>
-
- </div>
-
+          <div class="profile-info">
+            <h1 id="nomePerfil">João da Silva</h1>
+            <div class="info-item">
+              <i class="fa-regular fa-envelope"></i>
+              <span id="emailPerfil">joao.silva@email.com</span>
+            </div>
+            <div class="info-item">
+              <i class="fa-solid fa-location-dot"></i>
+              <span id="cidadePerfil">Recife, PE</span>
+            </div>
+          </div>
  </div>
  <button class="edit-btn" id="openModal">
  <i class="fa-regular fa-pen-to-square"></i>
@@ -61,18 +58,7 @@
 
  </div>
 
- <div class="progress-box">
 
- <div class="progress-header">
- <span></span>
- <span id="porcentagemText"></span>
- </div>
- 
- <div class="progress-bar">
- <div class="progress" id="progressBar"></div>
- </div>
-
- </div>
 
  <div class="tags">
  <div class="tag green"></div>
@@ -86,22 +72,19 @@
   Sobre mim
  </div>
 
- <p id="sobrePerfil">
-   
- </p>
+      <p id="sobrePerfil">Desenvolvedor Front-end em início de carreira, apaixonado por criar interfaces responsivas e acessíveis. Estudante de Engenharia de Software focando em ecossistema JavaScript.</p>
 
  </div>
  <div class="card">
  <div class="section-title">
   Habilidades
  </div>
- <div class="skills" id="skillsContainer">
- <div class="skill"></div>
- <div class="skill"></div>
- <div class="skill"></div>
- <div class="skill"></div>
- <div class="skill"></div>
- </div>
+      <div class="skills" id="skillsContainer">
+        <div class="skill">HTML</div>
+        <div class="skill">CSS</div>
+        <div class="skill">JavaScript</div>
+        <div class="skill">React</div>
+      </div>
  </div>
  </div>
  <div class="modal" id="modal">
@@ -157,9 +140,6 @@
     const avatarText = document.getElementById("avatarText");
 
 
-    const porcentagemText = document.getElementById("porcentagemText");
-    const progressBar = document.getElementById("progressBar");
-
 
     const skillsContainer = document.getElementById("skillsContainer");
 
@@ -212,8 +192,6 @@
 
       avatarText.innerText = iniciais.substring(0,2).toUpperCase();
 
-      const porcentagem = parseInt(porcentagemText.innerText) || 0;
-      progressBar.style.width = porcentagem + "%";
 
       skillsContainer.innerHTML = "";
 
@@ -235,7 +213,6 @@
         nome: inputNome.value,
         email: inputEmail.value,
         cidade: inputCidade.value,
-        porcentagem: porcentagem,
         sobre: inputSobre.value,
         skills: inputSkills.value
       };
@@ -248,63 +225,59 @@
     });
 
     function carregarPerfil(){
-
-      const dados = localStorage.getItem("perfilAluno");
+      let dados = localStorage.getItem("perfilAluno");
+      if(!dados){
+        const mockPerfil = {
+          nome: "João da Silva",
+          email: "joao.silva@email.com",
+          cidade: "Recife, PE",
+          sobre: "Desenvolvedor Front-end em início de carreira, apaixonado por criar interfaces responsivas e acessíveis. Estudante de Engenharia de Software focando em ecossistema JavaScript.",
+          skills: "HTML, CSS, JavaScript, React"
+        };
+        localStorage.setItem("perfilAluno", JSON.stringify(mockPerfil));
+        dados = localStorage.getItem("perfilAluno");
+      }
 
       if(dados){
-
         const perfil = JSON.parse(dados);
-
         nomePerfil.innerText = perfil.nome;
         emailPerfil.innerText = perfil.email;
         cidadePerfil.innerText = perfil.cidade;
         sobrePerfil.innerText = perfil.sobre;
 
-        porcentagemText.innerText = perfil.porcentagem + "%";
-        progressBar.style.width = perfil.porcentagem + "%";
 
         const partesNome = perfil.nome.split(" ");
-
         let iniciais = "";
-
         partesNome.forEach(nome => {
           iniciais += nome.charAt(0);
         });
 
         avatarText.innerText = iniciais.substring(0,2).toUpperCase();
-
         skillsContainer.innerHTML = "";
 
         const skills = perfil.skills.split(",");
-
         skills.forEach(skill => {
-
           const div = document.createElement("div");
-
           div.classList.add("skill");
-
           div.innerText = skill.trim();
-
           skillsContainer.appendChild(div);
-
         });
-
       }
-
     }
 
     carregarPerfil();
 
     document.getElementById("logoutBtn").addEventListener("click", (e) => {
-
       e.preventDefault();
-
       const confirmar = confirm("Deseja sair da plataforma?");
-
       if(confirmar){
-        window.location.href = "../login1.html";
+        window.location.href = "login_aluno.html";
       }
-
+    });
+    
+    lucide.createIcons();
+    document.getElementById('menuToggle')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
     });
 
   </script>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="../css/login_aluno.css">
+    <title>Recuperar Senha</title>
+</head>
+<body>
+    <header class="topo">
+        <div class="logo">
+            <img src="../assets/images/logo.png" alt="Logo Porto Connect">
+        </div>
+        <div class="acoes">
+            <a href="../login1.html" class="btn-entrar">Voltar ao Início</a>
+        </div>
+    </header>
+    
+    <a href="../login1.html" class="voltar">
+        <i class='bx bx-arrow-back'></i>
+        Voltar
+    </a>
+
+    <main>
+        <div class="container">
+            <form action="../login1.html" method="get">
+                <h1>Recuperar Senha</h1>
+                <p class="subtitle">Insira seu e-mail para receber as instruções</p>
+
+                <div class="input-box">
+                    <label for="email">Email</label>
+                    <input id="email" placeholder="Seu email cadastrado" type="email" required>
+                    <i class="bx bxs-envelope"></i>
+                </div>
+
+                <button type="submit">Enviar instruções</button>
+
+                <div class="criar-conta">
+                    <p>Lembrou a senha? <a href="../login1.html">Fazer login</a></p>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

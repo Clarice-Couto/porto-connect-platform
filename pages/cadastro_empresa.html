@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="../css/login_empresa.css">
+    <title>Cadastro de Empresa</title>
+</head>
+<body>
+
+    <header class="topo">
+        <div class="logo">
+            <img src="../assets/images/logo.png" alt="Logo Porto Connect">
+        </div>
+
+        <div class="acoes">
+            <a href="login_empresa.html" class="btn-entrar">Entrar</a>
+            <a href="home_empresa.html" class="btn-comecar">Começar</a>
+        </div>
+    </header>
+
+    <main>
+        <a href="login_empresa.html" class="voltar">
+            <i class='bx bx-arrow-back'></i>
+            Voltar para Login
+        </a>
+
+        <div class="container">
+            <form action="home_empresa.html" method="get">
+
+                <h1>Cadastro da Empresa</h1>
+                <p class="subtitle">Crie uma conta corporativa</p>
+
+                <div class="input-box">
+                    <label for="nome">Nome da Empresa</label>
+                    <input id="nome" placeholder="Nome da sua empresa" type="text" required>
+                    <i class="bx bxs-business"></i>
+                </div>
+
+                <div class="input-box">
+                    <label for="email">Email corporativo</label>
+                    <input id="email" placeholder="contato@empresa.com" type="email" required>
+                    <i class="bx bxs-envelope"></i>
+                </div>
+
+                <div class="input-box">
+                    <label for="senha">Senha</label>
+                    <input id="senha" placeholder="Crie uma senha" type="password" required>
+                    <i class="bx bxs-lock-alt"></i>
+                </div>
+
+                <button type="submit">Cadastrar Empresa</button>
+
+                <div class="criar-conta">
+                    <p>Já possui cadastro? <a href="login_empresa.html">Fazer login</a></p>
+                </div>
+
+            </form>
+        </div>
+    </main>
+</body>
+</html>
