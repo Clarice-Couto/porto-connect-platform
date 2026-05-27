@@ -6,31 +6,13 @@ menuToggle?.addEventListener('click', () => {
   navLinks.classList.toggle('open');
 });
 
-document.querySelectorAll('.nav-links a').forEach(link => {
-  link.addEventListener('click', (e) => {
-    if (link.classList.contains('logout')) {
-      e.preventDefault();
-      if (confirm('Deseja realmente sair?')) alert('Sessão encerrada.');
-      return;
-    }
-    e.preventDefault();
-    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-    link.classList.add('active');
-    navLinks.classList.remove('open');
-  });
-});
+// Navegação controlada pelo HTML (hrefs)
 
 document.getElementById('seeAllJobs')?.addEventListener('click', () => {
   alert('Carregando todas as vagas disponíveis...');
 });
 
-document.querySelectorAll('.icon-btn').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const label = btn.getAttribute('aria-label') || 'Abrir';
-    alert(`${label} — em breve!`);
-  });
-});
+// Botões de ícones tratados individualmente no HTML
 
 document.querySelectorAll('.project, .job, .application').forEach(card => {
   card.style.cursor = 'pointer';
@@ -40,12 +22,7 @@ document.querySelectorAll('.project, .job, .application').forEach(card => {
   });
 });
 
-document.querySelectorAll('.link').forEach(l => {
-  l.addEventListener('click', e => {
-    e.preventDefault();
-    alert('Listando todos os projetos...');
-  });
-});
+// Links Ver Todas tratados pelo HTML
 
 window.addEventListener('load', () => {
   const bar = document.querySelector('.progress span');

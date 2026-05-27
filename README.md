@@ -8,46 +8,65 @@
 
 O mercado de tecnologia enfrenta um paradoxo: empresas com vagas abertas e estudantes qualificados que não conseguem se encontrar. O problema não está na falta de talento nem na falta de oportunidades, está na ausência de uma ponte eficiente entre os dois lados.
 
-O **Porto Connect** resolve isso. A plataforma analisa o perfil técnico de cada estudante, suas hard skills, projetos práticos e nível de maturidade, e gera um ranking de compatibilidade com as vagas disponíveis nas empresas parceiras do Porto Digital. O resultado é um processo seletivo mais ágil, mais justo e baseado em evidências reais de capacidade técnica, e não apenas em currículos tradicionais.
+O **Porto Connect** resolve isso. A plataforma analisa o perfil técnico de cada estudante, suas hard skills e projetos práticos, gerando um ambiente de conexão mais orgânico com as vagas disponíveis nas empresas parceiras do Porto Digital. O resultado é um processo seletivo mais ágil, mais justo e baseado em evidências reais de capacidade técnica, e não apenas em currículos tradicionais.
 
 A solução beneficia três perfis:
 
-- **Estudantes** que ganham visibilidade real para o mercado, com recomendações de vagas compatíveis com seu nível e um portfólio guiado para apresentar seus projetos.
-- **Recrutadores** que acessam uma base de talentos validados, com indicadores técnicos confiáveis e visualização prática dos projetos de cada candidato.
-- **Coordenadores de residência** que passam a ter uma visão centralizada do progresso dos alunos e conseguem conectar pessoas e empresas com muito mais eficiência.
+- **Estudantes** que ganham visibilidade real para o mercado, com um portfólio guiado para apresentar seus projetos e acesso a um mural de vagas filtráveis.
+- **Recrutadores** que acessam uma base de talentos, com visualização prática dos projetos de cada candidato, além da gestão simplificada de suas vagas publicadas.
+- **Coordenadores de residência** que passam a ter uma visão centralizada para conectar pessoas e empresas com muito mais eficiência.
 
 ---
 
 ## Este repositório
 
-Este repositório contém o **Front-end** do Porto Connect, desenvolvido com **HTML, CSS e JavaScript**.
+Este repositório contém o **Front-end** do Porto Connect, desenvolvido com **HTML, CSS (Vanilla) e JavaScript**.
 
-A interface cobre os principais fluxos da plataforma: cadastro e edição de perfil, portfólio de projetos, descoberta e filtragem de vagas, candidatura e acompanhamento de processos seletivos.
+A interface cobre os principais fluxos da plataforma: 
+- Cadastro e login para Alunos e Empresas
+- Dashboard inteligente para gestão de vagas e talentos
+- Edição de perfil com salvamento em LocalStorage
+- Portfólio de projetos
+- Descoberta e filtragem de vagas
+- Visualização de detalhes dos candidatos
 
 ---
 
-## Estrutura
+## Estrutura do Projeto
 
-```
+```text
 porto-connect/
-├── index.html           # Tela inicial
-├── pages/               # Demais telas da aplicação
-│   ├── login.html
-│   ├── home.html
-│   ├── perfil.html
-│   ├── vagas.html
-│   └── portfolio.html
-├── css/                 # Estilos das páginas
-│   ├── perfil.css       # Estilos do perfil do aluno
+├── index.html                 # Ponto de entrada (Landing Page)
+├── login1.html                # Escolha de perfil (Estudante/Empresa)
+├── pages/                     # Telas da aplicação
+│   ├── cadastro_aluno.html
+│   ├── cadastro_empresa.html
+│   ├── login_aluno.html
+│   ├── login_empresa.html
+│   ├── home_aluno.html        # Dashboard do Aluno
+│   ├── home_empresa.html      # Dashboard da Empresa
+│   ├── perfil_aluno.html
+│   ├── perfil_empresa.html
+│   ├── detalhes_candidato.html
+│   ├── vagas.html             # Vagas disponíveis (Visão do Aluno)
+│   ├── vagas_empresa.html     # Gestão de vagas (Visão da Empresa)
+│   ├── nova_vaga.html
+│   ├── editar_vaga.html
+│   ├── portfolio.html
+│   ├── novo_projeto.html
+│   └── recuperar_senha.html
+├── css/                       # Estilos modulares
+│   ├── home_aluno.css         # CSS base do sistema e navbar
+│   ├── style_principal.css    # Landing page
 │   ├── login_aluno.css
 │   ├── login_empresa.css
-│   ├── home_aluno.css
-│   ├── style_empresa.css
-│   └── style_principal.css
+│   ├── perfil.css
+│   └── portfolio.css
 ├── js/
-│   └── script.js        # Scripts compartilhados
+│   ├── script_dashboard.js    # Lógica de navegação
+│   └── script.js
 └── assets/
-    └── images/          # Imagens e ícones
+    └── images/                # Logo e recursos visuais
 ```
 
 ---
@@ -73,10 +92,10 @@ Com a pasta aberta no VS Code, clique com o botão direito no arquivo `index.htm
 | Camada | Tecnologia |
 |--------|-----------|
 | Marcação | HTML5 |
-| Estilização | CSS3 |
-| Interatividade | JavaScript |
+| Estilização | CSS3 Vanilla |
+| Interatividade | JavaScript (Vanilla) + LocalStorage |
 | Versionamento | Git + GitHub |
-| Editor | VS Code |
+| Ícones | Lucide + FontAwesome |
 
 ---
 

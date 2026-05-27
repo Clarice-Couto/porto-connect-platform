@@ -7,34 +7,35 @@
   <title>Meu Portfólio</title>
 
   <!-- CSS -->
-  <link rel="stylesheet" href="../css/portifolio.css">
+  <link rel="stylesheet" href="../css/home_aluno.css">
+  <link rel="stylesheet" href="../css/portfolio.css">
 
   <!-- ICONES -->
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
 
   <!-- HEADER -->
-  <header class="header">
-
-    <div class="logo">
-      <img src="../assets/images/logo.png" alt="Logo">
-    </div>
-
-    <nav class="menu">
-      <a href="#">Dashboard</a>
-      <a href="#">Portfólio</a>
-      <a href="#">Vagas</a>
-      <a href="#">Perfil</a>
-
-      <a href="#" class="logout">
-        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-        Sair
+  <header class="navbar">
+    <div class="nav-inner">
+      <a href="./home_aluno.html" class="brand" aria-label="Porto Connect">
+        <img src="../assets/images/logo.png" alt="Porto Connect" height="34" class="brand-logo" />
       </a>
-    </nav>
 
+      <nav class="nav-links" id="navLinks">
+        <a href="./home_aluno.html">Dashboard</a>
+        <a href="./portfolio.html" class="active">Portfólio</a>
+        <a href="./vagas.html">Vagas</a>
+        <a href="./perfil_aluno.html">Perfil</a>
+        <a href="./login_aluno.html" class="logout"><i data-lucide="log-out"></i> Sair</a>
+      </nav>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
   </header>
 
   <!-- CONTEÚDO -->
@@ -47,7 +48,7 @@
         <p>2 projetos adicionados</p>
       </div>
 
-      <button class="btn-add">
+      <button class="btn-add" onclick="window.location.href='novo_projeto.html'">
         <i class="fa-solid fa-plus"></i>
         Adicionar projeto
       </button>
@@ -106,5 +107,11 @@
 
   </main>
 
+  <script>
+    lucide.createIcons();
+    document.getElementById('menuToggle')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
+    });
+  </script>
 </body>
 </html>

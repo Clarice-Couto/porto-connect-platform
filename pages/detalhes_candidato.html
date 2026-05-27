@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Detalhes do Candidato</title>
+
+<link rel="stylesheet" href="../css/home_aluno.css">
+<link rel="stylesheet" href="../css/perfil.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+.contact-actions { display: flex; gap: 16px; margin-top: 24px; }
+.btn-primary { background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: 0.3s; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-secondary { background: #f3f4f6; color: #374151; padding: 12px 24px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: 0.3s; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer; }
+.btn-secondary:hover { background: #e5e7eb; }
+.project-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.project-card h3 { margin-bottom: 8px; font-size: 18px; }
+.project-card p { color: #4b5563; font-size: 15px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="nav-inner">
+      <a href="./home_empresa.html" class="brand" aria-label="Porto Connect">
+        <img src="../assets/images/logo.png" alt="Porto Connect" height="34" class="brand-logo" />
+      </a>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="./home_empresa.html" class="active">Candidatos</a>
+        <a href="./vagas_empresa.html">Minhas Vagas</a>
+        <a href="./perfil_empresa.html">Perfil</a>
+        <a href="./login_empresa.html" class="logout"><i data-lucide="log-out"></i> Sair</a>
+      </nav>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
+  </header>
+
+ <div class="container">
+  <a href="home_empresa.html" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 24px; color: #4b5563; text-decoration: none; font-weight: 500;">
+    <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i> Voltar para candidatos
+  </a>
+
+  <div class="card">
+    <div class="profile-top">
+      <div class="profile-left">
+        <div class="avatar">
+          AE
+        </div>
+        <div class="profile-info">
+          <h1>Amanda Estephany</h1>
+          <div class="info-item">
+            <i class="fa-regular fa-envelope"></i>
+            <span>amanda.estephany@email.com</span>
+          </div>
+          <div class="info-item">
+            <i class="fa-solid fa-location-dot"></i>
+            <span>Recife, PE</span>
+          </div>
+        </div>
+      </div>
+      
+      <div style="text-align: right;">
+        <span class="badge" style="background: #eff6ff; color: #2563eb; padding: 6px 14px; border-radius: 12px; font-weight: 700;">Intermediário</span>
+      </div>
+    </div>
+
+
+    <div class="contact-actions">
+      <button class="btn-primary" onclick="alert('Mensagem enviada com sucesso!')">
+        <i data-lucide="mail"></i> Entrar em contato
+      </button>
+      <button class="btn-secondary" onclick="alert('Convite para processo seletivo enviado!')">
+        <i data-lucide="briefcase"></i> Convidar para vaga
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Sobre o Candidato</div>
+    <p>Estudante de desenvolvimento de software apaixonada por tecnologia. Focada em soluções robustas usando o ecossistema .NET e Java. Tenho facilidade para aprender rápido e trabalhar em equipe, buscando sempre as melhores práticas de Clean Code.</p>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Habilidades</div>
+    <div class="skills">
+      <div class="skill">Java</div>
+      <div class="skill">C#</div>
+      <div class="skill">.NET</div>
+      <div class="skill">SQL Server</div>
+      <div class="skill">Git</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Projetos em Destaque</div>
+    
+    <div class="project-card">
+      <h3>API de Gestão Financeira</h3>
+      <p>API REST desenvolvida em C# com .NET Core 8, implementando autenticação JWT, Entity Framework e arquitetura em camadas. Cobertura de testes unitários com xUnit.</p>
+      <div class="tags" style="margin-top: 10px;">
+        <div class="tag" style="background: #f3f4f6; color: #374151; font-size: 12px;">C#</div>
+        <div class="tag" style="background: #f3f4f6; color: #374151; font-size: 12px;">.NET</div>
+        <div class="tag" style="background: #f3f4f6; color: #374151; font-size: 12px;">SQL</div>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <h3>Sistema de Reservas</h3>
+      <p>Aplicação full-stack com backend em Java (Spring Boot) e front-end básico em HTML/CSS para gerenciamento de reservas de salas comerciais.</p>
+      <div class="tags" style="margin-top: 10px;">
+        <div class="tag" style="background: #f3f4f6; color: #374151; font-size: 12px;">Java</div>
+        <div class="tag" style="background: #f3f4f6; color: #374151; font-size: 12px;">Spring Boot</div>
+      </div>
+    </div>
+  </div>
+ </div>
+
+ <script>
+  lucide.createIcons();
+  document.getElementById('menuToggle').addEventListener('click', () => {
+    document.getElementById('navLinks').classList.toggle('active');
+  });
+ </script>
+</body>
+</html>
