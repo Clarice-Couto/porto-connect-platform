@@ -39,12 +39,16 @@ porto-connect/
 │   └── db.js              # Cliente API e Regras de Negócio
 ├── 📂 pages/              # Módulos de Interface (UI)
 │   ├── home_aluno.html    # Dashboard do Aluno
-│   ├── home_empresa.html  # Dashboard de Recrutamento da Empresa
-│   ├── vagas.html         # Painel de Vagas
-│   └── portfolio.html     # Vitrine de Competências (Portfólio)
+│   ├── home_empresa.html  # Gestão de Candidatos da Empresa
+│   ├── explorar_alunos.html # Banco de Talentos Global
+│   ├── detalhes_candidato.html # Perfil Detalhado do Aluno
+│   ├── vagas.html         # Mural de Vagas para Alunos
+│   ├── vagas_empresa.html # Mural de Vagas da Empresa
+│   └── portfolio.html     # Vitrine de Competências
 ├── 📂 css/                # Identidade Visual e Estilos
 ├── 📂 assets/             # Recursos de Marca e Ícones
-└── vercel.json            # Configuração de Deploy e Roteamento
+├── index.html             # Landing Page
+└── login.html             # Portal de Entrada
 ```
 
 ---
