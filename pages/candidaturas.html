@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Porto Connect - Minhas Candidaturas e Favoritos</title>
+  
+  <link rel="stylesheet" href="../css/home_aluno.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    /* Estilos das abas e listas */
+    .tabs-container {
+      margin-top: 30px;
+    }
+    .tabs-nav {
+      display: flex;
+      gap: 15px;
+      border-bottom: 2px solid #e5e7eb;
+      margin-bottom: 25px;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #6b7280;
+      cursor: pointer;
+      position: relative;
+      transition: 0.2s;
+    }
+    .tab-btn:hover {
+      color: #2563eb;
+    }
+    .tab-btn.active {
+      color: #2563eb;
+    }
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #2563eb;
+      border-radius: 2px;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    .candidaturas-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .card-cand {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: 0.2s;
+    }
+    .card-cand:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+    }
+    .cand-info h3 {
+      font-size: 18px;
+      color: #1e1b4b;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .cand-info p {
+      font-size: 14px;
+      color: #6b7280;
+    }
+    .cand-meta {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .cand-date {
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    .favs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .card-fav {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 200px;
+      transition: 0.2s;
+    }
+    .card-fav:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+    }
+    .fav-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .fav-head .badge {
+      background: #eff6ff;
+      color: #2563eb;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .btn-unfav {
+      background: none;
+      border: none;
+      color: #d97706;
+      cursor: pointer;
+      font-size: 18px;
+      transition: 0.2s;
+    }
+    .btn-unfav:hover {
+      color: #b45309;
+    }
+    .fav-body h3 {
+      font-size: 20px;
+      color: #1e1b4b;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .fav-body p {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    .fav-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .fav-actions button {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: 0.2s;
+    }
+    .btn-apply-fav {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-apply-fav:hover {
+      background: #1d4ed8;
+    }
+    .btn-apply-fav.applied {
+      background: #e2e8f0 !important;
+      color: #64748b !important;
+      cursor: not-allowed;
+    }
+
+    /* Modal de Sucesso */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.45);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal-success {
+      background: white;
+      border-radius: 20px;
+      padding: 35px 30px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(15,23,42,0.15);
+      transform: scale(0.9);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-overlay.open .modal-success {
+      transform: scale(1);
+    }
+    .success-icon {
+      width: 60px;
+      height: 60px;
+      background: #dcfce7;
+      color: #16a34a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 24px;
+    }
+    .modal-success h2 { margin-bottom: 10px; font-weight: 700; color: #1e1b4b; font-size: 22px; }
+    .modal-success p { color: #6b7280; font-size: 15px; line-height: 1.5; margin-bottom: 24px; }
+    .modal-success button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.2s;
+    }
+    .modal-success button:hover { background: #1d4ed8; }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <a href="./home_aluno.html" class="brand" aria-label="Porto Connect">
+        <img src="../assets/images/logo.png" alt="Porto Connect" height="34" class="brand-logo" />
+      </a>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="./home_aluno.html">Dashboard</a>
+        <a href="./portfolio.html">Portfólio</a>
+        <a href="./vagas.html">Vagas</a>
+        <a href="./candidaturas.html" class="active">Candidaturas</a>
+        <a href="./perfil_aluno.html">Perfil</a>
+        <a href="./login_aluno.html" class="logout"><i data-lucide="log-out"></i> Sair</a>
+      </nav>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="hero" style="margin-bottom: 30px;">
+      <h1>Gerenciamento de Vagas</h1>
+      <p style="color: #6b7280; font-size: 16px; margin-top: 4px;">Acompanhe suas candidaturas e vagas favoritadas em um só lugar</p>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-container">
+      <div class="tabs-nav">
+        <button class="tab-btn active" data-tab="candidaturasTab">Minhas Candidaturas (<span id="candsCount">0</span>)</button>
+        <button class="tab-btn" data-tab="favoritosTab">Vagas Salvas (<span id="favsCount">0</span>)</button>
+      </div>
+
+      <!-- CONTEUDO TABS -->
+      <div class="tab-content active" id="candidaturasTab">
+        <div class="candidaturas-list" id="candidaturasContainer">
+          <!-- Candidaturas renderizadas dinamicamente -->
+        </div>
+      </div>
+
+      <div class="tab-content" id="favoritosTab">
+        <div class="favs-grid" id="favoritosContainer">
+          <!-- Vagas salvas renderizadas dinamicamente -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal de Sucesso (para candidatura direta das salvas) -->
+  <div class="modal-overlay" id="successModal">
+    <div class="modal-success">
+      <div class="success-icon">
+        <i data-lucide="check"></i>
+      </div>
+      <h2>Candidatura Enviada!</h2>
+      <p>Você se candidatou com sucesso para a vaga de <strong id="modalJobTitle"></strong>.</p>
+      <button id="closeModalBtn">Entendido</button>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+    
+    document.getElementById('menuToggle')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
+    });
+
+    // --- SEGURANÇA E CONTEXTO ---
+    const alunoLogadoRaw = localStorage.getItem('aluno_logado');
+    if (!alunoLogadoRaw) {
+      window.location.href = 'login_aluno.html';
+    }
+    const alunoLogado = JSON.parse(alunoLogadoRaw || '{}');
+    const userEmail = alunoLogado.email || 'convidado';
+    const candidaturasKey = `candidaturas_${userEmail}`;
+    const favoritosKey = `favoritos_${userEmail}`;
+
+    let candidaturas = JSON.parse(localStorage.getItem(candidaturasKey) || '[]');
+    let favoritos = JSON.parse(localStorage.getItem(favoritosKey) || '[]');
+
+    // --- MANIPULAÇÃO DE ABAS ---
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        btn.classList.add('active');
+        const tabId = btn.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // --- RENDERIZADORES ---
+    function renderCandidaturas() {
+      const container = document.getElementById('candidaturasContainer');
+      document.getElementById('candsCount').innerText = candidaturas.length;
+      container.innerHTML = '';
+
+      if (candidaturas.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px; background: white; border-radius: 18px; border: 1px dashed #cbd5e1; color: #64748b;">
+            <i class="fa-regular fa-paper-plane" style="font-size: 40px; margin-bottom: 15px; display: block; color: #94a3b8;"></i>
+            <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Nenhuma candidatura enviada.</p>
+            <a href="vagas.html" style="color: #2563eb; font-weight: 600; text-decoration: none;">Ver vagas disponíveis</a>
+          </div>
+        `;
+        return;
+      }
+
+      candidaturas.forEach(cand => {
+        const card = document.createElement('div');
+        card.className = 'card-cand';
+
+        let statusClass = 'status-pending';
+        if (cand.status.toLowerCase() === 'aceito') statusClass = 'status-accepted';
+        if (cand.status.toLowerCase() === 'recusado') statusClass = 'status-rejected';
+
+        const dateText = cand.msgExtra || `Enviada em ${cand.data}`;
+
+        card.innerHTML = `
+          <div class="cand-info">
+            <h3>${cand.titulo}</h3>
+            <p>${cand.empresa}</p>
+          </div>
+          <div class="cand-meta">
+            <span class="cand-date">${dateText}</span>
+            <span class="status ${statusClass}">${cand.status}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderFavoritos() {
+      const container = document.getElementById('favoritosContainer');
+      document.getElementById('favsCount').innerText = favoritos.length;
+      container.innerHTML = '';
+
+      if (favoritos.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; grid-column: 1 / -1; padding: 40px; background: white; border-radius: 18px; border: 1px dashed #cbd5e1; color: #64748b;">
+            <i class="fa-regular fa-bookmark" style="font-size: 40px; margin-bottom: 15px; display: block; color: #94a3b8;"></i>
+            <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Nenhuma vaga salva.</p>
+            <a href="vagas.html" style="color: #2563eb; font-weight: 600; text-decoration: none;">Buscar vagas para salvar</a>
+          </div>
+        `;
+        return;
+      }
+
+      favoritos.forEach((fav, idx) => {
+        const card = document.createElement('div');
+        card.className = 'card-fav';
+
+        const jaCandidatado = candidaturas.some(cand => cand.titulo === fav.titulo && cand.empresa === fav.empresa);
+        const btnText = jaCandidatado ? 'Candidatado' : 'Candidatar-se';
+        const btnClass = jaCandidatado ? 'btn-apply-fav applied' : 'btn-apply-fav';
+        const btnDisabled = jaCandidatado ? 'disabled' : '';
+
+        card.innerHTML = `
+          <div>
+            <div class="fav-head">
+              <span class="badge">${fav.area}</span>
+              <button class="btn-unfav" onclick="removerFavorito(${idx})" aria-label="Remover dos favoritos">
+                <i class="fa-solid fa-bookmark"></i>
+              </button>
+            </div>
+            <div class="fav-body">
+              <h3>${fav.titulo}</h3>
+              <p>${fav.empresa}</p>
+              <p style="font-size: 13px; color: #9ca3af; margin: 0;">${fav.tipo}</p>
+            </div>
+          </div>
+          <div class="fav-actions" style="margin-top: 15px;">
+            <button class="${btnClass}" ${btnDisabled} onclick="candidatarFav('${fav.titulo}', '${fav.empresa}', this)">${btnText}</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // --- FUNÇÕES OPERACIONAIS ---
+    window.removerFavorito = function(idx) {
+      favoritos.splice(idx, 1);
+      localStorage.setItem(favoritosKey, JSON.stringify(favoritos));
+      renderFavoritos();
+    }
+
+    window.candidatarFav = function(title, company, button) {
+      const novaCandidatura = {
+        titulo: title,
+        empresa: company,
+        status: 'Pendente',
+        data: new Date().toLocaleDateString('pt-BR'),
+        diasAtras: 0
+      };
+
+      candidaturas.push(novaCandidatura);
+      localStorage.setItem(candidaturasKey, JSON.stringify(candidaturas));
+
+      button.innerText = 'Candidatado';
+      button.classList.add('applied');
+      button.disabled = true;
+
+      // Atualizar contadores e aba de candidaturas
+      renderCandidaturas();
+
+      const modal = document.getElementById('successModal');
+      const modalJobTitle = document.getElementById('modalJobTitle');
+      modalJobTitle.innerText = title;
+      modal.classList.add('open');
+    }
+
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+      document.getElementById('successModal').classList.remove('open');
+    });
+
+    // --- LOGOUT ---
+    document.querySelector('.logout')?.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (confirm("Deseja sair da plataforma?")) {
+        localStorage.removeItem('aluno_logado');
+        window.location.href = 'login_aluno.html';
+      }
+    });
+
+    // --- INICIALIZAÇÃO ---
+    renderCandidaturas();
+    renderFavoritos();
+  </script>
+</body>
+</html>
