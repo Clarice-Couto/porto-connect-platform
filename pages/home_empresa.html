@@ -11,27 +11,6 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="../js/db.js"></script>
   <style>
-    .tabs-container {
-      display: flex;
-      gap: 15px;
-      margin: 20px 0;
-      border-bottom: 2px solid #e2e8f0;
-      padding-bottom: 10px;
-    }
-    .tab-link {
-      padding: 12px 25px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 700;
-      color: #64748b;
-      border: none;
-      background: #f1f5f9;
-      transition: 0.2s;
-    }
-    .tab-link.active {
-      background: #2563eb;
-      color: white;
-    }
     .candidate-card {
       background: white;
       border-radius: 16px;
@@ -42,17 +21,6 @@
       cursor: pointer;
     }
     .candidate-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-    .tag {
-      display: inline-block;
-      background: #eff6ff;
-      color: #2563eb;
-      padding: 5px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      margin-right: 8px;
-      margin-top: 8px;
-      font-weight: 600;
-    }
   </style>
 </head>
 <body>
@@ -62,8 +30,8 @@
         <img src="../assets/images/logo.png" alt="Porto Connect" height="34" />
       </a>
       <nav class="nav-links" id="navLinks">
-        <a href="#" id="menuTabCandidates" class="active">Candidatos</a>
-        <a href="#" id="menuTabExplore">Explorar Alunos</a>
+        <a href="./home_empresa.html" class="active">Dashboard</a>
+        <a href="./explorar_alunos.html">Banco de Talentos</a>
         <a href="./vagas_empresa.html">Minhas Vagas</a>
         <a href="./perfil_empresa.html">Perfil</a>
         <a href="./login_empresa.html" class="logout"><i data-lucide="log-out"></i> Sair</a>
@@ -73,58 +41,42 @@
   </header>
 
   <main class="container">
-    <h1 class="title">Painel de Recrutamento</h1>
-    <p class="subtitle" id="welcomeMsg">Carregando...</p>
+    <h1 class="title">Painel de Candidaturas</h1>
+    <p class="subtitle" id="welcomeMsg">Bem-vindo!</p>
 
     <section class="stats">
-      <div class="card" id="cardStatCandidates" style="cursor:pointer;">
+      <div class="card">
         <div class="icon">👥</div>
         <h4>Suas Vagas</h4>
         <div class="number" id="statCandidatos">0</div>
-        <p>Inscritos ativos</p>
+        <p>Inscritos totais</p>
       </div>
-      <div class="card" id="cardStatExplore" style="cursor:pointer; border: 2px solid #2563eb;">
+      <a href="./explorar_alunos.html" class="card" style="text-decoration:none; color:inherit; border: 2px solid #2563eb;">
         <div class="icon">🌍</div>
-        <h4>Rede Global</h4>
+        <h4>Banco de Talentos</h4>
         <div class="number" id="statTotalAlunos">0</div>
-        <p>Alunos na plataforma</p>
-      </div>
+        <p>Ver todos os alunos</p>
+      </a>
       <div class="card">
         <div class="icon">💼</div>
-        <h4>Vagas</h4>
+        <h4>Vagas Ativas</h4>
         <div class="number" id="statVagasAtivas">0</div>
         <p>Publicadas</p>
       </div>
     </section>
 
-    <div class="tabs-container">
-      <button class="tab-link active" id="tabBtnCandidates">Candidatos Inscritos</button>
-      <button class="tab-link" id="tabBtnExplore">Banco de Talentos (Todos)</button>
-    </div>
-
     <section class="filter-box">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 id="viewTitle">Candidatos Inscritos</h2>
-        <span id="modeIndicator" style="background:#eff6ff; color:#2563eb; padding:5px 15px; border-radius:20px; font-size:12px; font-weight:800;">FILTRANDO SUAS VAGAS</span>
+        <h2>Gestão de Candidatos</h2>
+        <span style="background:#eff6ff; color:#2563eb; padding:5px 15px; border-radius:20px; font-size:12px; font-weight:800;">INSCRITOS NAS SUAS VAGAS</span>
       </div>
 
       <div class="filters">
         <div class="input-group">
-          <label>Buscar Nome</label>
-          <input type="text" id="filterName" placeholder="Quem você procura?" />
+          <label>Buscar Candidato</label>
+          <input type="text" id="filterName" placeholder="Nome ou e-mail..." />
         </div>
         <div class="input-group">
-          <label>Tecnologia</label>
-          <select id="filterSkill">
-            <option value="">Todas as tecnologias</option>
-            <option value="react">React</option>
-            <option value="python">Python</option>
-            <option value="javascript">JavaScript</option>
-            <option value="java">Java</option>
-            <option value="sql">SQL</option>
-          </select>
-        </div>
-        <div class="input-group" id="groupStatus">
           <label>Status</label>
           <select id="filterStatus">
             <option value="">Todos os status</option>
@@ -136,7 +88,7 @@
         </div>
       </div>
 
-      <div id="resultsCount" style="margin-bottom:15px; font-weight:600; color:#64748b;">Carregando...</div>
+      <div id="resultsCount" style="margin-bottom:15px; font-weight:600; color:#64748b;">0 candidato(s) encontrado(s)</div>
       <div class="candidate-grid" id="candidateGrid"></div>
     </section>
   </main>
@@ -144,7 +96,6 @@
   <script>
     (async function(){
       lucide.createIcons();
-      let currentMode = 'candidates';
       let dataStudents = [];
       let dataApps = [];
       let dataJobs = [];
@@ -165,68 +116,42 @@
 
       function updateUI() {
         const name = document.getElementById('filterName').value.toLowerCase().trim();
-        const skill = document.getElementById('filterSkill').value.toLowerCase();
         const status = document.getElementById('filterStatus').value.toLowerCase();
         const grid = document.getElementById('candidateGrid');
         grid.innerHTML = '';
 
-        let list = [];
-        if (currentMode === 'explore') {
-          list = dataStudents.filter(s => 
-            (name === "" || s.nome.toLowerCase().includes(name) || s.email.toLowerCase().includes(name)) &&
-            (skill === "" || (s.skills || "").toLowerCase().includes(skill))
-          );
-          list.forEach(s => {
-            const card = document.createElement('div');
-            card.className = 'candidate-card';
-            card.innerHTML = `
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="display:flex; gap:15px; align-items:center;">
-                  <div style="width:50px; height:50px; background:#2563eb; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:20px;">${s.nome.substring(0,1).toUpperCase()}</div>
-                  <div><h3 style="margin:0;">${s.nome}</h3><span style="color:#64748b; font-size:14px;">${s.email}</span></div>
-                </div>
-                <div style="background:#f0fdf4; color:#16a34a; padding:5px 15px; border-radius:20px; font-size:11px; font-weight:800;">DISPONÍVEL</div>
+        const list = dataApps.filter(a => {
+          const student = dataStudents.find(s => s.email === a.emailAluno) || {nome: 'Candidato'};
+          return (name === "" || student.nome.toLowerCase().includes(name) || a.emailAluno.toLowerCase().includes(name)) &&
+                 (status === "" || a.status.toLowerCase() === status);
+        });
+
+        list.forEach(a => {
+          const student = dataStudents.find(s => s.email === a.emailAluno) || {nome: 'Candidato'};
+          const card = document.createElement('div');
+          card.className = 'candidate-card';
+          card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; gap:15px; align-items:center;">
+                <div style="width:50px; height:50px; background:#f1f5f9; color:#475569; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:20px;">${student.nome.substring(0,1).toUpperCase()}</div>
+                <div><h3 style="margin:0;">${student.nome}</h3><span style="color:#2563eb; font-size:13px; font-weight:700;">Vaga: ${a.titulo}</span></div>
               </div>
-              <div style="margin-top:15px;">${(s.skills || '').split(',').map(t => t.trim() ? `<span class="tag">${t.trim()}</span>` : '').join('')}</div>
-            `;
-            card.onclick = () => window.location.href = `detalhes_candidato.html?email=${encodeURIComponent(s.email)}`;
-            grid.appendChild(card);
-          });
-        } else {
-          list = dataApps.filter(a => {
-            const student = dataStudents.find(s => s.email === a.emailAluno) || {nome: 'Candidato'};
-            return (name === "" || student.nome.toLowerCase().includes(name) || a.emailAluno.toLowerCase().includes(name)) &&
-                   (status === "" || a.status.toLowerCase() === status);
-          });
-          list.forEach(a => {
-            const student = dataStudents.find(s => s.email === a.emailAluno) || {nome: 'Candidato'};
-            const card = document.createElement('div');
-            card.className = 'candidate-card';
-            card.innerHTML = `
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="display:flex; gap:15px; align-items:center;">
-                  <div style="width:50px; height:50px; background:#f1f5f9; color:#475569; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:20px;">${student.nome.substring(0,1).toUpperCase()}</div>
-                  <div><h3 style="margin:0;">${student.nome}</h3><span style="color:#2563eb; font-size:13px; font-weight:700;">Vaga: ${a.titulo}</span></div>
-                </div>
-                <div style="text-align:right;">
-                   <div style="background:#eff6ff; color:#2563eb; padding:5px 15px; border-radius:20px; font-size:11px; font-weight:800;">${a.status.toUpperCase()}</div>
-                </div>
-              </div>
-              <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
-                <span style="color:#64748b; font-size:12px;">${a.emailAluno}</span>
-                <select onchange="changeStatus('${a.emailAluno}', '${a.titulo}', this.value)" style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-size:12px; font-weight:600;">
-                  <option value="Pendente" ${a.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                  <option value="Entrevista" ${a.status === 'Entrevista' ? 'selected' : ''}>Entrevista</option>
-                  <option value="Contratado" ${a.status === 'Contratado' ? 'selected' : ''}>Contratado</option>
-                  <option value="Recusado" ${a.status === 'Recusado' ? 'selected' : ''}>Recusado</option>
-                </select>
-              </div>
-            `;
-            card.onclick = (e) => { if(e.target.tagName !== 'SELECT') window.location.href=`detalhes_candidato.html?email=${encodeURIComponent(a.emailAluno)}`; };
-            grid.appendChild(card);
-          });
-        }
-        document.getElementById('resultsCount').innerText = `${list.length} registro(s) encontrado(s)`;
+              <div style="background:#eff6ff; color:#2563eb; padding:5px 15px; border-radius:20px; font-size:11px; font-weight:800;">${a.status.toUpperCase()}</div>
+            </div>
+            <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
+              <span style="color:#64748b; font-size:12px;">${a.emailAluno}</span>
+              <select onchange="changeStatus('${a.emailAluno}', '${a.titulo}', this.value)" style="padding:6px; border-radius:8px; border:1px solid #cbd5e1; font-size:12px; font-weight:600;">
+                <option value="Pendente" ${a.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                <option value="Entrevista" ${a.status === 'Entrevista' ? 'selected' : ''}>Entrevista</option>
+                <option value="Contratado" ${a.status === 'Contratado' ? 'selected' : ''}>Contratado</option>
+                <option value="Recusado" ${a.status === 'Recusado' ? 'selected' : ''}>Recusado</option>
+              </select>
+            </div>
+          `;
+          card.onclick = (e) => { if(e.target.tagName !== 'SELECT') window.location.href=`detalhes_candidato.html?email=${encodeURIComponent(a.emailAluno)}`; };
+          grid.appendChild(card);
+        });
+        document.getElementById('resultsCount').innerText = `${list.length} candidato(s) encontrado(s)`;
       }
 
       window.changeStatus = async (email, title, status) => {
@@ -235,38 +160,7 @@
         updateUI();
       };
 
-      function switchMode(mode) {
-        currentMode = mode;
-        document.querySelectorAll('.tab-link, #navLinks a').forEach(el => el.classList.remove('active'));
-        if (mode === 'explore') {
-          document.getElementById('tabBtnExplore').classList.add('active');
-          document.getElementById('menuTabExplore').classList.add('active');
-          document.getElementById('viewTitle').innerText = "Banco de Talentos (Todos os Alunos)";
-          document.getElementById('modeIndicator').innerText = "VISUALIZANDO REDE GLOBAL";
-          document.getElementById('modeIndicator').style.background = "#f0fdf4";
-          document.getElementById('modeIndicator').style.color = "#16a34a";
-          document.getElementById('groupStatus').style.display = 'none';
-        } else {
-          document.getElementById('tabBtnCandidates').classList.add('active');
-          document.getElementById('menuTabCandidates').classList.add('active');
-          document.getElementById('viewTitle').innerText = "Candidatos Inscritos";
-          document.getElementById('modeIndicator').innerText = "FILTRANDO SUAS VAGAS";
-          document.getElementById('modeIndicator').style.background = "#eff6ff";
-          document.getElementById('modeIndicator').style.color = "#2563eb";
-          document.getElementById('groupStatus').style.display = 'block';
-        }
-        updateUI();
-      }
-
-      document.getElementById('tabBtnCandidates').onclick = () => switchMode('candidates');
-      document.getElementById('tabBtnExplore').onclick = () => switchMode('explore');
-      document.getElementById('menuTabCandidates').onclick = () => switchMode('candidates');
-      document.getElementById('menuTabExplore').onclick = () => switchMode('explore');
-      document.getElementById('cardStatCandidates').onclick = () => switchMode('candidates');
-      document.getElementById('cardStatExplore').onclick = () => switchMode('explore');
-
       document.getElementById('filterName').oninput = updateUI;
-      document.getElementById('filterSkill').onchange = updateUI;
       document.getElementById('filterStatus').onchange = updateUI;
 
       await fetchData();
@@ -274,7 +168,7 @@
 
       document.querySelector('.logout').onclick = async (e) => {
         e.preventDefault();
-        if (confirm("Deseja sair?")) { await db.signOut(); window.location.href = 'login_empresa.html'; }
+        if (confirm("Sair?")) { await db.signOut(); window.location.href = 'login_empresa.html'; }
       };
       document.getElementById('menuToggle').onclick = () => document.getElementById('navLinks').classList.toggle('active');
     })();
