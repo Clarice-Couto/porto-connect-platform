@@ -99,6 +99,17 @@ function runOperation(db, op, payload = {}) {
       return { data: user, error: null };
     }
 
+    case 'getAllStudents': {
+      const data = db.students.map(s => ({
+        nome: s.nome,
+        email: s.email,
+        cidade: s.cidade,
+        skills: s.skills,
+        sobre: s.sobre
+      }));
+      return { data, error: null };
+    }
+
     case 'updateStudentProfile': {
       const idx = db.students.findIndex((item) => item.email === payload.email);
       if (idx < 0) return { data: null, error: { message: 'Aluno n�o encontrado' } };

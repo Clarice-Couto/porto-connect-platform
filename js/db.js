@@ -12,16 +12,28 @@ const localStore = {
   remove(key) {
     localStorage.removeItem(key);
   },
+  clearOldData() {
+    // Limpa chaves da versão antiga do projeto para evitar conflitos
+    const oldKeys = ['usuarios_aluno', 'usuarios_empresa', 'perfilAluno', 'perfilEmpresa'];
+    oldKeys.forEach(k => localStorage.removeItem(k));
+    
+    // Limpa chaves dinâmicas antigas (vagas_, favoritos_, etc)
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('vagas_') || key.startsWith('favoritos_') || key.startsWith('projetos_') || key.startsWith('candidaturas_')) {
+        localStorage.removeItem(key);
+      }
+    });
+  }
 };
 
-const cacheStudentProfile = (profile) => {
-  localStore.set('aluno_logado', profile);
-  localStore.set('perfilAluno', profile);
-};
+// Executa limpeza uma vez se necessário
+if (!localStorage.getItem('porto_connect_cleaned')) {
+  localStore.clearOldData();
+  localStorage.setItem('porto_connect_cleaned', 'true');
+}
 
-const cacheCompanyProfile = (profile) => {
-  localStore.set('empresa_logado', profile);
-  localStore.set('perfilEmpresa', profile);
+const cacheSession = (key, profile) => {
+  localStore.set(key, profile);
 };
 
 let useRemoteApi = null;
@@ -29,7 +41,6 @@ let useRemoteApi = null;
 const shouldUseRemoteApi = () => {
   if (useRemoteApi !== null) return useRemoteApi;
   const host = window.location.hostname;
-  // Use API se não estiver em localhost, ou se for explicitamente solicitado via query param ?api=true
   const urlParams = new URLSearchParams(window.location.search);
   const forceApi = urlParams.get('api') === 'true';
   useRemoteApi = (host !== 'localhost' && host !== '127.0.0.1') || forceApi;
@@ -37,8 +48,6 @@ const shouldUseRemoteApi = () => {
 };
 
 async function apiCall(op, payload = {}) {
-  // Ajuste o path se necessário dependendo de onde o frontend está em relação à API
-  // No Vercel, /api/db funciona se a pasta api/ estiver na raiz
   const response = await fetch('/api/db', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -57,21 +66,21 @@ async function callDb(op, payload = {}) {
     try {
       const result = await apiCall(op, payload);
       if (!result.error && result.data) {
-        // Cache de sessão local
-        if (['signUpStudent', 'signInStudent', 'updateStudentProfile'].includes(op)) cacheStudentProfile(result.data);
-        if (['signUpCompany', 'signInCompany', 'updateCompanyProfile'].includes(op)) cacheCompanyProfile(result.data);
+        // Apenas salva a SESSÃO (quem está logado), não os dados do banco
+        if (['signInStudent', 'signInCompany'].includes(op)) {
+          const key = op.includes('Student') ? 'aluno_logado' : 'empresa_logado';
+          cacheSession(key, result.data);
+        }
       }
       return result;
     } catch (error) {
       console.error('API Error:', error.message);
-      // Se a API falhar no Vercel, não temos fallback local para dados compartilhados
-      return { data: null, error: { message: 'Serviço de banco de dados temporariamente indisponível.' } };
+      return { data: null, error: { message: 'Serviço indisponível.' } };
     }
   }
   
-  // Mensagem informativa para desenvolvimento local
-  console.warn('Rodando em modo LOCAL (localStorage). Use ?api=true na URL para conectar ao banco compartilhado.');
-  return { data: null, error: { message: 'Banco de dados remoto não disponível em localhost sem ?api=true' } };
+  console.warn('Modo LOCAL desativado para dados compartilhados.');
+  return { data: null, error: { message: 'Use o ambiente de produção ou ?api=true' } };
 }
 
 const db = {
@@ -85,8 +94,6 @@ const db = {
   async signOut() {
     localStore.remove('aluno_logado');
     localStore.remove('empresa_logado');
-    localStore.remove('perfilAluno');
-    localStore.remove('perfilEmpresa');
     return true;
   },
 
@@ -103,8 +110,22 @@ const db = {
     return result.data;
   },
 
-  async updateStudentProfile(profile) { return callDb('updateStudentProfile', profile); },
-  async updateCompanyProfile(profile) { return callDb('updateCompanyProfile', profile); },
+  async getAllStudents() {
+    const result = await callDb('getAllStudents');
+    return result.data || [];
+  },
+
+  async updateStudentProfile(profile) { 
+    const res = await callDb('updateStudentProfile', profile);
+    if (res.data) cacheSession('aluno_logado', res.data);
+    return res;
+  },
+
+  async updateCompanyProfile(profile) { 
+    const res = await callDb('updateCompanyProfile', profile);
+    if (res.data) cacheSession('empresa_logado', res.data);
+    return res;
+  },
 
   async getCompanyVacancies(companyEmail) {
     const result = await callDb('getCompanyVacancies', { companyEmail });
@@ -171,6 +192,10 @@ const db = {
 
   async updateApplicationStatus(emailAluno, titulo, novoStatus, companyEmail) {
     return callDb('updateApplicationStatus', { emailAluno, titulo, novoStatus, companyEmail });
+  },
+
+  async normalizeStudentApplications(emailAluno) {
+    return this.getApplicationsByStudent(emailAluno);
   },
 
   usesRemoteApi: shouldUseRemoteApi,
