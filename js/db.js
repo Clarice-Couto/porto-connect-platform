@@ -1,32 +1,3 @@
-const SUPABASE_URL = window.SUPABASE_URL || 'https://YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
-
-let supabaseClient = null;
-
-const isSupabaseConfigured = () => {
-  return SUPABASE_URL && SUPABASE_ANON_KEY && 
-         !SUPABASE_URL.includes('YOUR_') && !SUPABASE_ANON_KEY.includes('YOUR_') &&
-         !SUPABASE_URL.includes('%%SUPABASE_') && !SUPABASE_ANON_KEY.includes('%%SUPABASE_');
-};
-
-const initSupabaseClient = async () => {
-  if (supabaseClient) return supabaseClient;
-  if (!isSupabaseConfigured()) {
-    console.warn('Supabase não está configurado. O app usará fallback localStorage. Configure SUPABASE_URL e SUPABASE_ANON_KEY em js/db.js.');
-    return null;
-  }
-
-  const module = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
-  supabaseClient = module.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      storage: window.localStorage,
-    },
-  });
-
-  return supabaseClient;
-};
-
 const localStore = {
   get(key) {
     try {
@@ -53,111 +24,297 @@ const cacheCompanyProfile = (profile) => {
   localStore.set('perfilEmpresa', profile);
 };
 
-const db = {
-  ready: initSupabaseClient(),
+const mapVacancy = (vacancy) => ({
+  ...vacancy,
+  empresa: vacancy.empresa || vacancy.company_name || '',
+});
 
-  async getClient() {
-    return await initSupabaseClient();
-  },
+const mapFavorite = (favorite) => ({
+  ...favorite,
+  titulo: favorite.titulo || favorite.vacancy_title || '',
+  empresa: favorite.empresa || favorite.company_name || '',
+  area: favorite.area || favorite.categoria || '',
+  tipo: favorite.tipo || '',
+});
 
-  async signUpStudent({ nome, email, password, cidade = '', sobre = '', skills = '' }) {
-    if (!isSupabaseConfigured()) {
+const mapApplication = (application) => ({
+  titulo: application.titulo || application.vacancy_title || '',
+  empresa: application.empresa || application.company_name || application.company_email || '',
+  emailAluno: application.emailAluno || application.student_email || '',
+  status: application.status || 'Pendente',
+  data: application.data || (application.created_at ? new Date(application.created_at).toLocaleDateString('pt-BR') : ''),
+  diasAtras: application.diasAtras || 0,
+  msgExtra: application.msgExtra || application.extra_message || '',
+  company_email: application.company_email || '',
+});
+
+let useRemoteApi = null;
+
+const shouldUseRemoteApi = () => {
+  if (useRemoteApi !== null) return useRemoteApi;
+  const host = window.location.hostname;
+  useRemoteApi = host !== 'localhost' && host !== '127.0.0.1';
+  return useRemoteApi;
+};
+
+async function apiCall(op, payload = {}) {
+  const response = await fetch('/api/db', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ op, payload }),
+  });
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result.error?.message || 'Erro ao acessar o banco de dados');
+  }
+  return result;
+}
+
+function runLocalOperation(op, payload = {}) {
+  switch (op) {
+    case 'signUpStudent': {
+      const { nome, email, password, cidade = '', sobre = '', skills = '' } = payload;
       const usuarios = localStore.get('usuarios_aluno') || [];
-      if (usuarios.some(user => user.email === email)) {
-        return { error: { message: 'Este e-mail já está cadastrado!' } };
+      if (usuarios.some((user) => user.email === email)) {
+        return { data: null, error: { message: 'Este e-mail já está cadastrado!' } };
       }
-      const novoUsuario = { nome, email, senha: password, cidade, sobre, skills };
-      usuarios.push(novoUsuario);
+      const profile = { id: crypto.randomUUID(), nome, email, senha: password, cidade, sobre, skills, role: 'student' };
+      usuarios.push(profile);
       localStore.set('usuarios_aluno', usuarios);
-      cacheStudentProfile(novoUsuario);
-      localStore.set(`candidaturas_${email}`, []);
-      localStore.set(`favoritos_${email}`, []);
-      localStore.set(`projetos_${email}`, []);
-      return { data: novoUsuario, error: null };
+      cacheStudentProfile(profile);
+      return { data: profile, error: null };
     }
+    case 'signInStudent': {
+      const usuarios = localStore.get('usuarios_aluno') || [];
+      const user = usuarios.find((item) => item.email === payload.email && item.senha === payload.password);
+      if (!user) return { data: null, error: { message: 'E-mail ou senha incorretos!' } };
+      cacheStudentProfile(user);
+      return { data: user, error: null };
+    }
+    case 'signUpCompany': {
+      const { nome, email, password, cidade = '', sobre = '' } = payload;
+      const usuarios = localStore.get('usuarios_empresa') || [];
+      if (usuarios.some((user) => user.email === email)) {
+        return { data: null, error: { message: 'Este e-mail corporativo já está cadastrado!' } };
+      }
+      const profile = { id: crypto.randomUUID(), nome, email, senha: password, cidade, sobre, role: 'company' };
+      usuarios.push(profile);
+      localStore.set('usuarios_empresa', usuarios);
+      cacheCompanyProfile(profile);
+      return { data: profile, error: null };
+    }
+    case 'signInCompany': {
+      const usuarios = localStore.get('usuarios_empresa') || [];
+      const user = usuarios.find((item) => item.email === payload.email && item.senha === payload.password);
+      if (!user) return { data: null, error: { message: 'E-mail corporativo ou senha incorretos!' } };
+      cacheCompanyProfile(user);
+      return { data: user, error: null };
+    }
+    case 'getStudentProfileByEmail': {
+      const usuarios = localStore.get('usuarios_aluno') || [];
+      return { data: usuarios.find((user) => user.email === payload.email) || null, error: null };
+    }
+    case 'getCompanyProfileByEmail': {
+      const usuarios = localStore.get('usuarios_empresa') || [];
+      return { data: usuarios.find((user) => user.email === payload.email) || null, error: null };
+    }
+    case 'updateStudentProfile': {
+      const usuarios = localStore.get('usuarios_aluno') || [];
+      const idx = usuarios.findIndex((user) => user.email === payload.email);
+      if (idx < 0) return { data: null, error: { message: 'Aluno não encontrado' } };
+      usuarios[idx] = { ...usuarios[idx], ...payload };
+      localStore.set('usuarios_aluno', usuarios);
+      cacheStudentProfile(usuarios[idx]);
+      return { data: usuarios[idx], error: null };
+    }
+    case 'updateCompanyProfile': {
+      const usuarios = localStore.get('usuarios_empresa') || [];
+      const idx = usuarios.findIndex((user) => user.email === payload.email);
+      if (idx < 0) return { data: null, error: { message: 'Empresa não encontrada' } };
+      usuarios[idx] = { ...usuarios[idx], ...payload };
+      localStore.set('usuarios_empresa', usuarios);
+      cacheCompanyProfile(usuarios[idx]);
+      return { data: usuarios[idx], error: null };
+    }
+    case 'getCompanyVacancies': {
+      const data = (localStore.get(`vagas_${payload.companyEmail}`) || []).map(mapVacancy);
+      return { data, error: null };
+    }
+    case 'getAllCompanyVacancies': {
+      const data = Object.keys(localStorage)
+        .filter((key) => key.startsWith('vagas_'))
+        .flatMap((key) => JSON.parse(localStorage.getItem(key) || '[]'))
+        .map(mapVacancy);
+      return { data, error: null };
+    }
+    case 'addCompanyVacancy': {
+      const vagasKey = `vagas_${payload.companyEmail}`;
+      const vagas = localStore.get(vagasKey) || [];
+      const record = {
+        ...payload.vacancy,
+        id: payload.vacancy.id || crypto.randomUUID(),
+        company_email: payload.companyEmail,
+        company_name: payload.vacancy.empresa || payload.vacancy.company_name || payload.companyName || '',
+        status: payload.vacancy.status || 'Ativa',
+        created_at: new Date().toISOString(),
+      };
+      vagas.push(record);
+      localStore.set(vagasKey, vagas);
+      return { data: mapVacancy(record), error: null };
+    }
+    case 'updateCompanyVacancy': {
+      const vagasKey = `vagas_${payload.companyEmail}`;
+      const vagas = localStore.get(vagasKey) || [];
+      const idx = vagas.findIndex((job) => job.id === payload.vacancyId);
+      if (idx < 0) return { data: null, error: { message: 'Vaga não encontrada' } };
+      vagas[idx] = { ...vagas[idx], ...payload.vacancy };
+      localStore.set(vagasKey, vagas);
+      return { data: mapVacancy(vagas[idx]), error: null };
+    }
+    case 'getStudentFavorites': {
+      const data = (localStore.get(`favoritos_${payload.studentEmail}`) || []).map(mapFavorite);
+      return { data, error: null };
+    }
+    case 'addStudentFavorite': {
+      const favoritosKey = `favoritos_${payload.studentEmail}`;
+      const favoritos = localStore.get(favoritosKey) || [];
+      const record = mapFavorite({
+        id: payload.favorite.id || crypto.randomUUID(),
+        titulo: payload.favorite.titulo,
+        empresa: payload.favorite.empresa,
+        company_email: payload.favorite.company_email || '',
+        categoria: payload.favorite.area || payload.favorite.categoria || '',
+        tipo: payload.favorite.tipo || '',
+        created_at: new Date().toISOString(),
+      });
+      favoritos.push(record);
+      localStore.set(favoritosKey, favoritos);
+      return { data: record, error: null };
+    }
+    case 'removeStudentFavorite': {
+      const favoritosKey = `favoritos_${payload.studentEmail}`;
+      const favoritos = (localStore.get(favoritosKey) || []).filter(
+        (fav) => !(fav.titulo === payload.vacancyTitle && fav.empresa === payload.companyName)
+      );
+      localStore.set(favoritosKey, favoritos);
+      return { data: favoritos, error: null };
+    }
+    case 'getStudentProjects': {
+      return { data: localStore.get(`projetos_${payload.studentEmail}`) || [], error: null };
+    }
+    case 'saveStudentProject': {
+      const projetosKey = `projetos_${payload.studentEmail}`;
+      const projetos = localStore.get(projetosKey) || [];
+      const projectId = payload.project.id || crypto.randomUUID();
+      const idx = projetos.findIndex((item) => String(item.id) === String(projectId));
+      const record = { ...payload.project, id: projectId, student_email: payload.studentEmail };
+      if (idx >= 0) projetos[idx] = record;
+      else projetos.push(record);
+      localStore.set(projetosKey, projetos);
+      return { data: record, error: null };
+    }
+    case 'deleteStudentProject': {
+      const projetosKey = `projetos_${payload.studentEmail}`;
+      const projetos = (localStore.get(projetosKey) || []).filter(
+        (item) => String(item.id) !== String(payload.projectId)
+      );
+      localStore.set(projetosKey, projetos);
+      return { data: projetos, error: null };
+    }
+    case 'applyToVacancy': {
+      const candidaturasKey = `candidaturas_${payload.application.emailAluno}`;
+      const candidaturas = localStore.get(candidaturasKey) || [];
+      const record = mapApplication({
+        ...payload.application,
+        id: crypto.randomUUID(),
+        student_email: payload.application.emailAluno,
+        company_email: payload.application.company_email || '',
+        company_name: payload.application.empresa || '',
+        vacancy_title: payload.application.titulo,
+        created_at: new Date().toISOString(),
+      });
+      candidaturas.push(record);
+      localStore.set(candidaturasKey, candidaturas);
+      return { data: record, error: null };
+    }
+    case 'getApplicationsByStudent': {
+      const data = Object.keys(localStorage)
+        .filter((key) => key.startsWith('candidaturas_'))
+        .flatMap((key) => JSON.parse(localStorage.getItem(key) || '[]'))
+        .filter((app) => app.emailAluno === payload.emailAluno || app.student_email === payload.emailAluno)
+        .map(mapApplication);
+      return { data, error: null };
+    }
+    case 'getApplicationsByCompany': {
+      const data = Object.keys(localStorage)
+        .filter((key) => key.startsWith('candidaturas_'))
+        .flatMap((key) => JSON.parse(localStorage.getItem(key) || '[]'))
+        .filter(
+          (app) =>
+            app.company_email === payload.companyEmail ||
+            app.empresa === payload.companyEmail ||
+            app.empresa_email === payload.companyEmail
+        )
+        .map(mapApplication);
+      return { data, error: null };
+    }
+    case 'updateApplicationStatus': {
+      const candidaturasKey = `candidaturas_${payload.emailAluno}`;
+      const candidaturas = localStore.get(candidaturasKey) || [];
+      const idx = candidaturas.findIndex(
+        (app) =>
+          (app.titulo === payload.titulo || app.vacancy_title === payload.titulo) &&
+          (app.company_email === payload.companyEmail || app.empresa === payload.companyEmail)
+      );
+      if (idx < 0) return { data: null, error: { message: 'Candidatura não encontrada' } };
+      candidaturas[idx].status = payload.novoStatus;
+      localStore.set(candidaturasKey, candidaturas);
+      return { data: mapApplication(candidaturas[idx]), error: null };
+    }
+    default:
+      return { data: null, error: { message: `Operação desconhecida: ${op}` } };
+  }
+}
 
-    const client = await this.getClient();
-    const { data, error } = await client.auth.signUp({ email, password });
-    if (error) return { error };
+async function callDb(op, payload = {}) {
+  if (shouldUseRemoteApi()) {
+    try {
+      const result = await apiCall(op, payload);
+      if (!result.error && result.data) {
+        if (op === 'signUpStudent' || op === 'signInStudent') cacheStudentProfile(result.data);
+        if (op === 'signUpCompany' || op === 'signInCompany') cacheCompanyProfile(result.data);
+        if (op === 'updateStudentProfile') cacheStudentProfile(result.data);
+        if (op === 'updateCompanyProfile') cacheCompanyProfile(result.data);
+      }
+      return result;
+    } catch (error) {
+      console.warn('API indisponível, usando localStorage:', error.message);
+      useRemoteApi = false;
+    }
+  }
+  return runLocalOperation(op, payload);
+}
 
-    const userId = data.user?.id || null;
-    const profile = { user_id: userId, nome, email, cidade, sobre, skills, role: 'student' };
-    const insert = await client.from('students').insert([profile]).select().single();
-    if (insert.error) return { error: insert.error };
-    cacheStudentProfile({ ...profile, senha: password });
-    return { data: insert.data, error: null };
+const db = {
+  ready: Promise.resolve(),
+
+  async signUpStudent(payload) {
+    return callDb('signUpStudent', payload);
   },
 
   async signInStudent(email, password) {
-    if (!isSupabaseConfigured()) {
-      const usuarios = localStore.get('usuarios_aluno') || [];
-      const usuario = usuarios.find(user => user.email === email && user.senha === password);
-      if (!usuario) {
-        return { error: { message: 'E-mail ou senha incorretos!' } };
-      }
-      cacheStudentProfile(usuario);
-      return { data: usuario, error: null };
-    }
-
-    const client = await this.getClient();
-    const { data, error } = await client.auth.signInWithPassword({ email, password });
-    if (error) return { error };
-    const profileResult = await client.from('students').select('*').eq('email', email).single();
-    if (profileResult.error) return { error: profileResult.error };
-    cacheStudentProfile(profileResult.data);
-    return { data: profileResult.data, error: null };
+    return callDb('signInStudent', { email, password });
   },
 
-  async signUpCompany({ nome, email, password, cidade = '', sobre = '' }) {
-    if (!isSupabaseConfigured()) {
-      const usuarios = localStore.get('usuarios_empresa') || [];
-      if (usuarios.some(user => user.email === email)) {
-        return { error: { message: 'Este e-mail corporativo já está cadastrado!' } };
-      }
-      const novoUsuario = { nome, email, senha: password, cidade, sobre };
-      usuarios.push(novoUsuario);
-      localStore.set('usuarios_empresa', usuarios);
-      cacheCompanyProfile(novoUsuario);
-      localStore.set(`vagas_${email}`, []);
-      return { data: novoUsuario, error: null };
-    }
-
-    const client = await this.getClient();
-    const { data, error } = await client.auth.signUp({ email, password });
-    if (error) return { error };
-    const userId = data.user?.id || null;
-    const profile = { user_id: userId, nome, email, cidade, sobre, role: 'company' };
-    const insert = await client.from('companies').insert([profile]).select().single();
-    if (insert.error) return { error: insert.error };
-    cacheCompanyProfile(profile);
-    return { data: insert.data, error: null };
+  async signUpCompany(payload) {
+    return callDb('signUpCompany', payload);
   },
 
   async signInCompany(email, password) {
-    if (!isSupabaseConfigured()) {
-      const usuarios = localStore.get('usuarios_empresa') || [];
-      const usuario = usuarios.find(user => user.email === email && user.senha === password);
-      if (!usuario) {
-        return { error: { message: 'E-mail corporativo ou senha incorretos!' } };
-      }
-      cacheCompanyProfile(usuario);
-      return { data: usuario, error: null };
-    }
-
-    const client = await this.getClient();
-    const { data, error } = await client.auth.signInWithPassword({ email, password });
-    if (error) return { error };
-    const profileResult = await client.from('companies').select('*').eq('email', email).single();
-    if (profileResult.error) return { error: profileResult.error };
-    cacheCompanyProfile(profileResult.data);
-    return { data: profileResult.data, error: null };
+    return callDb('signInCompany', { email, password });
   },
 
   async signOut() {
-    if (isSupabaseConfigured()) {
-      const client = await this.getClient();
-      await client.auth.signOut();
-    }
     localStore.remove('aluno_logado');
     localStore.remove('empresa_logado');
     localStore.remove('perfilAluno');
@@ -166,321 +323,107 @@ const db = {
   },
 
   getCurrentStudent() {
-    const cached = localStore.get('aluno_logado');
-    return cached;
+    return localStore.get('aluno_logado');
   },
 
   getCurrentCompany() {
-    const cached = localStore.get('empresa_logado');
-    return cached;
+    return localStore.get('empresa_logado');
   },
 
   async getStudentProfileByEmail(email) {
-    if (!isSupabaseConfigured()) {
-      const usuarios = localStore.get('usuarios_aluno') || [];
-      return usuarios.find(user => user.email === email) || null;
-    }
-    const client = await this.getClient();
-    const { data, error } = await client.from('students').select('*').eq('email', email).single();
-    if (error) return null;
-    return data;
+    const result = await callDb('getStudentProfileByEmail', { email });
+    return result.data;
   },
 
   async getCompanyProfileByEmail(email) {
-    if (!isSupabaseConfigured()) {
-      const usuarios = localStore.get('usuarios_empresa') || [];
-      return usuarios.find(user => user.email === email) || null;
-    }
-    const client = await this.getClient();
-    const { data, error } = await client.from('companies').select('*').eq('email', email).single();
-    if (error) return null;
-    return data;
+    const result = await callDb('getCompanyProfileByEmail', { email });
+    return result.data;
   },
 
   async updateStudentProfile(profile) {
-    if (!isSupabaseConfigured()) {
-      const usuarios = localStore.get('usuarios_aluno') || [];
-      const idx = usuarios.findIndex(user => user.email === profile.email);
-      if (idx >= 0) {
-        usuarios[idx] = { ...usuarios[idx], ...profile };
-        localStore.set('usuarios_aluno', usuarios);
-        cacheStudentProfile(usuarios[idx]);
-        return { data: usuarios[idx], error: null };
-      }
-      return { data: null, error: { message: 'Aluno não encontrado' } };
-    }
-    const client = await this.getClient();
-    const { data, error } = await client.from('students').update(profile).eq('email', profile.email).select().single();
-    if (!error) cacheStudentProfile(data);
-    return { data, error };
+    return callDb('updateStudentProfile', profile);
   },
 
   async updateCompanyProfile(profile) {
-    if (!isSupabaseConfigured()) {
-      const usuarios = localStore.get('usuarios_empresa') || [];
-      const idx = usuarios.findIndex(user => user.email === profile.email);
-      if (idx >= 0) {
-        usuarios[idx] = { ...usuarios[idx], ...profile };
-        localStore.set('usuarios_empresa', usuarios);
-        cacheCompanyProfile(usuarios[idx]);
-        return { data: usuarios[idx], error: null };
-      }
-      return { data: null, error: { message: 'Empresa não encontrada' } };
-    }
-    const client = await this.getClient();
-    const { data, error } = await client.from('companies').update(profile).eq('email', profile.email).select().single();
-    if (!error) cacheCompanyProfile(data);
-    return { data, error };
+    return callDb('updateCompanyProfile', profile);
   },
 
   async getCompanyVacancies(companyEmail) {
-    if (!isSupabaseConfigured()) {
-      return localStore.get(`vagas_${companyEmail}`) || [];
-    }
-    const client = await this.getClient();
-    const { data, error } = await client.from('vacancies').select('*').eq('company_email', companyEmail).order('created_at', { ascending: false });
-    if (error) return [];
-    return data;
+    const result = await callDb('getCompanyVacancies', { companyEmail });
+    return result.data || [];
   },
 
   async getAllCompanyVacancies() {
-    if (!isSupabaseConfigured()) {
-      return Object.keys(localStorage)
-        .filter(key => key.startsWith('vagas_'))
-        .flatMap(key => JSON.parse(localStorage.getItem(key) || '[]'));
-    }
-    const client = await this.getClient();
-    const { data, error } = await client.from('vacancies').select('*').order('created_at', { ascending: false });
-    if (error) return [];
-    return data;
+    const result = await callDb('getAllCompanyVacancies');
+    return result.data || [];
   },
 
   async addCompanyVacancy(companyEmail, vacancy) {
-    if (!isSupabaseConfigured()) {
-      const vagasKey = `vagas_${companyEmail}`;
-      const vagas = localStore.get(vagasKey) || [];
-      vagas.push(vacancy);
-      localStore.set(vagasKey, vagas);
-      return { data: vacancy, error: null };
-    }
-    const client = await this.getClient();
-    const vacancyRecord = {
-      ...vacancy,
-      id: vacancy.id || crypto.randomUUID(),
-      company_email: companyEmail,
-      company_name: vacancy.empresa || vacancy.company_name || '',
-      company_id: (await this.getCurrentCompany())?.user_id || null,
-      created_at: new Date().toISOString(),
-    };
-    const { data, error } = await client.from('vacancies').insert([vacancyRecord]).select().single();
-    return { data, error };
+    const company = this.getCurrentCompany();
+    return callDb('addCompanyVacancy', {
+      companyEmail,
+      vacancy,
+      companyName: company?.nome || '',
+    });
   },
 
   async updateCompanyVacancy(companyEmail, vacancyId, vacancy) {
-    if (!isSupabaseConfigured()) {
-      const vagasKey = `vagas_${companyEmail}`;
-      const vagas = localStore.get(vagasKey) || [];
-      const index = vagas.findIndex(job => job.id === vacancyId);
-      if (index >= 0) {
-        vagas[index] = vacancy;
-        localStore.set(vagasKey, vagas);
-        return { data: vacancy, error: null };
-      }
-      return { data: null, error: { message: 'Vaga não encontrada' } };
-    }
-    const client = await this.getClient();
-    const { data, error } = await client.from('vacancies').update(vacancy).eq('id', vacancyId).eq('company_email', companyEmail).select().single();
-    return { data, error };
+    return callDb('updateCompanyVacancy', { companyEmail, vacancyId, vacancy });
   },
 
   async getStudentFavorites(studentEmail) {
-    if (!isSupabaseConfigured()) {
-      return localStore.get(`favoritos_${studentEmail}`) || [];
-    }
-    const client = await this.getClient();
-    const { data, error } = await client.from('favorites').select('*').eq('student_email', studentEmail).order('created_at', { ascending: false });
-    if (error) return [];
-    return data;
+    const result = await callDb('getStudentFavorites', { studentEmail });
+    return result.data || [];
   },
 
   async addStudentFavorite(studentEmail, favorite) {
-    if (!isSupabaseConfigured()) {
-      const favoritosKey = `favoritos_${studentEmail}`;
-      const favoritos = localStore.get(favoritosKey) || [];
-      const novoFav = { id: favorite.id || Date.now(), ...favorite };
-      favoritos.push(novoFav);
-      localStore.set(favoritosKey, favoritos);
-      return { data: novoFav, error: null };
-    }
-    const client = await this.getClient();
-    const record = {
-      id: favorite.id || crypto.randomUUID(),
-      student_email: studentEmail,
-      vacancy_title: favorite.titulo,
-      company_name: favorite.empresa,
-      company_email: favorite.company_email || favorite.empresa_email || '',
-      categoria: favorite.area || favorite.categoria || '',
-      tipo: favorite.tipo || '',
-      created_at: new Date().toISOString(),
-    };
-    const { data, error } = await client.from('favorites').insert([record]).select().single();
-    return { data, error };
+    return callDb('addStudentFavorite', { studentEmail, favorite });
   },
 
   async removeStudentFavorite(studentEmail, vacancyTitle, companyName) {
-    if (!isSupabaseConfigured()) {
-      const favoritosKey = `favoritos_${studentEmail}`;
-      const favoritos = localStore.get(favoritosKey) || [];
-      const filtered = favoritos.filter(fav => !(fav.titulo === vacancyTitle && fav.empresa === companyName));
-      localStore.set(favoritosKey, filtered);
-      return { data: filtered, error: null };
-    }
-    const client = await this.getClient();
-    const { data, error } = await client.from('favorites').delete().match({ student_email: studentEmail, vacancy_title: vacancyTitle, company_name: companyName }).select();
-    return { data, error };
+    return callDb('removeStudentFavorite', { studentEmail, vacancyTitle, companyName });
   },
 
   async getStudentProjects(studentEmail) {
-    if (!isSupabaseConfigured()) {
-      return localStore.get(`projetos_${studentEmail}`) || [];
-    }
-    const client = await this.getClient();
-    const { data, error } = await client.from('projects').select('*').eq('student_email', studentEmail).order('created_at', { ascending: false });
-    if (error) return [];
-    return data;
+    const result = await callDb('getStudentProjects', { studentEmail });
+    return result.data || [];
   },
 
   async saveStudentProject(studentEmail, project) {
-    if (!isSupabaseConfigured()) {
-      const projetosKey = `projetos_${studentEmail}`;
-      const projetos = localStore.get(projetosKey) || [];
-      const projectId = project.id || String(Date.now());
-      const idx = projetos.findIndex(p => String(p.id) === String(projectId));
-      const projectToSave = { id: projectId, ...project };
-      if (idx >= 0) {
-        projetos[idx] = projectToSave;
-      } else {
-        projetos.push(projectToSave);
-      }
-      localStore.set(projetosKey, projetos);
-      return { data: projectToSave, error: null };
-    }
-    const client = await this.getClient();
-    const projectId = project.id || crypto.randomUUID();
-    const record = {
-      ...project,
-      id: projectId,
-      student_email: studentEmail,
-      created_at: new Date().toISOString(),
-    };
-    const { data, error } = await client.from('projects').upsert(record, { onConflict: 'id' }).select().single();
-    return { data, error };
+    return callDb('saveStudentProject', { studentEmail, project });
   },
 
   async deleteStudentProject(studentEmail, projectId) {
-    if (!isSupabaseConfigured()) {
-      const projetosKey = `projetos_${studentEmail}`;
-      const projetos = localStore.get(projetosKey) || [];
-      const filtered = projetos.filter(proj => String(proj.id) !== String(projectId));
-      localStore.set(projetosKey, filtered);
-      return { data: filtered, error: null };
-    }
-    const client = await this.getClient();
-    const { data, error } = await client.from('projects').delete().eq('id', projectId).eq('student_email', studentEmail).select();
-    return { data, error };
+    return callDb('deleteStudentProject', { studentEmail, projectId });
   },
 
-  isSupabaseConfigured,
-
   async applyToVacancy(application) {
-    if (!isSupabaseConfigured()) {
-      const userEmail = application.emailAluno || application.emailAluno;
-      const candidaturasKey = `candidaturas_${userEmail}`;
-      const candidaturas = localStore.get(candidaturasKey) || [];
-      candidaturas.push(application);
-      localStore.set(candidaturasKey, candidaturas);
-      return { data: application, error: null };
-    }
-    const client = await this.getClient();
-    const record = {
-      ...application,
-      id: crypto.randomUUID(),
-      student_email: application.emailAluno,
-      company_email: application.empresa_email || application.empresa_email || application.empresa || '',
-      company_name: application.empresa || '',
-      vacancy_title: application.titulo,
-      status: application.status || 'Pendente',
-      created_at: new Date().toISOString(),
-    };
-    const { data, error } = await client.from('applications').insert([record]).select().single();
-    return { data, error };
+    return callDb('applyToVacancy', { application });
   },
 
   async getApplicationsByStudent(emailAluno) {
-    if (!isSupabaseConfigured()) {
-      return Object.keys(localStorage)
-        .filter(key => key.startsWith('candidaturas_'))
-        .flatMap(key => JSON.parse(localStorage.getItem(key) || '[]'))
-        .filter(app => app.emailAluno === emailAluno);
-    }
-    const client = await this.getClient();
-    const { data, error } = await client.from('applications').select('*').eq('student_email', emailAluno).order('created_at', { ascending: false });
-    if (error) return [];
-    return data;
+    const result = await callDb('getApplicationsByStudent', { emailAluno });
+    return result.data || [];
   },
 
   async getApplicationsByCompany(companyEmail) {
-    if (!isSupabaseConfigured()) {
-      return Object.keys(localStorage)
-        .filter(key => key.startsWith('candidaturas_'))
-        .flatMap(key => JSON.parse(localStorage.getItem(key) || '[]'))
-        .filter(app => app.empresa === companyEmail || app.company_email === companyEmail || app.empresa_email === companyEmail);
-    }
-    const client = await this.getClient();
-    const { data, error } = await client.from('applications').select('*').or(`company_email.eq.${companyEmail},empresa.eq.${companyEmail}`);
-    if (error) return [];
-    return data;
+    const result = await callDb('getApplicationsByCompany', { companyEmail });
+    return result.data || [];
   },
 
   async updateApplicationStatus(emailAluno, titulo, novoStatus, companyEmail) {
-    if (!isSupabaseConfigured()) {
-      const candidaturasKey = `candidaturas_${emailAluno}`;
-      const candidaturas = localStore.get(candidaturasKey) || [];
-      const index = candidaturas.findIndex(app => app.titulo === titulo && (app.empresa === companyEmail || app.company_email === companyEmail));
-      if (index >= 0) {
-        candidaturas[index].status = novoStatus;
-        localStore.set(candidaturasKey, candidaturas);
-        return { data: candidaturas[index], error: null };
-      }
-      return { data: null, error: { message: 'Candidatura não encontrada' } };
-    }
-    const client = await this.getClient();
-    const { data, error } = await client.from('applications')
-      .update({ status: novoStatus })
-      .eq('student_email', emailAluno)
-      .eq('vacancy_title', titulo)
-      .eq('company_email', companyEmail)
-      .select()
-      .single();
-    return { data, error };
+    return callDb('updateApplicationStatus', { emailAluno, titulo, novoStatus, companyEmail });
   },
 
   async normalizeStudentApplications(emailAluno) {
-    const applications = await this.getApplicationsByStudent(emailAluno);
-    return applications.map(app => ({
-      titulo: app.titulo || app.vacancy_title || '',
-      empresa: app.empresa || app.company_name || app.company_email || '',
-      emailAluno: app.emailAluno || app.student_email || '',
-      status: app.status || 'Pendente',
-      data: app.data || new Date(app.created_at).toLocaleDateString('pt-BR') || '',
-      diasAtras: app.diasAtras || 0,
-      msgExtra: app.msgExtra || app.extra_message || '',
-    }));
+    return this.getApplicationsByStudent(emailAluno);
   },
 
   async getStudentByEmail(email) {
-    return await this.getStudentProfileByEmail(email);
+    return this.getStudentProfileByEmail(email);
   },
+
+  usesRemoteApi: shouldUseRemoteApi,
 };
 
 window.db = db;

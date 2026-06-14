@@ -311,7 +311,6 @@
     </div>
   </div>
 
-  <script src="../js/init-supabase.js"></script>
   <script src="../js/db.js"></script>
   <script>
     lucide.createIcons();
@@ -452,9 +451,11 @@
     }
 
     window.candidatarFav = async function(title, company, button) {
+      const favorite = favoritos.find(fav => fav.titulo === title && fav.empresa === company);
       const novaCandidatura = {
         titulo: title,
         empresa: company,
+        company_email: favorite?.company_email || '',
         emailAluno: userEmail,
         status: 'Pendente',
         data: new Date().toLocaleDateString('pt-BR'),

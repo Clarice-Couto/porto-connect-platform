@@ -25,7 +25,7 @@ Este repositório contém o **Front-end** do Porto Connect, desenvolvido com **H
 A interface cobre os principais fluxos da plataforma: 
 - Cadastro e login para Alunos e Empresas
 - Dashboard inteligente para gestão de vagas e talentos
-- Edição de perfil com salvamento em LocalStorage
+- Edição de perfil com persistência no banco (Vercel KV)
 - Portfólio de projetos
 - Descoberta e filtragem de vagas
 - Visualização de detalhes dos candidatos
@@ -63,47 +63,56 @@ porto-connect/
 │   ├── perfil.css
 │   └── portfolio.css
 ├── js/
-│   ├── script_dashboard.js   
+│   ├── db.js
+│   ├── script_dashboard.js
 │   └── script.js
-└── assets/
-    └── images/         
+├── api/
+│   └── db.js
 ```
+
+---
+
+## Como publicar (GitHub + Vercel)
+
+### 1. Commit e push
+
+```bash
+cd porto-connect-platform
+git add .
+git commit -m "Migrar banco para API Vercel com Upstash Redis"
+git push origin main
+```
+
+### 2. Deploy na Vercel
+
+Se o repositório ainda não estiver conectado:
+
+1. Acesse [vercel.com](https://vercel.com/) e importe o repo `Clarice-Couto/porto-connect-platform`
+2. Deixe as configurações padrão (sem build command) e clique em **Deploy**
+
+Se já estiver conectado, o push na `main` dispara o deploy automaticamente.
+
+### 3. Ativar o banco compartilhado (obrigatório para produção)
+
+1. No projeto Vercel: **Storage → Marketplace → Upstash Redis**
+2. Crie o banco e **conecte ao projeto** (a Vercel configura as variáveis sozinha)
+3. Vá em **Deployments → Redeploy** no último deploy
+
+Pronto. Sem Supabase, sem SQL, sem variáveis manuais.
+
+> Localmente (Live Server), o app usa localStorage. Na Vercel, usa Redis via `/api/db`.
 
 ---
 
 ## Como rodar localmente
 
-**Pré-requisito:** ter o VS Code com a extensão [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) instalada.
+**Pré-requisito:** VS Code com [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer).
 
 ```bash
-# Clone o repositório
-git clone https://github.com/seu-usuario/porto-connect.git
-
-# Abra a pasta no VS Code
-code porto-connect
+git clone https://github.com/Clarice-Couto/porto-connect-platform.git
+cd porto-connect-platform
+code .
 ```
-
-## Configurar Supabase e deploy (Netlify)
-
-1. Crie um projeto no Supabase e configure as tabelas mínimas: `students`, `companies`, `vacancies`, `applications` (colunas usadas pelo frontend: email, nome, status, created_at, etc.).
-2. No frontend, o arquivo `js/init-supabase.js` contém placeholders `%%SUPABASE_URL%%` e `%%SUPABASE_ANON_KEY%%`.
-    - Locally: substitua manualmente esses valores pelo `URL` e `anon key` do seu projeto.
-    - Netlify: adicione as variáveis de ambiente `SUPABASE_URL` e `SUPABASE_ANON_KEY` e, durante o build, substitua os placeholders (ex.: usando `sed` no comando de build) ou gere um arquivo `init-supabase.js` a partir dessas variáveis.
-
-Exemplo simples para Netlify (como comando de build):
-
-```bash
-# substitui os placeholders no arquivo antes de publicar
-sed -i "s|%%SUPABASE_URL%%|$SUPABASE_URL|g" ./js/init-supabase.js
-sed -i "s|%%SUPABASE_ANON_KEY%%|$SUPABASE_ANON_KEY|g" ./js/init-supabase.js
-npm run build-or-empty || true
-```
-
-3. Deploy no Netlify: conecte o repositório e defina as variáveis de ambiente. Certifique-se que `js/init-supabase.js` no build final contenha as chaves substituídas.
-
-4. Testes pós-deploy: acesse o site publicado, registre uma empresa/aluno e crie uma vaga; verifique no Supabase que os registros foram inseridos nas tabelas correspondentes.
-
-Observação: a `anon key` do Supabase é pensada para uso no cliente (front-end). Proteja a `service_role`/chaves administrativas — não as inclua no frontend.
 
 Com a pasta aberta no VS Code, clique com o botão direito no arquivo `index.html` e selecione **"Open with Live Server"**. O projeto abrirá automaticamente no navegador em `http://127.0.0.1:5500`.
 
@@ -115,7 +124,7 @@ Com a pasta aberta no VS Code, clique com o botão direito no arquivo `index.htm
 |--------|-----------|
 | Marcação | HTML5 |
 | Estilização | CSS3 Vanilla |
-| Interatividade | JavaScript (Vanilla) + LocalStorage |
+| Interatividade | JavaScript (Vanilla) + Upstash Redis |
 | Versionamento | Git + GitHub |
 | Ícones | Lucide + FontAwesome |
 
