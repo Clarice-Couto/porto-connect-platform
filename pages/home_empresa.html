@@ -11,89 +11,115 @@
   <link rel="stylesheet" href="../css/home_aluno.css"/>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="../js/db.js"></script>
+  <style>
+    /* Garantir que as abas sejam visíveis e clicáveis */
+    .nav-links a {
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .nav-links a.active {
+      background: rgba(37, 99, 235, 0.1);
+      color: #2563eb;
+      font-weight: 700;
+    }
+    .nav-links a:hover {
+      background: rgba(37, 99, 235, 0.05);
+    }
+    .candidate-card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border: 1px solid #e2e8f0;
+      transition: transform 0.2s;
+    }
+    .candidate-card:hover {
+      transform: translateY(-2px);
+    }
+    .tag {
+      display: inline-block;
+      background: #f1f5f9;
+      color: #475569;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-right: 6px;
+      margin-top: 6px;
+    }
+  </style>
 </head>
 <body>
 
   <header class="navbar">
     <div class="nav-inner">
-      <a href="./home_empresa.html" class="brand" aria-label="Porto Connect">
+      <a href="./home_empresa.html" class="brand">
         <img src="../assets/images/logo.png" alt="Porto Connect" height="34" class="brand-logo" />
       </a>
 
       <nav class="nav-links" id="navLinks">
-        <a href="./home_empresa.html" class="active" id="tabCandidatos">Candidatos</a>
-        <a href="#" id="tabExplorar">Explorar Alunos</a>
+        <a id="tabCandidatos" class="active">Candidatos</a>
+        <a id="tabExplorar">Explorar Alunos</a>
         <a href="./vagas_empresa.html">Minhas Vagas</a>
         <a href="./perfil_empresa.html">Perfil</a>
         <a href="./login_empresa.html" class="logout"><i data-lucide="log-out"></i> Sair</a>
       </nav>
 
-      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">
+      <button class="menu-toggle" id="menuToggle">
         <i data-lucide="menu"></i>
       </button>
     </div>
   </header>
 
   <main class="container">
-
     <h1 class="title">Dashboard da Empresa</h1>
-    <p class="subtitle">
-      Gerencie suas vagas e encontre os melhores talentos
-    </p>
-
+    <p class="subtitle">Bem-vindo(a)!</p>
 
     <section class="stats">
-
       <div class="card">
         <div class="icon">👥</div>
         <h4>Candidatos</h4>
         <div class="number" id="statCandidatos">0</div>
         <p>Inscritos em suas vagas</p>
       </div>
-
-      <div class="card">
+      <div class="card" id="btnGoExplore" style="cursor:pointer; transition: transform 0.2s;">
         <div class="icon">🌟</div>
         <h4>Banco de Talentos</h4>
         <div class="number" id="statTotalAlunos">0</div>
-        <p>Alunos na plataforma</p>
+        <p>Clique para ver todos os alunos</p>
       </div>
-
       <div class="card">
         <div class="icon">💼</div>
         <h4>Vagas Ativas</h4>
         <div class="number" id="statVagasAtivas">0</div>
         <p>Publicadas por você</p>
       </div>
-
     </section>
 
     <section class="filter-box">
-
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2 class="filter-title" id="sectionTitle">Candidatos Inscritos</h2>
         <div id="viewModeBadge" style="background: #eff6ff; color: #2563eb; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Modo: Suas Vagas</div>
       </div>
 
       <div class="filters">
-
         <div class="input-group">
-          <label>Buscar Nome</label>
-          <input type="text" id="filterName" placeholder="Ex: João Silva..." />
+          <label>Buscar por Nome ou E-mail</label>
+          <input type="text" id="filterName" placeholder="Ex: Lucas..." />
         </div>
-
         <div class="input-group">
           <label>Habilidade</label>
           <select id="filterSkill">
-            <option value="">Todas</option>
+            <option value="">Todas as Habilidades</option>
             <option value="react">React</option>
             <option value="python">Python</option>
             <option value="javascript">JavaScript</option>
             <option value="java">Java</option>
             <option value="sql">SQL</option>
-            <option value="sap">SAP</option>
           </select>
         </div>
-
         <div class="input-group" id="statusFilterGroup">
           <label>Status</label>
           <select id="filterLevel">
@@ -104,231 +130,170 @@
             <option value="recusado">Recusado</option>
           </select>
         </div>
-
       </div>
 
-      <div class="results" id="resultsCount">
-        Buscando...
-      </div>
-
-
-      <div class="candidate-grid" id="candidateGrid">
-        <!-- Preenchido via JS -->
-      </div>
-
+      <div class="results" id="resultsCount">Buscando...</div>
+      <div class="candidate-grid" id="candidateGrid"></div>
     </section>
-
   </main>
 
   <script>
     (async function(){
       lucide.createIcons();
       
-      let currentView = 'candidates'; // 'candidates' ou 'explore'
-      let allStudentsData = [];
-      let allApplicationsData = [];
-      let companyVacanciesData = [];
+      let currentView = 'candidates';
+      let allStudents = [];
+      let applications = [];
+      let vacancies = [];
 
       const filterName = document.getElementById('filterName');
       const filterSkill = document.getElementById('filterSkill');
       const filterLevel = document.getElementById('filterLevel');
-      const resultsCount = document.getElementById('resultsCount');
       const container = document.getElementById('candidateGrid');
-      const sectionTitle = document.getElementById('sectionTitle');
-      const viewModeBadge = document.getElementById('viewModeBadge');
-      const statusFilterGroup = document.getElementById('statusFilterGroup');
       
-      const tabCandidatos = document.getElementById('tabCandidatos');
-      const tabExplorar = document.getElementById('tabExplorar');
-
       const empresaLogadaRaw = localStorage.getItem('empresa_logado');
-      if (!empresaLogadaRaw) { window.location.href = 'login_aluno.html'; return; }
+      if (!empresaLogadaRaw) { window.location.href = 'login_empresa.html'; return; }
       const empresa = JSON.parse(empresaLogadaRaw);
+      document.querySelector('.subtitle').innerHTML = `Bem-vindo(a), <strong>${empresa.nome}</strong>!`;
 
-      async function refreshData() {
-        companyVacanciesData = await db.getCompanyVacancies(empresa.email);
-        allApplicationsData = await db.getApplicationsByCompany(empresa.email);
-        allStudentsData = await db.getAllStudents();
+      async function loadData() {
+        allStudents = await db.getAllStudents();
+        vacancies = await db.getCompanyVacancies(empresa.email);
+        applications = await db.getApplicationsByCompany(empresa.email);
         
-        document.getElementById('statCandidatos').innerText = allApplicationsData.length;
-        document.getElementById('statTotalAlunos').innerText = allStudentsData.length;
-        document.getElementById('statVagasAtivas').innerText = companyVacanciesData.filter(job => job.status === 'Ativa').length;
+        applications = applications.map(app => {
+          const student = allStudents.find(s => s.email === app.emailAluno);
+          return { ...app, nomeAluno: student ? student.nome : 'Candidato' };
+        });
+
+        document.getElementById('statCandidatos').innerText = applications.length;
+        document.getElementById('statTotalAlunos').innerText = allStudents.length;
+        document.getElementById('statVagasAtivas').innerText = vacancies.filter(v => v.status === 'Ativa').length;
       }
 
-      function applyFiltersAndRender() {
-        const nameTerm = filterName.value.trim().toLowerCase();
-        const skillTerm = filterSkill.value.trim().toLowerCase();
-        const levelTerm = filterLevel.value.trim().toLowerCase();
+      function render() {
+        const name = filterName.value.toLowerCase().trim();
+        const skill = filterSkill.value.toLowerCase();
+        const status = filterLevel.value.toLowerCase();
 
         container.innerHTML = '';
-        let listToRender = [];
+        let list = [];
 
         if (currentView === 'explore') {
-          // Lógica de Explorar Alunos
-          const allRequiredSkills = companyVacanciesData.map(v => v.skills || '').join(',');
-          listToRender = allStudentsData.map(s => ({
-            ...s,
-            matchPercent: db.calculateMatch(allRequiredSkills, s.skills)
-          })).sort((a, b) => b.matchPercent - a.matchPercent);
-
-          listToRender = listToRender.filter(s => {
-            const matchName = nameTerm === "" || s.nome.toLowerCase().includes(nameTerm);
-            const skills = (s.skills || "").toLowerCase();
-            const matchSkill = skillTerm === "" || skills.includes(skillTerm);
-            return matchName && matchSkill;
+          const allReqSkills = vacancies.map(v => v.skills || '').join(',');
+          list = allStudents.map(s => ({ ...s, match: db.calculateMatch(allReqSkills, s.skills) }))
+                    .sort((a,b) => b.match - a.match)
+                    .filter(s => (name === "" || s.nome.toLowerCase().includes(name) || s.email.toLowerCase().includes(name)) &&
+                                 (skill === "" || (s.skills || "").toLowerCase().includes(skill)));
+          
+          list.forEach(s => {
+            const color = s.match > 70 ? '#16a34a' : s.match > 30 ? '#ca8a04' : '#64748b';
+            const card = document.createElement('div');
+            card.className = 'candidate-card';
+            card.style.borderLeft = `5px solid ${color}`;
+            card.innerHTML = `
+              <div class="candidate-top" style="display:flex; justify-content:space-between; align-items:start;">
+                <div class="profile" style="display:flex; gap:12px; align-items:center;">
+                  <div class="avatar" style="width:45px; height:45px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#475569;">${s.nome.substring(0,2).toUpperCase()}</div>
+                  <div class="candidate-info"><h3 style="font-size:16px; margin:0;">${s.nome}</h3><span style="font-size:12px; color:#64748b;">${s.email}</span></div>
+                </div>
+                <div class="match-indicator" style="background:${color}15; padding:8px; border-radius:10px; text-align:center; min-width:70px;">
+                  <div style="font-size:7px; font-weight:800; color:${color};">SMART MATCH</div>
+                  <div style="font-size:16px; font-weight:900; color:${color};">${s.match}%</div>
+                </div>
+              </div>
+              <div class="tags" style="margin-top:10px;">${(s.skills || '').split(',').map(sk => sk.trim() ? `<span class="tag">${sk.trim()}</span>` : '').join('')}</div>
+            `;
+            card.style.cursor = 'pointer';
+            card.onclick = () => window.location.href = `detalhes_candidato.html?email=${encodeURIComponent(s.email)}`;
+            container.appendChild(card);
           });
         } else {
-          // Lógica de Candidatos Inscritos
-          listToRender = allApplicationsData.filter(app => {
-            const matchName = nameTerm === "" || app.emailAluno.toLowerCase().includes(nameTerm); // Fallback se não tiver nome ainda
-            const matchStatus = levelTerm === "" || app.status.toLowerCase() === levelTerm;
-            
-            // Para filtrar por skill e nome real, precisamos de mais dados (async no filter é ruim, vamos usar o que temos)
-            return matchName && matchStatus;
+          list = applications.filter(app => (name === "" || app.nomeAluno.toLowerCase().includes(name) || app.emailAluno.toLowerCase().includes(name)) &&
+                                           (status === "" || app.status.toLowerCase() === status));
+          
+          list.forEach(app => {
+            const student = allStudents.find(s => s.email === app.emailAluno) || {};
+            const vacancy = vacancies.find(v => v.titulo === app.titulo) || {};
+            const m = db.calculateMatch(vacancy.skills || '', student.skills || '');
+            const c = m > 70 ? '#16a34a' : m > 30 ? '#ca8a04' : '#64748b';
+
+            const card = document.createElement('div');
+            card.className = 'candidate-card';
+            card.innerHTML = `
+              <div class="candidate-top" style="display:flex; justify-content:space-between; align-items:start;">
+                <div class="profile" style="display:flex; gap:12px; align-items:center;">
+                  <div class="avatar" style="width:45px; height:45px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#475569;">${app.nomeAluno.substring(0,2).toUpperCase()}</div>
+                  <div class="candidate-info"><h3 style="font-size:16px; margin:0;">${app.nomeAluno}</h3><span style="font-size:12px; color:#64748b;">Inscrito em: ${app.titulo}</span></div>
+                </div>
+                <div style="text-align:right">
+                  <span class="badge" style="background:#eff6ff; color:#2563eb; font-weight:700; padding:4px 8px; border-radius:8px; font-size:12px;">${app.status}</span>
+                  <div style="font-size:9px; font-weight:800; color:${c}; margin-top:5px;">MATCH: ${m}%</div>
+                </div>
+              </div>
+              <div class="candidate-footer" style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:12px; color:#64748b">${app.emailAluno}</span>
+                <select onchange="updateStatus('${app.emailAluno}', '${app.titulo}', this.value)" style="padding:4px; border-radius:5px; border:1px solid #cbd5e1; font-size:12px;">
+                  <option value="Pendente" ${app.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                  <option value="Entrevista" ${app.status === 'Entrevista' ? 'selected' : ''}>Entrevista</option>
+                  <option value="Contratado" ${app.status === 'Contratado' ? 'selected' : ''}>Contratado</option>
+                  <option value="Recusado" ${app.status === 'Recusado' ? 'selected' : ''}>Recusado</option>
+                </select>
+              </div>
+            `;
+            card.querySelector('.profile').onclick = () => window.location.href = `detalhes_candidato.html?email=${encodeURIComponent(app.emailAluno)}`;
+            card.querySelector('.profile').style.cursor = 'pointer';
+            container.appendChild(card);
           });
         }
-
-        renderList(listToRender);
+        document.getElementById('resultsCount').innerText = `${list.length} encontrado(s)`;
       }
 
-      async function renderList(list) {
-        if (list.length === 0) {
-          container.innerHTML = `<div style="text-align: center; grid-column: 1 / -1; padding: 40px; background: white; border-radius: 18px; border: 1px dashed #cbd5e1; color: #64748b;">Nenhum resultado encontrado com os filtros aplicados.</div>`;
-          resultsCount.innerText = "0 resultados encontrados";
-          return;
+      window.updateStatus = async (email, title, newStatus) => {
+        await db.updateApplicationStatus(email, title, newStatus, empresa.email);
+        await loadData();
+        render();
+      };
+
+      const setView = (view) => {
+        currentView = view;
+        if (view === 'candidates') {
+          document.getElementById('tabExplorar').classList.remove('active');
+          document.getElementById('tabCandidatos').classList.add('active');
+          document.getElementById('sectionTitle').innerText = "Candidatos Inscritos";
+          document.getElementById('viewModeBadge').innerText = "Modo: Suas Vagas";
+          document.getElementById('viewModeBadge').style.background = "#eff6ff";
+          document.getElementById('viewModeBadge').style.color = "#2563eb";
+          document.getElementById('statusFilterGroup').style.display = 'block';
+        } else {
+          document.getElementById('tabCandidatos').classList.remove('active');
+          document.getElementById('tabExplorar').classList.add('active');
+          document.getElementById('sectionTitle').innerText = "Explorar Banco de Talentos";
+          document.getElementById('viewModeBadge').innerText = "Modo: Todos os Alunos";
+          document.getElementById('viewModeBadge').style.background = "#f0fdf4";
+          document.getElementById('viewModeBadge').style.color = "#16a34a";
+          document.getElementById('statusFilterGroup').style.display = 'none';
         }
+        render();
+      };
 
-        for (const item of list) {
-          if (currentView === 'explore') {
-            createExploreCard(item);
-          } else {
-            await createCandidateCard(item);
-          }
-        }
-        resultsCount.innerText = `${list.length} ${currentView === 'candidates' ? 'candidato' : 'aluno'}${list.length !== 1 ? 's' : ''} encontrado${list.length !== 1 ? 's' : ''}`;
-      }
+      document.getElementById('tabCandidatos').onclick = () => setView('candidates');
+      document.getElementById('tabExplorar').onclick = () => setView('explore');
+      document.getElementById('btnGoExplore').onclick = () => setView('explore');
 
-      function createExploreCard(student) {
-        const skillsArr = (student.skills || '').split(',').map(s => s.trim()).filter(Boolean);
-        const skillsHTML = skillsArr.length > 0 ? skillsArr.map(skill => `<div class="tag">${skill}</div>`).join('') : '<div class="tag">Nenhuma habilidade</div>';
-        let matchColor = student.matchPercent > 70 ? '#16a34a' : student.matchPercent > 30 ? '#ca8a04' : '#64748b';
+      filterName.oninput = render;
+      filterSkill.onchange = render;
+      filterLevel.onchange = render;
 
-        const card = document.createElement('div');
-        card.className = 'candidate-card';
-        card.style.borderLeft = `5px solid ${matchColor}`;
-        card.innerHTML = `
-          <div class="candidate-top">
-            <div class="profile">
-              <div class="avatar">${student.nome.split(' ').map(p => p.charAt(0)).join('').substring(0,2).toUpperCase()}</div>
-              <div class="candidate-info">
-                <h3>${student.nome}</h3>
-                <span>${student.cidade || 'Local não informado'}</span>
-              </div>
-            </div>
-            <div class="match-indicator" style="background: ${matchColor}15; padding: 10px; border-radius: 12px; text-align: center; min-width: 80px;">
-              <div style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: ${matchColor};">Smart Match</div>
-              <div style="font-size: 18px; font-weight: 900; color: ${matchColor};">${student.matchPercent}%</div>
-            </div>
-          </div>
-          <p class="description">${student.sobre || 'Estudante focado em tecnologia.'}</p>
-          <div class="tags">${skillsHTML}</div>
-        `;
-        card.style.cursor = 'pointer';
-        card.addEventListener('click', () => window.location.href = `detalhes_candidato.html?email=${encodeURIComponent(student.email)}`);
-        container.appendChild(card);
-      }
+      await loadData();
+      render();
 
-      async function createCandidateCard(app) {
-        const student = await db.getStudentByEmail(app.emailAluno) || { nome: 'Candidato', skills: '' };
-        
-        // Re-filtrar por nome real se o filtro de nome estiver ativo
-        const nameTerm = filterName.value.trim().toLowerCase();
-        if (nameTerm !== "" && !student.nome.toLowerCase().includes(nameTerm)) return;
-        
-        // Re-filtrar por skill se estiver ativo
-        const skillTerm = filterSkill.value.trim().toLowerCase();
-        if (skillTerm !== "" && !student.skills.toLowerCase().includes(skillTerm)) return;
-
-        const vacancy = companyVacanciesData.find(v => v.titulo === app.titulo) || {};
-        const matchPercent = db.calculateMatch(vacancy.skills || '', student.skills || '');
-        const matchClass = matchPercent > 70 ? 'background: #dcfce7; color: #15803d;' : matchPercent > 40 ? 'background: #fef9c3; color: #a16207;' : 'background: #f1f5f9; color: #475569;';
-
-        const card = document.createElement('div');
-        card.className = 'candidate-card';
-        card.innerHTML = `
-          <div class="candidate-top">
-            <div class="profile">
-              <div class="avatar">${student.nome.split(' ').map(p => p.charAt(0)).join('').substring(0,2).toUpperCase()}</div>
-              <div class="candidate-info">
-                <h3>${student.nome}</h3>
-                <span>${app.emailAluno}</span>
-              </div>
-            </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-              <span class="badge" style="background: #eff6ff; color: #2563eb; padding: 6px 14px; border-radius: 12px; font-weight: 700;">${app.status}</span>
-              <span style="${matchClass} padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; border: 1px solid currentColor;">MATCH: ${matchPercent}%</span>
-            </div>
-          </div>
-          <p class="description">Vaga: <strong>${app.titulo}</strong></p>
-          <div class="candidate-footer" style="margin-top:15px; display:flex; justify-content:flex-end; align-items:center; gap:10px;">
-            <label style="font-size:12px; font-weight:700; color:#64748b;">Alterar Status:</label>
-            <select class="status-select" style="padding:5px; border-radius:6px; border:1px solid #cbd5e1;">
-              <option value="Pendente" ${app.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
-              <option value="Entrevista" ${app.status === 'Entrevista' ? 'selected' : ''}>Entrevista</option>
-              <option value="Contratado" ${app.status === 'Contratado' ? 'selected' : ''}>Contratado</option>
-              <option value="Recusado" ${app.status === 'Recusado' ? 'selected' : ''}>Recusado</option>
-            </select>
-          </div>
-        `;
-        card.querySelector('.candidate-top').style.cursor = 'pointer';
-        card.querySelector('.candidate-top').addEventListener('click', () => window.location.href = `detalhes_candidato.html?email=${encodeURIComponent(app.emailAluno)}`);
-        card.querySelector('.status-select').addEventListener('change', async function() {
-          await db.updateApplicationStatus(app.emailAluno, app.titulo, this.value, empresa.email);
-          await refreshData();
-          applyFiltersAndRender();
-        });
-        container.appendChild(card);
-      }
-
-      tabCandidatos.addEventListener('click', (e) => {
+      document.querySelector('.logout').onclick = async (e) => {
         e.preventDefault();
-        currentView = 'candidates';
-        tabExplorar.classList.remove('active');
-        tabCandidatos.classList.add('active');
-        sectionTitle.innerText = "Candidatos Inscritos";
-        viewModeBadge.innerText = "Modo: Suas Vagas";
-        statusFilterGroup.style.display = 'flex';
-        applyFiltersAndRender();
-      });
-
-      tabExplorar.addEventListener('click', (e) => {
-        e.preventDefault();
-        currentView = 'explore';
-        tabCandidatos.classList.remove('active');
-        tabExplorar.classList.add('active');
-        sectionTitle.innerText = "Explorar Banco de Talentos";
-        viewModeBadge.innerText = "Modo: Todos os Alunos";
-        statusFilterGroup.style.display = 'none';
-        applyFiltersAndRender();
-      });
-
-      filterName.addEventListener('input', applyFiltersAndRender);
-      filterSkill.addEventListener('change', applyFiltersAndRender);
-      filterLevel.addEventListener('change', applyFiltersAndRender);
-
-      const subTitle = document.querySelector('.subtitle');
-      if (subTitle) subTitle.innerHTML = `Bem-vindo(a), <strong>${empresa.nome}</strong>!`;
+        if (confirm("Sair?")) { await db.signOut(); window.location.href = 'login_empresa.html'; }
+      };
       
-      await refreshData();
-      applyFiltersAndRender();
-
-      document.querySelector('.logout')?.addEventListener('click', async function(e) {
-        e.preventDefault();
-        if (confirm("Deseja sair da plataforma?")) {
-          await db.signOut();
-          window.location.href = 'login_empresa.html';
-        }
-      });
+      document.getElementById('menuToggle').onclick = () => document.getElementById('navLinks').classList.toggle('active');
     })();
   </script>
 </body>
