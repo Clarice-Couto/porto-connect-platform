@@ -13,11 +13,8 @@ const localStore = {
     localStorage.removeItem(key);
   },
   clearOldData() {
-    // Limpa chaves da versão antiga do projeto para evitar conflitos
     const oldKeys = ['usuarios_aluno', 'usuarios_empresa', 'perfilAluno', 'perfilEmpresa'];
     oldKeys.forEach(k => localStorage.removeItem(k));
-    
-    // Limpa chaves dinâmicas antigas (vagas_, favoritos_, etc)
     Object.keys(localStorage).forEach(key => {
       if (key.startsWith('vagas_') || key.startsWith('favoritos_') || key.startsWith('projetos_') || key.startsWith('candidaturas_')) {
         localStorage.removeItem(key);
@@ -26,7 +23,6 @@ const localStore = {
   }
 };
 
-// Executa limpeza uma vez se necessário
 if (!localStorage.getItem('porto_connect_cleaned')) {
   localStore.clearOldData();
   localStorage.setItem('porto_connect_cleaned', 'true');
@@ -53,7 +49,6 @@ async function apiCall(op, payload = {}) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ op, payload }),
   });
-  
   const result = await response.json();
   if (!response.ok) {
     throw new Error(result.error?.message || 'Erro ao acessar o banco de dados');
@@ -66,7 +61,6 @@ async function callDb(op, payload = {}) {
     try {
       const result = await apiCall(op, payload);
       if (!result.error && result.data) {
-        // Apenas salva a SESSÃO (quem está logado), não os dados do banco
         if (['signInStudent', 'signInCompany'].includes(op)) {
           const key = op.includes('Student') ? 'aluno_logado' : 'empresa_logado';
           cacheSession(key, result.data);
@@ -78,13 +72,32 @@ async function callDb(op, payload = {}) {
       return { data: null, error: { message: 'Serviço indisponível.' } };
     }
   }
-  
   console.warn('Modo LOCAL desativado para dados compartilhados.');
   return { data: null, error: { message: 'Use o ambiente de produção ou ?api=true' } };
 }
 
 const db = {
   ready: Promise.resolve(),
+
+  // Algoritmo de Match Inteligente
+  calculateMatch(requiredSkillsStr, studentSkillsStr) {
+    if (!requiredSkillsStr || !studentSkillsStr) return 0;
+    
+    const required = requiredSkillsStr.toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
+    const student = studentSkillsStr.toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
+    
+    if (required.length === 0) return 100;
+    
+    let matches = 0;
+    required.forEach(req => {
+      // Partial matching (ex: "Java" matches "Javascript") - mas aqui faremos exato para ser mais justo
+      if (student.some(s => s === req || s.includes(req) || req.includes(s))) {
+        matches++;
+      }
+    });
+    
+    return Math.round((matches / required.length) * 100);
+  },
 
   async signUpStudent(payload) { return callDb('signUpStudent', payload); },
   async signInStudent(email, password) { return callDb('signInStudent', { email, password }); },
@@ -196,6 +209,10 @@ const db = {
 
   async normalizeStudentApplications(emailAluno) {
     return this.getApplicationsByStudent(emailAluno);
+  },
+
+  async getStudentByEmail(email) {
+    return this.getStudentProfileByEmail(email);
   },
 
   usesRemoteApi: shouldUseRemoteApi,

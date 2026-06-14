@@ -143,7 +143,7 @@
       function filterCandidates() {
         const nameTerm = filterName.value.toLowerCase();
         const skillTerm = filterSkill.value.toLowerCase();
-        const levelTerm = filterLevel ? filterLevel.value.toLowerCase() : "";
+        const levelTerm = filterLevel.value.toLowerCase();
         const cards = Array.from(document.querySelectorAll('.candidate-card'));
 
         let visibleCount = 0;
@@ -154,9 +154,10 @@
           const hasSkill = skillTerm === "" || skills.some(tag => tag.includes(skillTerm));
           
           let hasLevel = true;
-          if (currentView === 'candidates' && filterLevel) {
-            const level = card.querySelector('.badge') ? card.querySelector('.badge').innerText.toLowerCase() : "";
-            hasLevel = levelTerm === "" || level.includes(levelTerm);
+          if (currentView === 'candidates') {
+            const levelBadge = card.querySelector('.badge');
+            const level = levelBadge ? levelBadge.innerText.toLowerCase() : "";
+            hasLevel = levelTerm === "" || level === levelTerm;
           }
 
           if (name.includes(nameTerm) && hasSkill && hasLevel) {
@@ -182,6 +183,9 @@
         tabExplorar.classList.add('active');
 
         const students = await db.getAllStudents();
+        const myVacancies = await db.getCompanyVacancies(empresa.email);
+        const allRequiredSkills = myVacancies.map(v => v.skills || '').join(',');
+        
         container.innerHTML = '';
 
         if (students.length === 0) {
@@ -189,9 +193,17 @@
           return;
         }
 
-        students.forEach(student => {
+        // Ordenar estudantes por match com as vagas da empresa
+        const studentsWithMatch = students.map(s => {
+          const matchPercent = db.calculateMatch(allRequiredSkills, s.skills);
+          return { ...s, matchPercent };
+        }).sort((a, b) => b.matchPercent - a.matchPercent);
+
+        studentsWithMatch.forEach(student => {
           const skills = (student.skills || '').split(',').map(s => s.trim()).filter(Boolean);
           const skillsHTML = skills.length > 0 ? skills.map(skill => `<div class="tag">${skill}</div>`).join('') : '<div class="tag">Nenhuma habilidade informada</div>';
+
+          const matchClass = student.matchPercent > 70 ? 'style="color: #16a34a;"' : student.matchPercent > 40 ? 'style="color: #ca8a04;"' : 'style="color: #64748b;"';
 
           const card = document.createElement('div');
           card.className = 'candidate-card';
@@ -204,6 +216,10 @@
                   <h3>${student.nome}</h3>
                   <span>${student.cidade || 'Local não informado'}</span>
                 </div>
+              </div>
+              <div class="match-badge" style="text-align: right;">
+                <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: 2px;">Smart Match</div>
+                <div ${matchClass} style="font-size: 18px; font-weight: 800;">${student.matchPercent}%</div>
               </div>
             </div>
             <p class="description">${student.sobre || 'Estudante em busca de novas oportunidades e desafios técnicos.'}</p>
@@ -231,6 +247,8 @@
         tabCandidatos.classList.add('active');
 
         const applications = await db.getApplicationsByCompany(empresa.email);
+        const myVacancies = await db.getCompanyVacancies(empresa.email);
+        
         container.innerHTML = '';
 
         if (applications.length === 0) {
@@ -240,8 +258,13 @@
 
         for (const app of applications) {
           const student = await db.getStudentByEmail(app.emailAluno) || { nome: 'Candidato anônimo', email: app.emailAluno, cidade: '---', skills: '' };
+          const vacancy = myVacancies.find(v => v.titulo === app.titulo) || {};
+          const matchPercent = db.calculateMatch(vacancy.skills || '', student.skills || '');
+          
           const skills = (student.skills || '').split(',').map(s => s.trim()).filter(Boolean);
           const skillsHTML = skills.map(skill => `<div class="tag">${skill}</div>`).join('');
+          
+          const matchClass = matchPercent > 70 ? 'background: #dcfce7; color: #15803d;' : matchPercent > 40 ? 'background: #fef9c3; color: #a16207;' : 'background: #f1f5f9; color: #475569;';
 
           const card = document.createElement('div');
           card.className = 'candidate-card';
@@ -254,7 +277,10 @@
                   <span>${student.cidade}</span>
                 </div>
               </div>
-              <span class="badge" style="background: #eff6ff; color: #2563eb; padding: 6px 14px; border-radius: 12px; font-weight: 700;">${app.status}</span>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                <span class="badge" style="background: #eff6ff; color: #2563eb; padding: 6px 14px; border-radius: 12px; font-weight: 700;">${app.status}</span>
+                <span class="match-tag" style="${matchClass} padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; border: 1px solid currentColor;">MATCH: ${matchPercent}%</span>
+              </div>
             </div>
             <p class="description">Inscrito para: <strong>${app.titulo}</strong></p>
             <div class="tags">${skillsHTML}</div>
