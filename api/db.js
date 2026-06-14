@@ -58,24 +58,24 @@ function runOperation(db, op, payload = {}) {
     case 'signUpStudent': {
       const { nome, email, password, cidade = '', sobre = '', skills = '' } = payload;
       if (db.students.some((user) => user.email === email)) {
-        return { data: null, error: { message: 'Este e-mail j� est� cadastrado!' } };
+        return { data: null, error: { message: 'Este e-mail já está cadastrado!' } };
       }
       const profile = { id: crypto.randomUUID(), nome, email, senha: password, cidade, sobre, skills, role: 'student' };
       db.students.push(profile);
       return { data: profile, error: null };
-    }
+      }
 
-    case 'signInStudent': {
+      case 'signInStudent': {
       const { email, password } = payload;
       const user = db.students.find((item) => item.email === email && item.senha === password);
       if (!user) return { data: null, error: { message: 'E-mail ou senha incorretos!' } };
       return { data: user, error: null };
-    }
+      }
 
-    case 'signUpCompany': {
+      case 'signUpCompany': {
       const { nome, email, password, cidade = '', sobre = '' } = payload;
       if (db.companies.some((user) => user.email === email)) {
-        return { data: null, error: { message: 'Este e-mail corporativo j� est� cadastrado!' } };
+        return { data: null, error: { message: 'Este e-mail corporativo já está cadastrado!' } };
       }
       const profile = { id: crypto.randomUUID(), nome, email, senha: password, cidade, sobre, role: 'company' };
       db.companies.push(profile);

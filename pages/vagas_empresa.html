@@ -83,7 +83,7 @@
           </div>
         `;
       } else {
-        // Need to count applications per job
+
         const apps = await db.getApplicationsByCompany(empresa.email);
         container.innerHTML = vagas.map(vaga => {
           const isActive = vaga.status === 'Ativa';

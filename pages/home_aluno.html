@@ -42,7 +42,6 @@
 
     <section class="stats">
 
-
       <article class="card stat">
         <div class="stat-head">
           <span>Projetos</span>
@@ -116,7 +115,6 @@
         h1Greeting.innerHTML = `Olá, ${alunoLogado.nome}! <span class="wave">👋</span>`;
       }
 
-      // Renderizar projetos recentes dinamicamente
       const projectsRow = document.querySelector('.cards-row');
       if (projectsRow) {
         const projetos = await db.getStudentProjects(alunoLogado.email);
@@ -160,7 +158,6 @@
         }
       }
 
-      // Atualizar estatística de Habilidades (terceiro stat-value)
       const perfil = await db.getStudentProfileByEmail(alunoLogado.email);
       if (perfil) {
         const skillsCount = perfil.skills ? perfil.skills.split(',').map(s => s.trim()).filter(Boolean).length : 0;
@@ -170,7 +167,6 @@
         }
       }
 
-      // Renderizar vagas publicadas pelas empresas
       const opportunityGrid = document.getElementById('opportunityGrid');
       if (opportunityGrid) {
         const vacancies = (await db.getAllCompanyVacancies()).filter(vaga => vaga.status === 'Ativa');
@@ -197,10 +193,8 @@
         }
       }
 
-      // Normalizar candidaturas com base em vagas reais
       const aplicaçõesValidas = await db.normalizeStudentApplications(alunoLogado.email);
 
-      // Renderizar candidaturas dinamicamente
       const appsRow = document.querySelector('.apps-row');
       if (appsRow) {
         const candidaturas = aplicaçõesValidas;

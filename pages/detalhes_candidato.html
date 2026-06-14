@@ -65,7 +65,7 @@
           </div>
         </div>
       </div>
-      
+
       <div style="text-align: right;">
         <span class="badge" id="candidatoLevel" style="background: #eff6ff; color: #2563eb; padding: 6px 14px; border-radius: 12px; font-weight: 700;">--</span>
       </div>
@@ -89,14 +89,14 @@
   <div class="card">
     <div class="section-title">Habilidades</div>
     <div class="skills" id="candidatoSkills">
-      <!-- Preenchido dinamicamente -->
+
     </div>
   </div>
 
   <div class="card">
     <div class="section-title">Projetos em Destaque</div>
     <div id="candidatoProjetos">
-      <!-- Preenchido dinamicamente -->
+
     </div>
   </div>
  </div>
@@ -154,7 +154,6 @@
       });
     }
 
-    // Calcular nível com base no número de habilidades
     const levelBadge = document.getElementById('candidatoLevel');
     if (skills.length < 3) {
       levelBadge.innerText = 'Iniciante';
@@ -188,7 +187,7 @@
           </div>
         `).join('');
 
-        const projectLinkHTML = proj.link 
+        const projectLinkHTML = proj.link
           ? `<a href="${proj.link}" target="_blank" style="display:inline-flex; align-items:center; gap:6px; color:#2563eb; text-decoration:none; font-weight:600; font-size:14px; margin-top:12px;">
                <i class="fa-brands fa-github"></i> Ver repositório
              </a>`

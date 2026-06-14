@@ -55,8 +55,6 @@
         </button>
       </div>
 
-
-
       <div class="tags">
         <div class="tag green"></div>
       </div>
@@ -208,7 +206,7 @@
         return;
       }
       const empresa = JSON.parse(empresaLogadaRaw);
-      // try Supabase first
+
       const perfil = await db.getCompanyProfileByEmail(empresa.email) || JSON.parse(localStorage.getItem('perfilEmpresa') || 'null') || empresa;
 
       nomePerfil.innerText = perfil.nome || '';
@@ -243,7 +241,7 @@
     };
     document.getElementById("logoutBtn")?.addEventListener("click", handleLogout);
     document.querySelector(".logout")?.addEventListener("click", handleLogout);
-    
+
     lucide.createIcons();
     document.getElementById('menuToggle')?.addEventListener('click', () => {
       document.getElementById('navLinks').classList.toggle('active');

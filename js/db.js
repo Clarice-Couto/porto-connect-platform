@@ -79,26 +79,6 @@ async function callDb(op, payload = {}) {
 const db = {
   ready: Promise.resolve(),
 
-  // Algoritmo de Match Inteligente
-  calculateMatch(requiredSkillsStr, studentSkillsStr) {
-    if (!requiredSkillsStr || !studentSkillsStr) return 0;
-    
-    const required = requiredSkillsStr.toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
-    const student = studentSkillsStr.toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
-    
-    if (required.length === 0) return 100;
-    
-    let matches = 0;
-    required.forEach(req => {
-      // Partial matching (ex: "Java" matches "Javascript") - mas aqui faremos exato para ser mais justo
-      if (student.some(s => s === req || s.includes(req) || req.includes(s))) {
-        matches++;
-      }
-    });
-    
-    return Math.round((matches / required.length) * 100);
-  },
-
   async signUpStudent(payload) { return callDb('signUpStudent', payload); },
   async signInStudent(email, password) { return callDb('signInStudent', { email, password }); },
   async signUpCompany(payload) { return callDb('signUpCompany', payload); },
@@ -128,13 +108,13 @@ const db = {
     return result.data || [];
   },
 
-  async updateStudentProfile(profile) { 
+  async updateStudentProfile(profile) {
     const res = await callDb('updateStudentProfile', profile);
     if (res.data) cacheSession('aluno_logado', res.data);
     return res;
   },
 
-  async updateCompanyProfile(profile) { 
+  async updateCompanyProfile(profile) {
     const res = await callDb('updateCompanyProfile', profile);
     if (res.data) cacheSession('empresa_logado', res.data);
     return res;

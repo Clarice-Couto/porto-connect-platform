@@ -4,16 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Porto Connect - Minhas Candidaturas e Favoritos</title>
-  
+
   <link rel="stylesheet" href="../css/home_aluno.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://unpkg.com/lucide@latest"></script>
-  
+
   <style>
-    /* Estilos das abas e listas */
+
     .tabs-container {
       margin-top: 30px;
     }
@@ -188,7 +188,6 @@
       cursor: not-allowed;
     }
 
-    /* Modal de Sucesso */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -249,7 +248,7 @@
   </style>
 </head>
 <body>
-  <!-- HEADER -->
+
   <header class="navbar">
     <div class="nav-inner">
       <a href="./home_aluno.html" class="brand" aria-label="Porto Connect">
@@ -277,29 +276,26 @@
       <p style="color: #6b7280; font-size: 16px; margin-top: 4px;">Acompanhe suas candidaturas e vagas favoritadas em um só lugar</p>
     </div>
 
-    <!-- TABS -->
     <div class="tabs-container">
       <div class="tabs-nav">
         <button class="tab-btn active" data-tab="candidaturasTab">Minhas Candidaturas (<span id="candsCount">0</span>)</button>
         <button class="tab-btn" data-tab="favoritosTab">Vagas Salvas (<span id="favsCount">0</span>)</button>
       </div>
 
-      <!-- CONTEUDO TABS -->
       <div class="tab-content active" id="candidaturasTab">
         <div class="candidaturas-list" id="candidaturasContainer">
-          <!-- Candidaturas renderizadas dinamicamente -->
+
         </div>
       </div>
 
       <div class="tab-content" id="favoritosTab">
         <div class="favs-grid" id="favoritosContainer">
-          <!-- Vagas salvas renderizadas dinamicamente -->
+
         </div>
       </div>
     </div>
   </main>
 
-  <!-- Modal de Sucesso (para candidatura direta das salvas) -->
   <div class="modal-overlay" id="successModal">
     <div class="modal-success">
       <div class="success-icon">
@@ -314,12 +310,11 @@
   <script src="../js/db.js"></script>
   <script>
     lucide.createIcons();
-    
+
     document.getElementById('menuToggle')?.addEventListener('click', () => {
       document.getElementById('navLinks').classList.toggle('active');
     });
 
-    // --- SEGURANÇA E CONTEXTO ---
     const alunoLogadoRaw = localStorage.getItem('aluno_logado');
     if (!alunoLogadoRaw) {
       window.location.href = 'login_aluno.html';
@@ -331,19 +326,17 @@
     let candidaturas = [];
     let favoritos = [];
 
-    // --- MANIPULAÇÃO DE ABAS ---
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        
+
         btn.classList.add('active');
         const tabId = btn.getAttribute('data-tab');
         document.getElementById(tabId).classList.add('active');
       });
     });
 
-    // --- RENDERIZADORES ---
     function renderCandidaturas() {
       const container = document.getElementById('candidaturasContainer');
       document.getElementById('candsCount').innerText = candidaturas.length;
@@ -440,7 +433,6 @@
       });
     }
 
-    // --- FUNÇÕES OPERACIONAIS ---
     window.removerFavorito = async function(idx) {
       const favorite = favoritos[idx];
       const result = await db.removeStudentFavorite(userEmail, favorite.titulo, favorite.empresa);
@@ -485,7 +477,6 @@
       document.getElementById('successModal').classList.remove('open');
     });
 
-    // --- LOGOUT ---
     document.querySelector('.logout')?.addEventListener('click', async function(e) {
       e.preventDefault();
       if (confirm("Deseja sair da plataforma?")) {
@@ -494,7 +485,6 @@
       }
     });
 
-    // Atualiza automaticamente se outra aba/janela alterar as candidaturas ou favoritos no localStorage
     window.addEventListener('storage', async (evt) => {
       if (!evt.key) return;
       if (evt.key === candidaturasKey) {
@@ -507,7 +497,6 @@
       }
     });
 
-    // --- INICIALIZAÇÃO ---
     (async function () {
       candidaturas = await db.normalizeStudentApplications(userEmail);
       favoritos = await db.getStudentFavorites(userEmail);

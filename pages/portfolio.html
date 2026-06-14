@@ -6,16 +6,14 @@
 
   <title>Meu Portfólio</title>
 
-  <!-- CSS -->
   <link rel="stylesheet" href="../css/home_aluno.css">
   <link rel="stylesheet" href="../css/portfolio.css">
 
-  <!-- ICONES -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="../js/db.js"></script>
   <style>
-    /* Custom card modifications & actions */
+
     .card {
       display: flex;
       flex-direction: column;
@@ -63,7 +61,6 @@
       color: #b91c1c;
     }
 
-    /* Modal Detalhes do Projeto */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -149,7 +146,6 @@
 
 <body>
 
-  <!-- HEADER -->
   <header class="navbar">
     <div class="nav-inner">
       <a href="./home_aluno.html" class="brand" aria-label="Porto Connect">
@@ -171,7 +167,6 @@
     </div>
   </header>
 
-  <!-- CONTEÚDO -->
   <main class="container">
 
     <div class="top-content">
@@ -188,27 +183,25 @@
 
     </div>
 
-    <!-- CARDS -->
     <div class="cards" id="projectsContainer">
-      <!-- Cards serão carregados dinamicamente via JS -->
+
     </div>
 
   </main>
 
-  <!-- Modal Detalhes do Projeto -->
   <div class="modal-overlay" id="projectDetailsModal">
     <div class="modal-details">
       <button class="close-btn" id="closeDetailsBtn">
         <i data-lucide="x"></i>
       </button>
       <h2 id="modalProjectTitle">Título do Projeto</h2>
-      
+
       <p class="section-title">Sobre o Projeto</p>
       <p id="modalProjectDesc">Descrição do projeto...</p>
-      
+
       <p class="section-title">Tecnologias</p>
       <div class="tags" id="modalProjectTags" style="margin-bottom: 20px;"></div>
-      
+
       <a href="#" target="_blank" class="project-repo" id="modalProjectLink">
         <i class="fa-brands fa-github" style="font-size: 20px;"></i> Ver Repositório
       </a>
@@ -221,7 +214,6 @@
       document.getElementById('navLinks').classList.toggle('active');
     });
 
-    // --- SEGURANÇA E SESSÃO ---
     const alunoLogadoRaw = localStorage.getItem('aluno_logado');
     if (!alunoLogadoRaw) {
       window.location.href = 'login_aluno.html';
@@ -256,8 +248,7 @@
       projetos.forEach((proj, idx) => {
         const card = document.createElement('div');
         card.className = 'card';
-        
-        // Formatar as tags
+
         const tagsArr = proj.tags.split(',').map(t => t.trim()).filter(Boolean);
         const tagsHTML = tagsArr.map(tag => `<span>${tag}</span>`).join('');
 
@@ -278,12 +269,11 @@
       });
     }
 
-    // --- FUNÇÕES DE AÇÃO ---
     window.verDetalhes = function(idx) {
       const proj = projetos[idx];
       document.getElementById('modalProjectTitle').innerText = proj.titulo;
       document.getElementById('modalProjectDesc').innerText = proj.descricao;
-      
+
       const tagsContainer = document.getElementById('modalProjectTags');
       tagsContainer.innerHTML = '';
       proj.tags.split(',').forEach(tag => {
@@ -314,19 +304,16 @@
       }
     }
 
-    // Fechar Modal
     document.getElementById('closeDetailsBtn').addEventListener('click', () => {
       document.getElementById('projectDetailsModal').classList.remove('open');
     });
-    
-    // Fechar clicando fora
+
     document.getElementById('projectDetailsModal').addEventListener('click', (e) => {
       if (e.target.id === 'projectDetailsModal') {
         document.getElementById('projectDetailsModal').classList.remove('open');
       }
     });
 
-    // --- LOGOUT ---
     document.querySelector('.logout')?.addEventListener('click', async function(e) {
       e.preventDefault();
       if (confirm("Deseja sair da plataforma?")) {

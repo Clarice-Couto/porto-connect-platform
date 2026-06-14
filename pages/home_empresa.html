@@ -12,7 +12,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="../js/db.js"></script>
   <style>
-    /* Garantir que as abas sejam visíveis e clicáveis */
+
     .nav-links a {
       cursor: pointer;
       padding: 8px 16px;
@@ -140,7 +140,7 @@
   <script>
     (async function(){
       lucide.createIcons();
-      
+
       let currentView = 'candidates';
       let allStudents = [];
       let applications = [];
@@ -150,7 +150,7 @@
       const filterSkill = document.getElementById('filterSkill');
       const filterLevel = document.getElementById('filterLevel');
       const container = document.getElementById('candidateGrid');
-      
+
       const empresaLogadaRaw = localStorage.getItem('empresa_logado');
       if (!empresaLogadaRaw) { window.location.href = 'login_empresa.html'; return; }
       const empresa = JSON.parse(empresaLogadaRaw);
@@ -160,7 +160,7 @@
         allStudents = await db.getAllStudents();
         vacancies = await db.getCompanyVacancies(empresa.email);
         applications = await db.getApplicationsByCompany(empresa.email);
-        
+
         applications = applications.map(app => {
           const student = allStudents.find(s => s.email === app.emailAluno);
           return { ...app, nomeAluno: student ? student.nome : 'Candidato' };
@@ -180,26 +180,17 @@
         let list = [];
 
         if (currentView === 'explore') {
-          const allReqSkills = vacancies.map(v => v.skills || '').join(',');
-          list = allStudents.map(s => ({ ...s, match: db.calculateMatch(allReqSkills, s.skills) }))
-                    .sort((a,b) => b.match - a.match)
-                    .filter(s => (name === "" || s.nome.toLowerCase().includes(name) || s.email.toLowerCase().includes(name)) &&
+          list = allStudents.filter(s => (name === "" || s.nome.toLowerCase().includes(name) || s.email.toLowerCase().includes(name)) &&
                                  (skill === "" || (s.skills || "").toLowerCase().includes(skill)));
-          
+
           list.forEach(s => {
-            const color = s.match > 70 ? '#16a34a' : s.match > 30 ? '#ca8a04' : '#64748b';
             const card = document.createElement('div');
             card.className = 'candidate-card';
-            card.style.borderLeft = `5px solid ${color}`;
             card.innerHTML = `
               <div class="candidate-top" style="display:flex; justify-content:space-between; align-items:start;">
                 <div class="profile" style="display:flex; gap:12px; align-items:center;">
                   <div class="avatar" style="width:45px; height:45px; background:#f1f5f9; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#475569;">${s.nome.substring(0,2).toUpperCase()}</div>
                   <div class="candidate-info"><h3 style="font-size:16px; margin:0;">${s.nome}</h3><span style="font-size:12px; color:#64748b;">${s.email}</span></div>
-                </div>
-                <div class="match-indicator" style="background:${color}15; padding:8px; border-radius:10px; text-align:center; min-width:70px;">
-                  <div style="font-size:7px; font-weight:800; color:${color};">SMART MATCH</div>
-                  <div style="font-size:16px; font-weight:900; color:${color};">${s.match}%</div>
                 </div>
               </div>
               <div class="tags" style="margin-top:10px;">${(s.skills || '').split(',').map(sk => sk.trim() ? `<span class="tag">${sk.trim()}</span>` : '').join('')}</div>
@@ -211,13 +202,8 @@
         } else {
           list = applications.filter(app => (name === "" || app.nomeAluno.toLowerCase().includes(name) || app.emailAluno.toLowerCase().includes(name)) &&
                                            (status === "" || app.status.toLowerCase() === status));
-          
-          list.forEach(app => {
-            const student = allStudents.find(s => s.email === app.emailAluno) || {};
-            const vacancy = vacancies.find(v => v.titulo === app.titulo) || {};
-            const m = db.calculateMatch(vacancy.skills || '', student.skills || '');
-            const c = m > 70 ? '#16a34a' : m > 30 ? '#ca8a04' : '#64748b';
 
+          list.forEach(app => {
             const card = document.createElement('div');
             card.className = 'candidate-card';
             card.innerHTML = `
@@ -228,7 +214,6 @@
                 </div>
                 <div style="text-align:right">
                   <span class="badge" style="background:#eff6ff; color:#2563eb; font-weight:700; padding:4px 8px; border-radius:8px; font-size:12px;">${app.status}</span>
-                  <div style="font-size:9px; font-weight:800; color:${c}; margin-top:5px;">MATCH: ${m}%</div>
                 </div>
               </div>
               <div class="candidate-footer" style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
@@ -292,7 +277,7 @@
         e.preventDefault();
         if (confirm("Sair?")) { await db.signOut(); window.location.href = 'login_empresa.html'; }
       };
-      
+
       document.getElementById('menuToggle').onclick = () => document.getElementById('navLinks').classList.toggle('active');
     })();
   </script>
