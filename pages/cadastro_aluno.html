@@ -24,7 +24,7 @@
 
     <main>
         <div class="container">
-            <form action="home_aluno.html" method="get">
+            <form>
                 <h1>Cadastro de Aluno</h1>
                 <p class="subtitle">Crie sua conta na plataforma</p>
 
@@ -55,38 +55,20 @@
         </div>
     </main>
 
+    <script src="../js/init-supabase.js"></script>
+    <script src="../js/db.js"></script>
     <script>
-        document.querySelector('form').addEventListener('submit', function(e) {
+        document.querySelector('form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const nome = document.getElementById('nome').value.trim();
             const email = document.getElementById('email').value.trim();
             const senha = document.getElementById('senha').value;
 
-            let usuarios = JSON.parse(localStorage.getItem('usuarios_aluno') || '[]');
-
-            if (usuarios.some(user => user.email === email)) {
-                alert('Este e-mail já está cadastrado!');
+            const result = await db.signUpStudent({ nome, email, password: senha });
+            if (result.error) {
+                alert(result.error.message || 'Não foi possível cadastrar. Tente novamente.');
                 return;
             }
-
-            const novoUsuario = {
-                nome: nome,
-                email: email,
-                senha: senha,
-                cidade: '',
-                sobre: '',
-                skills: ''
-            };
-
-            usuarios.push(novoUsuario);
-            localStorage.setItem('usuarios_aluno', JSON.stringify(usuarios));
-
-            localStorage.setItem('aluno_logado', JSON.stringify(novoUsuario));
-            localStorage.setItem('perfilAluno', JSON.stringify(novoUsuario));
-            localStorage.setItem(`candidaturas_${email}`, JSON.stringify([]));
-            localStorage.setItem(`favoritos_${email}`, JSON.stringify([]));
-            localStorage.setItem(`projetos_${email}`, JSON.stringify([]));
-
             window.location.href = 'home_aluno.html';
         });
     </script>

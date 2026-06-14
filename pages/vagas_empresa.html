@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="../js/init-supabase.js"></script>
 <script src="../js/db.js"></script>
 <style>
 .vagas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; margin-top: 30px; }
@@ -65,25 +66,17 @@
       document.getElementById('navLinks').classList.toggle('active');
     });
 
-    function getAllApplications() {
-      return Object.keys(localStorage)
-        .filter(key => key.startsWith('candidaturas_'))
-        .flatMap(key => JSON.parse(localStorage.getItem(key) || '[]'));
-    }
-
-    function countApplicationsForJob(titulo, empresa) {
-      return getAllApplications().filter(app => app.titulo === titulo && app.empresa === empresa).length;
-    }
-
-    const empresaRaw = localStorage.getItem('empresa_logado');
-    if (!empresaRaw) {
-      window.location.href = 'login_empresa.html';
-    } else {
+    (async function(){
+      const empresaRaw = localStorage.getItem('empresa_logado');
+      if (!empresaRaw) {
+        window.location.href = 'login_empresa.html';
+        return;
+      }
       const empresa = JSON.parse(empresaRaw);
-      const vagas = db.getCompanyVacancies(empresa.email);
+      const vagas = await db.getCompanyVacancies(empresa.email);
       const container = document.getElementById('jobGrid');
 
-      if (vagas.length === 0) {
+      if (!vagas || vagas.length === 0) {
         container.innerHTML = `
           <div style="text-align: center; padding: 40px; background: white; border-radius: 18px; border: 1px dashed #cbd5e1; color: #64748b; grid-column: 1 / -1;">
             <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Você ainda não publicou nenhuma vaga.</p>
@@ -91,16 +84,18 @@
           </div>
         `;
       } else {
+        // Need to count applications per job
+        const apps = await db.getApplicationsByCompany(empresa.email);
         container.innerHTML = vagas.map(vaga => {
           const isActive = vaga.status === 'Ativa';
-          const appCount = countApplicationsForJob(vaga.titulo, vaga.empresa);
+          const appCount = apps.filter(app => app.vacancy_title === vaga.titulo || app.titulo === vaga.titulo).length;
           return `
             <article class="card job">
               <span class="status-badge ${isActive ? 'status-active' : 'status-closed'}">${vaga.status}</span>
-              <span class="badge" style="background: ${isActive ? '#dbeafe' : '#f3e8ff'}; color: ${isActive ? '#1e40af' : '#6b21a8'}; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; width: max-content; margin-bottom: 12px;">${vaga.categoria}</span>
+              <span class="badge" style="background: ${isActive ? '#dbeafe' : '#f3e8ff'}; color: ${isActive ? '#1e40af' : '#6b21a8'}; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; width: max-content; margin-bottom: 12px;">${vaga.categoria || ''}</span>
               <h3>${vaga.titulo}</h3>
-              <p class="small-text" style="color: #6b7280; font-size: 14px; margin-top: 4px;">${vaga.modelo} • ${vaga.tipo}</p>
-              <p style="margin-top: 12px; color: #374151; line-height: 1.6;">${vaga.descricao}</p>
+              <p class="small-text" style="color: #6b7280; font-size: 14px; margin-top: 4px;">${vaga.modelo || ''} • ${vaga.tipo || ''}</p>
+              <p style="margin-top: 12px; color: #374151; line-height: 1.6;">${vaga.descricao || ''}</p>
               <div class="candidates-info">
                 <i data-lucide="users" style="width: 16px; height: 16px;"></i> ${appCount} candidatura${appCount !== 1 ? 's' : ''}
               </div>
@@ -113,7 +108,7 @@
         }).join('');
         lucide.createIcons();
       }
-    }
+    })();
   </script>
 </body>
 </html>

@@ -9,6 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="../js/init-supabase.js"></script>
+<script src="../js/db.js"></script>
 <style>
 .form-container { max-width: 600px; margin: 40px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
 .form-group { margin-bottom: 20px; }
@@ -80,71 +82,67 @@
       document.getElementById('navLinks').classList.toggle('active');
     });
 
-    // --- SEGURANÇA E CONTEXTO ---
-    const alunoLogadoRaw = localStorage.getItem('aluno_logado');
-    if (!alunoLogadoRaw) {
-      window.location.href = 'login_aluno.html';
-    }
-    const alunoLogado = JSON.parse(alunoLogadoRaw || '{}');
-    const userEmail = alunoLogado.email || 'convidado';
-    const projetosKey = `projetos_${userEmail}`;
-    let projetos = JSON.parse(localStorage.getItem(projetosKey) || '[]');
-
-    // --- VERIFICAR SE É MODO DE EDIÇÃO ---
-    const urlParams = new URLSearchParams(window.location.search);
-    const editIndex = urlParams.get('edit');
-    const isEdit = editIndex !== null && editIndex !== '';
-
-    const pageTitle = document.querySelector('.form-container h1');
-    const inputTitulo = document.getElementById('titulo');
-    const inputDesc = document.getElementById('descricao');
-    const inputTags = document.getElementById('tags');
-    const inputLink = document.getElementById('link');
-    const form = document.querySelector('form');
-
-    if (isEdit) {
-      const idx = parseInt(editIndex, 10);
-      if (pageTitle) pageTitle.innerText = "Editar Projeto";
-      
-      const proj = projetos[idx];
-      if (proj) {
-        inputTitulo.value = proj.titulo || '';
-        inputDesc.value = proj.descricao || '';
-        inputTags.value = proj.tags || '';
-        inputLink.value = proj.link || '';
-      }
-    }
-
-    // --- SUBMISSÃO DO FORMULÁRIO ---
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      const novoProj = {
-        titulo: inputTitulo.value.trim(),
-        descricao: inputDesc.value.trim(),
-        tags: inputTags.value.trim(),
-        link: inputLink.value.trim()
-      };
-
-      if (isEdit) {
-        const idx = parseInt(editIndex, 10);
-        projetos[idx] = novoProj;
-      } else {
-        projetos.push(novoProj);
-      }
-
-      localStorage.setItem(projetosKey, JSON.stringify(projetos));
-      window.location.href = 'portfolio.html';
-    });
-
-    // --- LOGOUT ---
-    document.querySelector('.logout')?.addEventListener('click', function(e) {
-      e.preventDefault();
-      if (confirm("Deseja sair da plataforma?")) {
-        localStorage.removeItem('aluno_logado');
+    (async function () {
+      // --- SEGURANÇA E CONTEXTO ---
+      const alunoLogadoRaw = localStorage.getItem('aluno_logado');
+      if (!alunoLogadoRaw) {
         window.location.href = 'login_aluno.html';
       }
-    });
+      const alunoLogado = JSON.parse(alunoLogadoRaw || '{}');
+      const userEmail = alunoLogado.email || 'convidado';
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId = urlParams.get('edit');
+      const isEdit = editId !== null && editId !== '';
+
+      const pageTitle = document.querySelector('.form-container h1');
+      const inputTitulo = document.getElementById('titulo');
+      const inputDesc = document.getElementById('descricao');
+      const inputTags = document.getElementById('tags');
+      const inputLink = document.getElementById('link');
+      const form = document.querySelector('form');
+
+      let projetos = await db.getStudentProjects(userEmail);
+
+      if (isEdit) {
+        if (pageTitle) pageTitle.innerText = "Editar Projeto";
+        const proj = projetos.find(project => String(project.id) === String(editId));
+        if (proj) {
+          inputTitulo.value = proj.titulo || '';
+          inputDesc.value = proj.descricao || '';
+          inputTags.value = proj.tags || '';
+          inputLink.value = proj.link || '';
+        }
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const novoProj = {
+          id: isEdit ? editId : undefined,
+          titulo: inputTitulo.value.trim(),
+          descricao: inputDesc.value.trim(),
+          tags: inputTags.value.trim(),
+          link: inputLink.value.trim()
+        };
+
+        const result = await db.saveStudentProject(userEmail, novoProj);
+        if (result.error) {
+          alert(result.error.message || 'Erro ao salvar projeto. Tente novamente.');
+          return;
+        }
+
+        window.location.href = 'portfolio.html';
+      });
+
+      document.querySelector('.logout')?.addEventListener('click', async function(e) {
+        e.preventDefault();
+        if (confirm("Deseja sair da plataforma?")) {
+          await db.signOut();
+          window.location.href = 'login_aluno.html';
+        }
+      });
+    })();
   </script>
 </body>
 </html>

@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="../js/init-supabase.js"></script>
 <script src="../js/db.js"></script>
 <style>
 .vagas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
@@ -155,7 +156,6 @@
 
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
-    const jobs = document.querySelectorAll('.card.job');
 
     function renderJobs(jobList) {
       const grid = document.getElementById('jobGrid');
@@ -220,70 +220,34 @@
       });
     }
 
-    searchBtn.addEventListener('click', () => {
-      renderJobs(getFilteredJobs());
+    searchBtn.addEventListener('click', async () => {
+      renderJobs(await getFilteredJobs());
     });
-    searchInput.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') renderJobs(getFilteredJobs());
+    searchInput.addEventListener('keyup', async (e) => {
+      if (e.key === 'Enter') renderJobs(await getFilteredJobs());
     });
-    searchInput.addEventListener('input', () => renderJobs(getFilteredJobs()));
+    searchInput.addEventListener('input', async () => renderJobs(await getFilteredJobs()));
 
-    function getFilteredJobs() {
+    async function getFilteredJobs() {
       const term = searchInput.value.toLowerCase();
-      const allJobs = db.getAllCompanyVacancies().filter(job => job.status === 'Ativa');
+      const allJobs = (await db.getAllCompanyVacancies()).filter(job => job.status === 'Ativa');
       return allJobs.filter(job => {
-        const text = `${job.titulo} ${job.empresa} ${job.categoria} ${job.tipo} ${job.modelo} ${job.descricao}`.toLowerCase();
+        const text = `${job.titulo} ${job.empresa || job.company_name || ''} ${job.categoria || ''} ${job.tipo || ''} ${job.modelo || ''} ${job.descricao || ''}`.toLowerCase();
         return text.includes(term);
       });
     }
 
-    // --- LOGICA DE CANDIDATURA COM LOCALSTORAGE ---
     const alunoLogadoRaw = localStorage.getItem('aluno_logado');
+    if (!alunoLogadoRaw) {
+      window.location.href = 'login_aluno.html';
+    }
     const alunoLogado = JSON.parse(alunoLogadoRaw || '{}');
     const userEmail = alunoLogado.email || 'convidado';
     const candidaturasKey = `candidaturas_${userEmail}`;
-    const favoritosKey = `favoritos_${userEmail}`;
-    let candidaturas = JSON.parse(localStorage.getItem(candidaturasKey) || '[]');
-    let favoritos = JSON.parse(localStorage.getItem(favoritosKey) || '[]');
+    let candidaturas = [];
+    let favoritos = [];
 
-    document.querySelectorAll('.card.job').forEach(card => {
-      const title = card.querySelector('h3').innerText;
-      const company = card.querySelector('p').innerText;
-      const btnApply = card.querySelector('.btn-apply');
-      const btnSave = card.querySelector('.btn-save');
-
-      // Restaurar estado da candidatura
-      const jaCandidatado = candidaturas.some(cand => cand.titulo === title && cand.empresa === company);
-      if (jaCandidatado) {
-        btnApply.innerText = 'Candidatado';
-        btnApply.classList.add('candidatado');
-        btnApply.disabled = true;
-        btnApply.removeAttribute('onclick');
-      } else {
-        btnApply.removeAttribute('onclick');
-        btnApply.addEventListener('click', () => {
-          candidatar(title, company, btnApply);
-        });
-      }
-
-      // Restaurar estado dos favoritos
-      const jaFavoritada = favoritos.some(fav => fav.titulo === title && fav.empresa === company);
-      if (jaFavoritada) {
-        btnSave.classList.add('favoritado');
-        btnSave.innerHTML = '<i class="fa-solid fa-bookmark" style="font-size: 16px;"></i>';
-      } else {
-        btnSave.innerHTML = '<i class="fa-regular fa-bookmark" style="font-size: 16px;"></i>';
-      }
-
-      if (btnSave) {
-        btnSave.removeAttribute('onclick');
-        btnSave.addEventListener('click', () => {
-          toggleFavorito(title, company, btnSave);
-        });
-      }
-    });
-
-    function toggleFavorito(title, company, button) {
+    async function toggleFavorito(title, company, button, categoria, tipo) {
       if (!alunoLogadoRaw) {
         alert('Você precisa estar logado para favoritar vagas!');
         window.location.href = 'login_aluno.html';
@@ -291,30 +255,25 @@
       }
 
       const idx = favoritos.findIndex(fav => fav.titulo === title && fav.empresa === company);
+      const vacancy = { titulo: title, empresa: company, categoria, tipo };
       if (idx !== -1) {
-        // Remover
-        favoritos.splice(idx, 1);
+        const result = await db.removeStudentFavorite(userEmail, title, company);
+        if (!result.error) {
+          favoritos = result.data;
+        }
         button.classList.remove('favoritado');
         button.innerHTML = '<i class="fa-regular fa-bookmark" style="font-size: 16px;"></i>';
       } else {
-        // Adicionar
-        const cardElement = button.closest('.card.job');
-        const badge = cardElement.querySelector('.badge')?.innerText || 'Geral';
-        const typeText = cardElement.querySelector('.small-text')?.innerText || 'Remoto • Full-time';
-
-        favoritos.push({
-          titulo: title,
-          empresa: company,
-          area: badge,
-          tipo: typeText
-        });
+        const result = await db.addStudentFavorite(userEmail, vacancy);
+        if (!result.error) {
+          favoritos.push(result.data);
+        }
         button.classList.add('favoritado');
         button.innerHTML = '<i class="fa-solid fa-bookmark" style="font-size: 16px;"></i>';
       }
-      localStorage.setItem(favoritosKey, JSON.stringify(favoritos));
     }
 
-    function candidatar(title, company, button) {
+    async function candidatar(title, company, button) {
       if (!alunoLogadoRaw) {
         alert('Você precisa estar logado para se candidatar!');
         window.location.href = 'login_aluno.html';
@@ -330,8 +289,13 @@
         diasAtras: 0
       };
 
-      candidaturas.push(novaCandidatura);
-      localStorage.setItem(candidaturasKey, JSON.stringify(candidaturas));
+      const result = await db.applyToVacancy(novaCandidatura);
+      if (result.error) {
+        alert(result.error.message || 'Erro ao enviar candidatura. Tente novamente.');
+        return;
+      }
+
+      candidaturas = await db.normalizeStudentApplications(userEmail);
 
       button.innerText = 'Candidatado';
       button.classList.add('candidatado');
@@ -347,8 +311,14 @@
       document.getElementById('successModal').classList.remove('open');
     });
 
+    async function initPage() {
+      candidaturas = await db.normalizeStudentApplications(userEmail);
+      favoritos = await db.getStudentFavorites(userEmail);
+      renderJobs(await getFilteredJobs());
+    }
+
     // Inicializar com as vagas já publicadas pelas empresas
-    renderJobs(getFilteredJobs());
+    initPage();
   </script>
 </body>
 </html>

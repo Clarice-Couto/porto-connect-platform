@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="../js/init-supabase.js"></script>
 <script src="../js/db.js"></script>
 <style>
 .form-container { max-width: 600px; margin: 40px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
@@ -113,40 +114,47 @@
       return params.get(name);
     }
 
-    const empresaRaw = localStorage.getItem('empresa_logado');
-    if (!empresaRaw) {
-      window.location.href = 'login_empresa.html';
-    } else {
+    (async function(){
+      const empresaRaw = localStorage.getItem('empresa_logado');
+      if (!empresaRaw) {
+        window.location.href = 'login_empresa.html';
+        return;
+      }
       const empresa = JSON.parse(empresaRaw);
-      const vagas = db.getCompanyVacancies(empresa.email);
-      const vagaId = Number(getQueryParam('id'));
-      const vaga = vagas.find(job => job.id === vagaId);
+      const vagas = await db.getCompanyVacancies(empresa.email);
+      const vagaId = getQueryParam('id');
+      const vaga = vagas.find(job => String(job.id) === String(vagaId));
 
       if (!vaga) {
         alert('Vaga não encontrada.');
         window.location.href = 'vagas_empresa.html';
-      } else {
-        document.getElementById('titulo').value = vaga.titulo;
-        document.getElementById('tipo').value = vaga.tipo;
-        document.getElementById('modelo').value = vaga.modelo;
-        document.getElementById('descricao').value = vaga.descricao;
-        document.getElementById('tags').value = vaga.categoria;
-        document.getElementById('status').value = vaga.status || 'Ativa';
-
-        document.querySelector('form').addEventListener('submit', function(e) {
-          e.preventDefault();
-          vaga.titulo = document.getElementById('titulo').value.trim();
-          vaga.tipo = document.getElementById('tipo').value;
-          vaga.modelo = document.getElementById('modelo').value;
-          vaga.descricao = document.getElementById('descricao').value.trim();
-          vaga.categoria = document.getElementById('tags').value;
-          vaga.status = document.getElementById('status').value;
-
-          db.updateCompanyVacancy(empresa.email, vaga.id, vaga);
-          window.location.href = 'vagas_empresa.html';
-        });
+        return;
       }
-    }
+
+      document.getElementById('titulo').value = vaga.titulo;
+      document.getElementById('tipo').value = vaga.tipo || '';
+      document.getElementById('modelo').value = vaga.modelo || '';
+      document.getElementById('descricao').value = vaga.descricao || '';
+      document.getElementById('tags').value = vaga.categoria || '';
+      document.getElementById('status').value = vaga.status || 'Ativa';
+
+      document.querySelector('form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        vaga.titulo = document.getElementById('titulo').value.trim();
+        vaga.tipo = document.getElementById('tipo').value;
+        vaga.modelo = document.getElementById('modelo').value;
+        vaga.descricao = document.getElementById('descricao').value.trim();
+        vaga.categoria = document.getElementById('tags').value;
+        vaga.status = document.getElementById('status').value;
+
+        const res = await db.updateCompanyVacancy(empresa.email, vaga.id, vaga);
+        if (res.error) {
+          alert(res.error.message || 'Erro ao atualizar vaga.');
+          return;
+        }
+        window.location.href = 'vagas_empresa.html';
+      });
+    })();
   </script>
 </body>
 </html>

@@ -78,7 +78,7 @@
     </div>
   </div>
 
-  <div class="modal" id="modal">
+    <div class="modal" id="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h2>Editar Perfil</h2>
@@ -114,6 +114,8 @@
     </div>
   </div>
 
+  <script src="../js/init-supabase.js"></script>
+  <script src="../js/db.js"></script>
   <script>
     const modal = document.getElementById("modal");
     const openModal = document.getElementById("openModal");
@@ -157,7 +159,7 @@
       }
     });
 
-    document.getElementById("saveBtn").addEventListener("click", () => {
+    document.getElementById("saveBtn").addEventListener("click", async () => {
       nomePerfil.innerText = inputNome.value;
       emailPerfil.innerText = inputEmail.value;
       cidadePerfil.innerText = inputCidade.value;
@@ -188,71 +190,45 @@
         skills: inputSkills.value
       };
 
-      localStorage.setItem("perfilEmpresa", JSON.stringify(perfil));
-
-      const empresaLogadaRaw = localStorage.getItem("empresa_logado");
-      if (empresaLogadaRaw) {
-        const empresaLogada = JSON.parse(empresaLogadaRaw);
-        const oldEmail = empresaLogada.email;
-        const updatedEmpresa = { ...empresaLogada, ...perfil };
-        localStorage.setItem("empresa_logado", JSON.stringify(updatedEmpresa));
-
-        let usuarios = JSON.parse(localStorage.getItem("usuarios_empresa") || "[]");
-        const idx = usuarios.findIndex(u => u.email === oldEmail);
-        if (idx !== -1) {
-          usuarios[idx] = { ...usuarios[idx], ...perfil };
-          localStorage.setItem("usuarios_empresa", JSON.stringify(usuarios));
-        }
-      }
-
-      alert("Perfil atualizado com sucesso!");
-      modal.style.display = "none";
-    });
-
-    function carregarPerfil(){
-      const empresaLogadaRaw = localStorage.getItem("empresa_logado");
-      if (!empresaLogadaRaw) {
-        window.location.href = "login_empresa.html";
+      const empresaLogadaRaw = localStorage.getItem('empresa_logado');
+      const empresa = empresaLogadaRaw ? JSON.parse(empresaLogadaRaw) : null;
+      const profileToSave = { ...(empresa || {}), ...perfil };
+      const res = await db.updateCompanyProfile(profileToSave);
+      if (res.error) {
+        alert(res.error.message || 'Erro ao atualizar perfil.');
         return;
       }
+      alert('Perfil atualizado com sucesso!');
+      modal.style.display = 'none';
+    });
 
-      let perfil = JSON.parse(localStorage.getItem("perfilEmpresa") || 'null');
-      if (!perfil) {
-        perfil = JSON.parse(empresaLogadaRaw);
-        localStorage.setItem("perfilEmpresa", JSON.stringify(perfil));
+    async function carregarPerfil(){
+      const empresaLogadaRaw = localStorage.getItem('empresa_logado');
+      if (!empresaLogadaRaw) {
+        window.location.href = 'login_empresa.html';
+        return;
       }
+      const empresa = JSON.parse(empresaLogadaRaw);
+      // try Supabase first
+      const perfil = await db.getCompanyProfileByEmail(empresa.email) || JSON.parse(localStorage.getItem('perfilEmpresa') || 'null') || empresa;
 
-      if (perfil) {
-        nomePerfil.innerText = perfil.nome;
-        emailPerfil.innerText = perfil.email;
-        cidadePerfil.innerText = perfil.cidade;
-        sobrePerfil.innerText = perfil.sobre;
+      nomePerfil.innerText = perfil.nome || '';
+      emailPerfil.innerText = perfil.email || '';
+      cidadePerfil.innerText = perfil.cidade || '';
+      sobrePerfil.innerText = perfil.sobre || '';
 
-
-        const partesNome = perfil.nome.split(" ");
-        let iniciais = "";
-        partesNome.forEach(nome => {
-          iniciais += nome.charAt(0);
+      const partesNome = (perfil.nome || '').split(' ');
+      let iniciais = '';
+      partesNome.forEach(n => { iniciais += (n.charAt(0) || ''); });
+      avatarText.innerText = iniciais.substring(0,2).toUpperCase();
+      skillsContainer.innerHTML = '';
+      const skills = (perfil.skills || '').split(',').map(s => s.trim()).filter(Boolean);
+      if (skills.length === 0) {
+        const div = document.createElement('div'); div.classList.add('skill'); div.innerText = 'Sem habilidades informadas'; skillsContainer.appendChild(div);
+      } else {
+        skills.forEach(skill => {
+          const div = document.createElement('div'); div.classList.add('skill'); div.innerText = skill; skillsContainer.appendChild(div);
         });
-
-        avatarText.innerText = iniciais.substring(0,2).toUpperCase();
-        skillsContainer.innerHTML = "";
-
-        const skills = (perfil.skills || '').split(",").map(skill => skill.trim()).filter(Boolean);
-        skillsContainer.innerHTML = '';
-        if (skills.length === 0) {
-          const div = document.createElement("div");
-          div.classList.add("skill");
-          div.innerText = "Sem habilidades informadas";
-          skillsContainer.appendChild(div);
-        } else {
-          skills.forEach(skill => {
-            const div = document.createElement("div");
-            div.classList.add("skill");
-            div.innerText = skill;
-            skillsContainer.appendChild(div);
-          });
-        }
       }
     }
 

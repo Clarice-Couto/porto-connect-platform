@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="../js/init-supabase.js"></script>
 <script src="../js/db.js"></script>
 <style>
 .form-container { max-width: 600px; margin: 40px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
@@ -100,7 +101,7 @@
       document.getElementById('navLinks').classList.toggle('active');
     });
 
-  document.querySelector('form').addEventListener('submit', function(e) {
+  document.querySelector('form').addEventListener('submit', async function(e) {
     e.preventDefault();
     const empresa = db.getCurrentCompany();
     if (!empresa || !empresa.email) {
@@ -114,17 +115,23 @@
     const descricao = document.getElementById('descricao').value.trim();
     const categoria = document.getElementById('tags').value;
 
-    db.addCompanyVacancy(empresa.email, {
-      id: Date.now(),
+    const vacancy = {
+      id: crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()),
       titulo,
       tipo,
       modelo,
       descricao,
       categoria,
       empresa: empresa.nome,
-      emailEmpresa: empresa.email,
+      company_name: empresa.nome,
+      company_email: empresa.email,
       status: 'Ativa'
-    });
+    };
 
+    const res = await db.addCompanyVacancy(empresa.email, vacancy);
+    if (res.error) {
+      alert(res.error.message || 'Erro ao publicar vaga.');
+      return;
+    }
     window.location.href = 'vagas_empresa.html';
   });

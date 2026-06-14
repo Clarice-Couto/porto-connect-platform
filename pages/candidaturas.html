@@ -311,6 +311,8 @@
     </div>
   </div>
 
+  <script src="../js/init-supabase.js"></script>
+  <script src="../js/db.js"></script>
   <script>
     lucide.createIcons();
     
@@ -326,10 +328,9 @@
     const alunoLogado = JSON.parse(alunoLogadoRaw || '{}');
     const userEmail = alunoLogado.email || 'convidado';
     const candidaturasKey = `candidaturas_${userEmail}`;
-    const favoritosKey = `favoritos_${userEmail}`;
 
-    let candidaturas = JSON.parse(localStorage.getItem(candidaturasKey) || '[]');
-    let favoritos = JSON.parse(localStorage.getItem(favoritosKey) || '[]');
+    let candidaturas = [];
+    let favoritos = [];
 
     // --- MANIPULAÇÃO DE ABAS ---
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -441,30 +442,37 @@
     }
 
     // --- FUNÇÕES OPERACIONAIS ---
-    window.removerFavorito = function(idx) {
-      favoritos.splice(idx, 1);
-      localStorage.setItem(favoritosKey, JSON.stringify(favoritos));
+    window.removerFavorito = async function(idx) {
+      const favorite = favoritos[idx];
+      const result = await db.removeStudentFavorite(userEmail, favorite.titulo, favorite.empresa);
+      if (!result.error) {
+        favoritos = result.data;
+      }
       renderFavoritos();
     }
 
-    window.candidatarFav = function(title, company, button) {
+    window.candidatarFav = async function(title, company, button) {
       const novaCandidatura = {
         titulo: title,
         empresa: company,
+        emailAluno: userEmail,
         status: 'Pendente',
         data: new Date().toLocaleDateString('pt-BR'),
         diasAtras: 0
       };
 
-      candidaturas.push(novaCandidatura);
-      localStorage.setItem(candidaturasKey, JSON.stringify(candidaturas));
+      const result = await db.applyToVacancy(novaCandidatura);
+      if (result.error) {
+        alert(result.error.message || 'Erro ao enviar candidatura. Tente novamente.');
+        return;
+      }
+
+      candidaturas = await db.normalizeStudentApplications(userEmail);
+      renderCandidaturas();
 
       button.innerText = 'Candidatado';
       button.classList.add('applied');
       button.disabled = true;
-
-      // Atualizar contadores e aba de candidaturas
-      renderCandidaturas();
 
       const modal = document.getElementById('successModal');
       const modalJobTitle = document.getElementById('modalJobTitle');
@@ -477,26 +485,34 @@
     });
 
     // --- LOGOUT ---
-    document.querySelector('.logout')?.addEventListener('click', function(e) {
+    document.querySelector('.logout')?.addEventListener('click', async function(e) {
       e.preventDefault();
       if (confirm("Deseja sair da plataforma?")) {
-        localStorage.removeItem('aluno_logado');
+        await db.signOut();
         window.location.href = 'login_aluno.html';
       }
     });
 
-    // Atualiza automaticamente se outra aba/janela alterar as candidaturas no localStorage
-    window.addEventListener('storage', (evt) => {
+    // Atualiza automaticamente se outra aba/janela alterar as candidaturas ou favoritos no localStorage
+    window.addEventListener('storage', async (evt) => {
       if (!evt.key) return;
       if (evt.key === candidaturasKey) {
-        candidaturas = JSON.parse(evt.newValue || '[]');
+        candidaturas = await db.normalizeStudentApplications(userEmail);
         renderCandidaturas();
+      }
+      if (evt.key === `favoritos_${userEmail}`) {
+        favoritos = await db.getStudentFavorites(userEmail);
+        renderFavoritos();
       }
     });
 
     // --- INICIALIZAÇÃO ---
-    renderCandidaturas();
-    renderFavoritos();
+    (async function () {
+      candidaturas = await db.normalizeStudentApplications(userEmail);
+      favoritos = await db.getStudentFavorites(userEmail);
+      renderCandidaturas();
+      renderFavoritos();
+    })();
   </script>
 </body>
 </html>

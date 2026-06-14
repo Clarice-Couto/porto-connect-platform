@@ -24,7 +24,7 @@
 
     <main>
         <div class="container">
-            <form action="home_aluno.html" method="get">
+            <form>
                 <h1>Login do Aluno</h1>
                 <p class="subtitle">Acesse sua conta</p>
 
@@ -57,23 +57,20 @@
         </div>
     </main>
 
+    <script src="../js/init-supabase.js"></script>
+    <script src="../js/db.js"></script>
     <script>
-        document.querySelector('form').addEventListener('submit', function(e) {
+        document.querySelector('form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
             const senha = document.getElementById('senha').value;
 
-            let usuarios = JSON.parse(localStorage.getItem('usuarios_aluno') || '[]');
-
-            const usuario = usuarios.find(user => user.email === email && user.senha === senha);
-
-            if (usuario) {
-                localStorage.setItem('aluno_logado', JSON.stringify(usuario));
-                localStorage.setItem('perfilAluno', JSON.stringify(usuario));
-                window.location.href = 'home_aluno.html';
-            } else {
-                alert('E-mail ou senha incorretos!');
+            const result = await db.signInStudent(email, senha);
+            if (result.error) {
+                alert(result.error.message || 'E-mail ou senha incorretos!');
+                return;
             }
+            window.location.href = 'home_aluno.html';
         });
     </script>
 </body>

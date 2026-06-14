@@ -25,7 +25,7 @@
         </a>
 
         <div class="container">
-            <form action="home_empresa.html" method="get">
+            <form>
 
                 <h1>Cadastro da Empresa</h1>
                 <p class="subtitle">Crie uma conta corporativa</p>
@@ -58,36 +58,20 @@
         </div>
     </main>
 
+    <script src="../js/init-supabase.js"></script>
+    <script src="../js/db.js"></script>
     <script>
-        document.querySelector('form').addEventListener('submit', function(e) {
+        document.querySelector('form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const nome = document.getElementById('nome').value.trim();
             const email = document.getElementById('email').value.trim();
             const senha = document.getElementById('senha').value;
 
-            let usuarios = JSON.parse(localStorage.getItem('usuarios_empresa') || '[]');
-
-            if (usuarios.some(user => user.email === email)) {
-                alert('Este e-mail corporativo já está cadastrado!');
+            const result = await db.signUpCompany({ nome, email, password: senha });
+            if (result.error) {
+                alert(result.error.message || 'Não foi possível cadastrar a empresa. Tente novamente.');
                 return;
             }
-
-            const novoUsuario = {
-                nome: nome,
-                email: email,
-                senha: senha,
-                cidade: '',
-                sobre: '',
-                skills: ''
-            };
-
-            usuarios.push(novoUsuario);
-            localStorage.setItem('usuarios_empresa', JSON.stringify(usuarios));
-
-            localStorage.setItem('empresa_logado', JSON.stringify(novoUsuario));
-            localStorage.setItem('perfilEmpresa', JSON.stringify(novoUsuario));
-            localStorage.setItem(`vagas_${email}`, JSON.stringify([]));
-
             window.location.href = 'home_empresa.html';
         });
     </script>

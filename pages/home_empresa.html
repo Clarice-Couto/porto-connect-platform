@@ -119,173 +119,141 @@
   </main>
 
   <script>
-    lucide.createIcons();
-    document.getElementById('menuToggle')?.addEventListener('click', () => {
-      document.getElementById('navLinks').classList.toggle('active');
-    });
-
-    const filterName = document.getElementById('filterName');
-    const filterSkill = document.getElementById('filterSkill');
-    const filterLevel = document.getElementById('filterLevel');
-    const resultsCount = document.getElementById('resultsCount');
-
-    function filterCandidates() {
-      const nameTerm = filterName.value.toLowerCase();
-      const skillTerm = filterSkill.value.toLowerCase();
-      const levelTerm = filterLevel.value.toLowerCase();
-      const cards = Array.from(document.querySelectorAll('.candidate-card'));
-
-      let visibleCount = 0;
-
-      cards.forEach(card => {
-        const name = card.querySelector('h3').innerText.toLowerCase();
-
-        const skills = Array.from(card.querySelectorAll('.tag')).map(t => t.innerText.toLowerCase());
-        const hasSkill = skillTerm === "" || skills.some(tag => tag.includes(skillTerm));
-
-        const level = card.querySelector('.level').innerText.toLowerCase();
-        const hasLevel = levelTerm === "" || level.includes(levelTerm);
-
-        if (name.includes(nameTerm) && hasSkill && hasLevel) {
-          card.style.display = '';
-          visibleCount++;
-        } else {
-          card.style.display = 'none';
-        }
+    (async function(){
+      lucide.createIcons();
+      document.getElementById('menuToggle')?.addEventListener('click', () => {
+        document.getElementById('navLinks').classList.toggle('active');
       });
 
-      resultsCount.innerText = `${visibleCount} candidato${visibleCount !== 1 ? 's' : ''} encontrado${visibleCount !== 1 ? 's' : ''}`;
-    }
+      const filterName = document.getElementById('filterName');
+      const filterSkill = document.getElementById('filterSkill');
+      const filterLevel = document.getElementById('filterLevel');
+      const resultsCount = document.getElementById('resultsCount');
 
-    function getAllApplications() {
-      return Object.keys(localStorage)
-        .filter(key => key.startsWith('candidaturas_'))
-        .flatMap(key => JSON.parse(localStorage.getItem(key) || '[]'));
-    }
+      function filterCandidates() {
+        const nameTerm = filterName.value.toLowerCase();
+        const skillTerm = filterSkill.value.toLowerCase();
+        const levelTerm = filterLevel.value.toLowerCase();
+        const cards = Array.from(document.querySelectorAll('.candidate-card'));
 
-    function getStudentByEmail(email) {
-      const usuarios = JSON.parse(localStorage.getItem('usuarios_aluno') || '[]');
-      return usuarios.find(user => user.email === email) || null;
-    }
+        let visibleCount = 0;
 
-    function updateApplicationStatus(emailAluno, titulo, novoStatus) {
-      const key = `candidaturas_${emailAluno}`;
-      const apps = JSON.parse(localStorage.getItem(key) || '[]');
-      let changed = false;
-      for (let i = 0; i < apps.length; i++) {
-        const a = apps[i];
-        if (a.titulo === titulo && a.empresa === (window.empresaLogada ? window.empresaLogada.nome : a.empresa)) {
-          a.status = novoStatus;
-          apps[i] = a;
-          changed = true;
-          break;
+        cards.forEach(card => {
+          const name = card.querySelector('h3').innerText.toLowerCase();
+          const skills = Array.from(card.querySelectorAll('.tag')).map(t => t.innerText.toLowerCase());
+          const hasSkill = skillTerm === "" || skills.some(tag => tag.includes(skillTerm));
+          const level = card.querySelector('.level').innerText.toLowerCase();
+          const hasLevel = levelTerm === "" || level.includes(levelTerm);
+
+          if (name.includes(nameTerm) && hasSkill && hasLevel) {
+            card.style.display = '';
+            visibleCount++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        resultsCount.innerText = `${visibleCount} candidato${visibleCount !== 1 ? 's' : ''} encontrado${visibleCount !== 1 ? 's' : ''}`;
+      }
+
+      async function renderCandidateCards(applications) {
+        const container = document.getElementById('candidateGrid');
+        container.innerHTML = '';
+
+        if (applications.length === 0) {
+          container.innerHTML = `
+            <div style="text-align: center; grid-column: 1 / -1; padding: 40px; background: white; border-radius: 18px; border: 1px dashed #cbd5e1; color: #64748b;">
+              <i class="fa-regular fa-user" style="font-size: 40px; margin-bottom: 15px; display: block; color: #94a3b8;"></i>
+              <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Nenhum candidato encontrado para suas vagas.</p>
+              <a href="vagas_empresa.html" style="color: #2563eb; font-weight: 600; text-decoration: none;">Ver minhas vagas</a>
+            </div>
+          `;
+          return;
         }
-      }
-      if (changed) {
-        localStorage.setItem(key, JSON.stringify(apps));
-        // Re-render dashboard to reflect change
-        renderDashboard(window.empresaLogada ? window.empresaLogada.nome : '', window.empresaLogada ? window.empresaLogada.email : '');
-      }
-    }
 
-    window.updateApplicationStatusFromSelect = function(el) {
-      const email = el.dataset.email;
-      const title = el.dataset.title;
-      const status = el.value;
-      updateApplicationStatus(email, title, status);
-    }
+        for (const app of applications) {
+          const student = await db.getStudentByEmail(app.emailAluno) || { nome: 'Candidato anônimo', email: app.emailAluno || '---', cidade: 'Não informado', skills: '' };
+          const skills = (student.skills || '').split(',').map(s => s.trim()).filter(Boolean);
+          const skillsHTML = skills.length > 0 ? skills.map(skill => `<div class="tag">${skill}</div>`).join('') : '<div class="tag">Nenhuma habilidade informada</div>';
 
-    function renderCandidateCards(applications) {
-      const container = document.getElementById('candidateGrid');
-      container.innerHTML = '';
-
-      if (applications.length === 0) {
-        container.innerHTML = `
-          <div style="text-align: center; grid-column: 1 / -1; padding: 40px; background: white; border-radius: 18px; border: 1px dashed #cbd5e1; color: #64748b;">
-            <i class="fa-regular fa-user" style="font-size: 40px; margin-bottom: 15px; display: block; color: #94a3b8;"></i>
-            <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Nenhum candidato encontrado para suas vagas.</p>
-            <a href="vagas_empresa.html" style="color: #2563eb; font-weight: 600; text-decoration: none;">Ver minhas vagas</a>
-          </div>
-        `;
-        return;
-      }
-
-      applications.forEach(app => {
-        const student = getStudentByEmail(app.emailAluno) || { nome: 'Candidato anônimo', email: app.emailAluno || '---', cidade: 'Não informado', skills: '' };
-        const skills = (student.skills || '').split(',').map(s => s.trim()).filter(Boolean);
-        const skillsHTML = skills.length > 0 ? skills.map(skill => `<div class="tag">${skill}</div>`).join('') : '<div class="tag">Nenhuma habilidade informada</div>';
-
-        const card = document.createElement('div');
-        card.className = 'candidate-card';
-        card.style.cursor = 'pointer';
-        card.innerHTML = `
-          <div class="candidate-top">
-            <div class="profile">
-              <div class="avatar">${student.nome.split(' ').map(p => p.charAt(0)).join('').substring(0,2).toUpperCase()}</div>
-              <div class="candidate-info">
-                <h3>${student.nome}</h3>
-                <span>${student.cidade}</span>
+          const card = document.createElement('div');
+          card.className = 'candidate-card';
+          card.style.cursor = 'pointer';
+          card.innerHTML = `
+            <div class="candidate-top">
+              <div class="profile">
+                <div class="avatar">${student.nome.split(' ').map(p => p.charAt(0)).join('').substring(0,2).toUpperCase()}</div>
+                <div class="candidate-info">
+                  <h3>${student.nome}</h3>
+                  <span>${student.cidade}</span>
+                </div>
+              </div>
+              <div style="text-align: right; min-width: 120px;">
+                <span class="badge" style="background: #eff6ff; color: #2563eb; padding: 6px 14px; border-radius: 12px; font-weight: 700;">${app.status}</span>
               </div>
             </div>
-            <div style="text-align: right; min-width: 120px;">
-              <span class="badge" style="background: #eff6ff; color: #2563eb; padding: 6px 14px; border-radius: 12px; font-weight: 700;">${app.status}</span>
+            <p class="description">Candidato inscrito para a vaga de <strong>${app.titulo}</strong>.</p>
+            <div class="tags">${skillsHTML}</div>
+            <div class="candidate-footer">
+              <div class="projects">⭐ ${skills.length} habilidade${skills.length !== 1 ? 's' : ''}</div>
+              <div class="level">${app.emailAluno || 'E-mail não disponível'}</div>
             </div>
-          </div>
-          <p class="description">Candidato inscrito para a vaga de <strong>${app.titulo}</strong>.</p>
-          <div class="tags">${skillsHTML}</div>
-          <div class="candidate-footer">
-            <div class="projects">⭐ ${skills.length} habilidade${skills.length !== 1 ? 's' : ''}</div>
-            <div class="level">${app.emailAluno || 'E-mail não disponível'}</div>
-          </div>
-          <div class="candidate-actions" style="margin-top:12px; display:flex; gap:8px; align-items:center; justify-content:flex-end;">
-            <label style="font-weight:600; font-size:13px; color:#475569; margin-right:8px;">Status:</label>
-            <select class="status-select" data-email="${app.emailAluno}" data-title="${app.titulo}" onchange="window.updateApplicationStatusFromSelect && window.updateApplicationStatusFromSelect(this)" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; background:white;">
-              <option value="Pendente" ${app.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
-              <option value="Entrevista" ${app.status === 'Entrevista' ? 'selected' : ''}>Entrevista</option>
-              <option value="Contratado" ${app.status === 'Contratado' ? 'selected' : ''}>Contratado</option>
-              <option value="Recusado" ${app.status === 'Recusado' ? 'selected' : ''}>Recusado</option>
-            </select>
-          </div>
-        `;
-        card.querySelector('.candidate-top').addEventListener('click', () => window.location.href = 'detalhes_candidato.html');
-        container.appendChild(card);
-      });
-    }
+            <div class="candidate-actions" style="margin-top:12px; display:flex; gap:8px; align-items:center; justify-content:flex-end;">
+              <label style="font-weight:600; font-size:13px; color:#475569; margin-right:8px;">Status:</label>
+              <select class="status-select" data-email="${app.emailAluno}" data-title="${app.titulo}" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; background:white;">
+                <option value="Pendente" ${app.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                <option value="Entrevista" ${app.status === 'Entrevista' ? 'selected' : ''}>Entrevista</option>
+                <option value="Contratado" ${app.status === 'Contratado' ? 'selected' : ''}>Contratado</option>
+                <option value="Recusado" ${app.status === 'Recusado' ? 'selected' : ''}>Recusado</option>
+              </select>
+            </div>
+          `;
+          card.querySelector('.candidate-top').addEventListener('click', () => window.location.href = 'detalhes_candidato.html');
+          card.querySelector('.status-select').addEventListener('change', async function() {
+            const email = this.dataset.email;
+            const title = this.dataset.title;
+            const status = this.value;
+            await db.updateApplicationStatus(email, title, status, empresa.email);
+            await refreshDashboard();
+          });
+          container.appendChild(card);
+        }
+      }
 
-    function renderDashboard(companyName, companyEmail) {
-      const jobs = JSON.parse(localStorage.getItem(`vagas_${companyEmail}`) || '[]');
-      const apps = getAllApplications().filter(app => app.empresa === companyName);
+      async function refreshDashboard() {
+        const jobs = await db.getCompanyVacancies(empresa.email);
+        const apps = await db.getApplicationsByCompany(empresa.email);
+        document.querySelector('.stats .card:nth-child(1) .number').innerText = apps.length;
+        document.querySelector('.stats .card:nth-child(2) .number').innerText = jobs.filter(job => job.status === 'Ativa').length;
+        resultsCount.innerText = `${apps.length} candidato${apps.length !== 1 ? 's' : ''} encontrado${apps.length !== 1 ? 's' : ''}`;
+        await renderCandidateCards(apps);
+      }
 
-      document.querySelector('.stats .card:nth-child(1) .number').innerText = apps.length;
-      document.querySelector('.stats .card:nth-child(2) .number').innerText = jobs.filter(job => job.status === 'Ativa').length;
-      resultsCount.innerText = `${apps.length} candidato${apps.length !== 1 ? 's' : ''} encontrado${apps.length !== 1 ? 's' : ''}`;
-      renderCandidateCards(apps);
-    }
+      filterName.addEventListener('input', filterCandidates);
+      filterSkill.addEventListener('change', filterCandidates);
+      filterLevel.addEventListener('change', filterCandidates);
 
-    filterName.addEventListener('input', filterCandidates);
-    filterSkill.addEventListener('change', filterCandidates);
-    filterLevel.addEventListener('change', filterCandidates);
-
-    // Verificar se a empresa está logada
-    (function() {
+      // Verificar se a empresa está logada
       const empresaLogadaRaw = localStorage.getItem('empresa_logado');
       if (!empresaLogadaRaw) {
         window.location.href = 'login_empresa.html';
         return;
       }
-      window.empresaLogada = JSON.parse(empresaLogadaRaw);
+      const empresa = JSON.parse(empresaLogadaRaw);
+      window.empresaLogada = empresa;
       const subTitle = document.querySelector('.subtitle');
       if (subTitle) {
-        subTitle.innerHTML = `Bem-vindo(a), <strong>${window.empresaLogada.nome}</strong>! Gerencie suas vagas e encontre os melhores talentos.`;
+        subTitle.innerHTML = `Bem-vindo(a), <strong>${empresa.nome}</strong>! Gerencie suas vagas e encontre os melhores talentos.`;
       }
-      renderDashboard(window.empresaLogada.nome, window.empresaLogada.email);
+      await refreshDashboard();
+
       const logoutBtn = document.querySelector('.logout');
       if (logoutBtn) {
         logoutBtn.addEventListener('click', function(e) {
           e.preventDefault();
           const confirmar = confirm("Deseja sair da plataforma?");
           if (confirmar) {
-            localStorage.removeItem('empresa_logado');
+            db.signOut();
             window.location.href = 'login_empresa.html';
           }
         });

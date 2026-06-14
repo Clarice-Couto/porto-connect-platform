@@ -13,6 +13,8 @@
   <!-- ICONES -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="../js/init-supabase.js"></script>
+  <script src="../js/db.js"></script>
   <style>
     /* Custom card modifications & actions */
     .card {
@@ -227,15 +229,15 @@
     }
     const alunoLogado = JSON.parse(alunoLogadoRaw || '{}');
     const userEmail = alunoLogado.email || 'convidado';
-    const projetosKey = `projetos_${userEmail}`;
 
-    // --- CARREGAR PROJETOS ---
-    let projetos = JSON.parse(localStorage.getItem(projetosKey) || '[]');
-    
-    // Não inicializa portfólio automático para novos usuários.
-
+    let projetos = [];
     const container = document.getElementById('projectsContainer');
     const projectCountText = document.querySelector('.top-content p');
+
+    async function initProjects() {
+      projetos = await db.getStudentProjects(userEmail);
+      renderProjects();
+    }
 
     function renderProjects() {
       container.innerHTML = '';
@@ -304,10 +306,11 @@
       document.getElementById('projectDetailsModal').classList.add('open');
     }
 
-    window.excluirProjeto = function(idx) {
+    window.excluirProjeto = async function(idx) {
       if (confirm('Tem certeza que deseja excluir este projeto do seu portfólio?')) {
+        const projectToDelete = projetos[idx];
+        await db.deleteStudentProject(userEmail, projectToDelete.id);
         projetos.splice(idx, 1);
-        localStorage.setItem(projetosKey, JSON.stringify(projetos));
         renderProjects();
       }
     }
@@ -325,15 +328,15 @@
     });
 
     // --- LOGOUT ---
-    document.querySelector('.logout')?.addEventListener('click', function(e) {
+    document.querySelector('.logout')?.addEventListener('click', async function(e) {
       e.preventDefault();
       if (confirm("Deseja sair da plataforma?")) {
-        localStorage.removeItem('aluno_logado');
+        await db.signOut();
         window.location.href = 'login_aluno.html';
       }
     });
 
-    renderProjects();
+    await initProjects();
   </script>
 </body>
 </html>

@@ -91,21 +91,7 @@
           <a href="./vagas.html" class="link">Ver todas</a>
         </div>
 
-        <div class="cards-col">
-          <article class="card job">
-            <span class="badge">Frontend</span>
-            <h3>Desenvolvedor React Jr.</h3>
-            <p>TechCorp - Porto</p>
-            <p class="small-text">Remoto • Full-time</p>
-          </article>
-
-          <article class="card job">
-            <span class="badge">Backend</span>
-            <h3>Desenvolvedor Node.js</h3>
-            <p>StartupXYZ - Lisboa</p>
-            <p class="small-text">Presencial • Full-time</p>
-          </article>
-        </div>
+        <div class="cards-col" id="opportunityGrid"></div>
       </div>
     </section>
 
@@ -119,9 +105,11 @@
     </section>
   </main>
 
+  <script src="../js/init-supabase.js"></script>
+  <script src="../js/db.js"></script>
   <script src="../js/script_dashboard.js"></script>
   <script>
-    (function () {
+    (async function () {
       const alunoLogadoRaw = localStorage.getItem('aluno_logado');
       if (!alunoLogadoRaw) {
         window.location.href = 'login_aluno.html';
@@ -132,14 +120,11 @@
       if (h1Greeting) {
         h1Greeting.innerHTML = `Olá, ${alunoLogado.nome}! <span class="wave">👋</span>`;
       }
+
       // Renderizar projetos recentes dinamicamente
       const projectsRow = document.querySelector('.cards-row');
       if (projectsRow) {
-        const projetosKey = `projetos_${alunoLogado.email}`;
-        let projetos = JSON.parse(localStorage.getItem(projetosKey) || '[]');
-
-        // Não inicializa portfólio automático para novos usuários.
-
+        const projetos = await db.getStudentProjects(alunoLogado.email);
         projectsRow.innerHTML = '';
 
         if (projetos.length === 0) {
@@ -155,7 +140,7 @@
             const article = document.createElement('article');
             article.className = 'card project';
 
-            const tagsArr = proj.tags.split(',').map(t => t.trim()).filter(Boolean);
+            const tagsArr = (proj.tags || '').split(',').map(t => t.trim()).filter(Boolean);
             const tagsHTML = tagsArr.map(tag => `<span>${tag}</span>`).join('');
 
             const repoBtn = proj.link
@@ -181,9 +166,8 @@
       }
 
       // Atualizar estatística de Habilidades (terceiro stat-value)
-      const perfilRaw = localStorage.getItem('perfilAluno');
-      if (perfilRaw) {
-        const perfil = JSON.parse(perfilRaw);
+      const perfil = await db.getStudentProfileByEmail(alunoLogado.email);
+      if (perfil) {
         const skillsCount = perfil.skills ? perfil.skills.split(',').map(s => s.trim()).filter(Boolean).length : 0;
         const skillsStat = document.querySelectorAll('.stat-value')[2];
         if (skillsStat) {
@@ -191,14 +175,40 @@
         }
       }
 
+      // Renderizar vagas publicadas pelas empresas
+      const opportunityGrid = document.getElementById('opportunityGrid');
+      if (opportunityGrid) {
+        const vacancies = (await db.getAllCompanyVacancies()).filter(vaga => vaga.status === 'Ativa');
+        opportunityGrid.innerHTML = '';
+        if (vacancies.length === 0) {
+          opportunityGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; padding: 30px; background: white; border-radius: 18px; border: 1px dashed #cbd5e1; text-align: center; color: #64748b; width: 100%;">
+              <p style="font-weight: 500; margin-bottom: 8px;">Nenhuma vaga publicada pelas empresas ainda.</p>
+              <a href="./vagas.html" style="color: #2563eb; font-weight: 600; text-decoration: none; font-size: 14px;">Ver vagas abertas</a>
+            </div>
+          `;
+        } else {
+          vacancies.slice(0, 2).forEach(vaga => {
+            const article = document.createElement('article');
+            article.className = 'card job';
+            article.innerHTML = `
+              <span class="badge">${vaga.categoria || 'Geral'}</span>
+              <h3>${vaga.titulo}</h3>
+              <p>${vaga.empresa || vaga.company_name || vaga.company_email || ''}</p>
+              <p class="small-text">${vaga.modelo} • ${vaga.tipo}</p>
+            `;
+            opportunityGrid.appendChild(article);
+          });
+        }
+      }
+
+      // Normalizar candidaturas com base em vagas reais
+      const aplicaçõesValidas = await db.normalizeStudentApplications(alunoLogado.email);
+
       // Renderizar candidaturas dinamicamente
       const appsRow = document.querySelector('.apps-row');
       if (appsRow) {
-        const candidaturasKey = `candidaturas_${alunoLogado.email}`;
-        let candidaturas = JSON.parse(localStorage.getItem(candidaturasKey) || '[]');
-
-        // Usuário novo não recebe candidaturas falsas automaticamente.
-
+        const candidaturas = aplicaçõesValidas;
         appsRow.innerHTML = '';
         candidaturas.forEach(cand => {
           const card = document.createElement('article');
@@ -240,11 +250,11 @@
 
       const logoutBtn = document.querySelector('.logout');
       if (logoutBtn) {
-        logoutBtn.addEventListener('click', function (e) {
+        logoutBtn.addEventListener('click', async function (e) {
           e.preventDefault();
           const confirmar = confirm("Deseja sair da plataforma?");
           if (confirmar) {
-            localStorage.removeItem('aluno_logado');
+            await db.signOut();
             window.location.href = 'login_aluno.html';
           }
         });

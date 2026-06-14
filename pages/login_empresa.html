@@ -25,7 +25,7 @@
         </a>
 
         <div class="container">
-            <form action="home_empresa.html" method="get">
+            <form>
 
                 <h1>Login da Empresa</h1>
                 <p class="subtitle">Acesse sua conta corporativa</p>
@@ -60,23 +60,20 @@
         </div>
     </main>
 
+    <script src="../js/init-supabase.js"></script>
+    <script src="../js/db.js"></script>
     <script>
-        document.querySelector('form').addEventListener('submit', function(e) {
+        document.querySelector('form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
             const senha = document.getElementById('senha').value;
 
-            let usuarios = JSON.parse(localStorage.getItem('usuarios_empresa') || '[]');
-
-            const usuario = usuarios.find(user => user.email === email && user.senha === senha);
-
-            if (usuario) {
-                localStorage.setItem('empresa_logado', JSON.stringify(usuario));
-                localStorage.setItem('perfilEmpresa', JSON.stringify(usuario));
-                window.location.href = 'home_empresa.html';
-            } else {
-                alert('E-mail corporativo ou senha incorretos!');
+            const result = await db.signInCompany(email, senha);
+            if (result.error) {
+                alert(result.error.message || 'E-mail corporativo ou senha incorretos!');
+                return;
             }
+            window.location.href = 'home_empresa.html';
         });
     </script>
 </body>
