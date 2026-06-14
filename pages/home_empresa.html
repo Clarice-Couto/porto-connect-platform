@@ -98,7 +98,7 @@
             <option value="">Todos</option>
             <option value="pendente">Pendente</option>
             <option value="entrevista">Entrevista</option>
-            <option value="aceito">Aceito</option>
+            <option value="contratado">Contratado</option>
             <option value="recusado">Recusado</option>
           </select>
         </div>
@@ -242,7 +242,7 @@
             <select class="status-select" data-email="${app.emailAluno}" data-title="${app.titulo}" onchange="window.updateApplicationStatusFromSelect && window.updateApplicationStatusFromSelect(this)" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; background:white;">
               <option value="Pendente" ${app.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
               <option value="Entrevista" ${app.status === 'Entrevista' ? 'selected' : ''}>Entrevista</option>
-              <option value="Aceito" ${app.status === 'Aceito' ? 'selected' : ''}>Aceito</option>
+              <option value="Contratado" ${app.status === 'Contratado' ? 'selected' : ''}>Contratado</option>
               <option value="Recusado" ${app.status === 'Recusado' ? 'selected' : ''}>Recusado</option>
             </select>
           </div>

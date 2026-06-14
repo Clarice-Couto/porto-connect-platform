@@ -83,6 +83,9 @@
 
             localStorage.setItem('aluno_logado', JSON.stringify(novoUsuario));
             localStorage.setItem('perfilAluno', JSON.stringify(novoUsuario));
+            localStorage.setItem(`candidaturas_${email}`, JSON.stringify([]));
+            localStorage.setItem(`favoritos_${email}`, JSON.stringify([]));
+            localStorage.setItem(`projetos_${email}`, JSON.stringify([]));
 
             window.location.href = 'home_aluno.html';
         });

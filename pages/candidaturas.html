@@ -366,15 +366,15 @@
 
         let statusClass = 'status-pending';
         const statusKey = cand.status.toLowerCase();
-        if (statusKey === 'aceito') statusClass = 'status-accepted';
+        if (statusKey === 'contratado' || statusKey === 'aceito') statusClass = 'status-accepted';
         if (statusKey === 'recusado' || statusKey === 'rejeitado') statusClass = 'status-rejected';
         if (statusKey === 'entrevista') statusClass = 'status-interview';
 
         let dateText = `Enviada em ${cand.data}`;
         if (statusKey === 'entrevista') {
           dateText = cand.msgExtra || `Entrevista agendada para ${cand.data}`;
-        } else if (statusKey === 'aceito') {
-          dateText = cand.msgExtra || 'Parabéns! Processo seletivo concluído com sucesso.';
+        } else if (statusKey === 'contratado' || statusKey === 'aceito') {
+          dateText = cand.msgExtra || 'Parabéns! Você foi contratado.';
         } else if (statusKey === 'recusado' || statusKey === 'rejeitado') {
           dateText = cand.msgExtra || 'Infelizmente sua candidatura não foi aprovada.';
         }

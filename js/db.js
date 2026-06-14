@@ -68,6 +68,24 @@ const db = {
     });
     this.saveCompanyVacancies(email, vagas);
     return vagas;
+  },
+
+  getAllStudents() {
+    return this.get('usuarios_aluno', []);
+  },
+
+  getAllCompanies() {
+    return this.get('usuarios_empresa', []);
+  },
+
+  getStudentApplications(email) {
+    return this.get(`candidaturas_${email}`, []);
+  },
+
+  getAllApplications() {
+    return Object.keys(this.storage)
+      .filter(key => key.startsWith('candidaturas_'))
+      .flatMap(key => this.get(key, []));
   }
 };
 

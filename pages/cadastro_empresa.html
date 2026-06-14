@@ -86,6 +86,7 @@
 
             localStorage.setItem('empresa_logado', JSON.stringify(novoUsuario));
             localStorage.setItem('perfilEmpresa', JSON.stringify(novoUsuario));
+            localStorage.setItem(`vagas_${email}`, JSON.stringify([]));
 
             window.location.href = 'home_empresa.html';
         });
