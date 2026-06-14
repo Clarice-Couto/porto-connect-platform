@@ -43,30 +43,30 @@ porto-connect/
 │   ├── cadastro_empresa.html
 │   ├── login_aluno.html
 │   ├── login_empresa.html
-│   ├── home_aluno.html        # Dashboard do Aluno
-│   ├── home_empresa.html      # Dashboard da Empresa
+│   ├── home_aluno.html        
+│   ├── home_empresa.html     
 │   ├── perfil_aluno.html
 │   ├── perfil_empresa.html
 │   ├── detalhes_candidato.html
-│   ├── vagas.html             # Vagas disponíveis (Visão do Aluno)
-│   ├── vagas_empresa.html     # Gestão de vagas (Visão da Empresa)
+│   ├── vagas.html           
+│   ├── vagas_empresa.html  
 │   ├── nova_vaga.html
 │   ├── editar_vaga.html
 │   ├── portfolio.html
 │   ├── novo_projeto.html
 │   └── recuperar_senha.html
-├── css/                       # Estilos modulares
-│   ├── home_aluno.css         # CSS base do sistema e navbar
-│   ├── style_principal.css    # Landing page
+├── css/                      
+│   ├── home_aluno.css       
+│   ├── style_principal.css  
 │   ├── login_aluno.css
 │   ├── login_empresa.css
 │   ├── perfil.css
 │   └── portfolio.css
 ├── js/
-│   ├── script_dashboard.js    # Lógica de navegação
+│   ├── script_dashboard.js   
 │   └── script.js
 └── assets/
-    └── images/                # Logo e recursos visuais
+    └── images/         
 ```
 
 ---
