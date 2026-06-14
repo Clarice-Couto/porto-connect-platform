@@ -78,6 +78,72 @@
     document.getElementById('menuToggle').addEventListener('click', () => {
       document.getElementById('navLinks').classList.toggle('active');
     });
+
+    // --- SEGURANÇA E CONTEXTO ---
+    const alunoLogadoRaw = localStorage.getItem('aluno_logado');
+    if (!alunoLogadoRaw) {
+      window.location.href = 'login_aluno.html';
+    }
+    const alunoLogado = JSON.parse(alunoLogadoRaw || '{}');
+    const userEmail = alunoLogado.email || 'convidado';
+    const projetosKey = `projetos_${userEmail}`;
+    let projetos = JSON.parse(localStorage.getItem(projetosKey) || '[]');
+
+    // --- VERIFICAR SE É MODO DE EDIÇÃO ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const editIndex = urlParams.get('edit');
+    const isEdit = editIndex !== null && editIndex !== '';
+
+    const pageTitle = document.querySelector('.form-container h1');
+    const inputTitulo = document.getElementById('titulo');
+    const inputDesc = document.getElementById('descricao');
+    const inputTags = document.getElementById('tags');
+    const inputLink = document.getElementById('link');
+    const form = document.querySelector('form');
+
+    if (isEdit) {
+      const idx = parseInt(editIndex, 10);
+      if (pageTitle) pageTitle.innerText = "Editar Projeto";
+      
+      const proj = projetos[idx];
+      if (proj) {
+        inputTitulo.value = proj.titulo || '';
+        inputDesc.value = proj.descricao || '';
+        inputTags.value = proj.tags || '';
+        inputLink.value = proj.link || '';
+      }
+    }
+
+    // --- SUBMISSÃO DO FORMULÁRIO ---
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const novoProj = {
+        titulo: inputTitulo.value.trim(),
+        descricao: inputDesc.value.trim(),
+        tags: inputTags.value.trim(),
+        link: inputLink.value.trim()
+      };
+
+      if (isEdit) {
+        const idx = parseInt(editIndex, 10);
+        projetos[idx] = novoProj;
+      } else {
+        projetos.push(novoProj);
+      }
+
+      localStorage.setItem(projetosKey, JSON.stringify(projetos));
+      window.location.href = 'portfolio.html';
+    });
+
+    // --- LOGOUT ---
+    document.querySelector('.logout')?.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (confirm("Deseja sair da plataforma?")) {
+        localStorage.removeItem('aluno_logado');
+        window.location.href = 'login_aluno.html';
+      }
+    });
   </script>
 </body>
 </html>

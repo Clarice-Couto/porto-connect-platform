@@ -173,6 +173,50 @@
       if (h1Greeting) {
         h1Greeting.innerHTML = `Olá, ${alunoLogado.nome}! <span class="wave">👋</span>`;
       }
+      // Renderizar candidaturas dinamicamente
+      const appsRow = document.querySelector('.apps-row');
+      if (appsRow) {
+        const candidaturasKey = `candidaturas_${alunoLogado.email}`;
+        let candidaturas = JSON.parse(localStorage.getItem(candidaturasKey) || '[]');
+        
+        if (candidaturas.length === 0) {
+          candidaturas = [
+            { titulo: 'Desenvolvedor React Jr.', empresa: 'TechCorp', status: 'Pendente', data: '10/05/2026', msgExtra: 'Candidatura enviada há 5 dias' },
+            { titulo: 'Desenvolvedor Full Stack', empresa: 'WebDev Solutions', status: 'Aceito', data: '15/05/2026', msgExtra: 'Entrevista agendada para 20 de maio' }
+          ];
+          localStorage.setItem(candidaturasKey, JSON.stringify(candidaturas));
+        }
+
+        appsRow.innerHTML = '';
+        candidaturas.forEach(cand => {
+          const card = document.createElement('article');
+          card.className = 'card application';
+          
+          let statusClass = 'status-pending';
+          if (cand.status.toLowerCase() === 'aceito') statusClass = 'status-accepted';
+          if (cand.status.toLowerCase() === 'recusado') statusClass = 'status-rejected';
+
+          const subtitleText = cand.msgExtra || `Candidatura enviada em ${cand.data}`;
+
+          card.innerHTML = `
+            <div class="app-head">
+              <div>
+                <h3>${cand.titulo}</h3>
+                <p>${cand.empresa}</p>
+              </div>
+              <span class="status ${statusClass}">${cand.status}</span>
+            </div>
+            <p class="small-text">${subtitleText}</p>
+          `;
+          appsRow.appendChild(card);
+        });
+
+        const statValue = document.querySelectorAll('.stat-value')[1];
+        if (statValue) {
+          statValue.innerText = candidaturas.length;
+        }
+      }
+
       const logoutBtn = document.querySelector('.logout');
       if (logoutBtn) {
         logoutBtn.addEventListener('click', function(e) {
