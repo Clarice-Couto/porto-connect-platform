@@ -173,6 +173,82 @@
       if (h1Greeting) {
         h1Greeting.innerHTML = `Olá, ${alunoLogado.nome}! <span class="wave">👋</span>`;
       }
+      // Renderizar projetos recentes dinamicamente
+      const projectsRow = document.querySelector('.cards-row');
+      if (projectsRow) {
+        const projetosKey = `projetos_${alunoLogado.email}`;
+        let projetos = JSON.parse(localStorage.getItem(projetosKey) || '[]');
+        
+        if (projetos.length === 0 && localStorage.getItem(`has_initialized_portfolio_${alunoLogado.email}`) === null) {
+          projetos = [
+            {
+              titulo: "Sistema de Gestão de Tarefas",
+              descricao: "Aplicativo web completo para gerenciar tarefas com autenticação de usuários, categorização, filtros de status, ordenação e datas de vencimento. Desenvolvido para melhorar a produtividade pessoal ou de pequenas equipes.",
+              tags: "React, TypeScript, Node.js, MongoDB",
+              link: "https://github.com/usuario/gestao-tarefas"
+            },
+            {
+              titulo: "Landing Page Responsiva",
+              descricao: "Landing page moderna e extremamente responsiva para uma startup de tecnologia, contendo seções de depoimentos, preços dinâmicos, animações fluidas ao rolar a página e formulário de contato integrado.",
+              tags: "React, Tailwind CSS, Framer Motion",
+              link: "https://github.com/usuario/landing-page-startup"
+            }
+          ];
+          localStorage.setItem(projetosKey, JSON.stringify(projetos));
+          localStorage.setItem(`has_initialized_portfolio_${alunoLogado.email}`, 'true');
+        }
+
+        projectsRow.innerHTML = '';
+        
+        if (projetos.length === 0) {
+          projectsRow.innerHTML = `
+            <div style="grid-column: 1 / -1; padding: 30px; background: white; border-radius: 18px; border: 1px dashed #cbd5e1; text-align: center; color: #64748b; width: 100%;">
+              <p style="font-weight: 500; margin-bottom: 8px;">Nenhum projeto no seu portfólio.</p>
+              <a href="./portfolio.html" style="color: #2563eb; font-weight: 600; text-decoration: none; font-size: 14px;">Ir para o Portfólio</a>
+            </div>
+          `;
+        } else {
+          const dashboardProjetos = projetos.slice(0, 2);
+          dashboardProjetos.forEach(proj => {
+            const article = document.createElement('article');
+            article.className = 'card project';
+            
+            const tagsArr = proj.tags.split(',').map(t => t.trim()).filter(Boolean);
+            const tagsHTML = tagsArr.map(tag => `<span>${tag}</span>`).join('');
+            
+            const repoBtn = proj.link 
+              ? `<button class="icon-btn" aria-label="Ver no GitHub" onclick="window.open('${proj.link}', '_blank')"><i data-lucide="github"></i></button>`
+              : '';
+
+            article.innerHTML = `
+              <div class="project-head">
+                <h3>${proj.titulo}</h3>
+                ${repoBtn}
+              </div>
+              <p>${proj.descricao.length > 110 ? proj.descricao.substring(0, 110) + '...' : proj.descricao}</p>
+              <div class="tags">${tagsHTML}</div>
+            `;
+            projectsRow.appendChild(article);
+          });
+        }
+
+        const projectStat = document.querySelectorAll('.stat-value')[0];
+        if (projectStat) {
+          projectStat.innerText = projetos.length;
+        }
+      }
+
+      // Atualizar estatística de Habilidades (terceiro stat-value)
+      const perfilRaw = localStorage.getItem('perfilAluno');
+      if (perfilRaw) {
+        const perfil = JSON.parse(perfilRaw);
+        const skillsCount = perfil.skills ? perfil.skills.split(',').map(s => s.trim()).filter(Boolean).length : 0;
+        const skillsStat = document.querySelectorAll('.stat-value')[2];
+        if (skillsStat) {
+          skillsStat.innerText = skillsCount;
+        }
+      }
+
       // Renderizar candidaturas dinamicamente
       const appsRow = document.querySelector('.apps-row');
       if (appsRow) {
