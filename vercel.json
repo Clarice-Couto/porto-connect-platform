@@ -1,23 +1,3 @@
 {
-  "cleanUrls": true,
-  "rewrites": [
-    { "source": "/login", "destination": "/login.html" },
-    { "source": "/pages/login_aluno", "destination": "/pages/login_aluno.html" },
-    { "source": "/pages/login_empresa", "destination": "/pages/login_empresa.html" },
-    { "source": "/pages/cadastro_aluno", "destination": "/pages/cadastro_aluno.html" },
-    { "source": "/pages/cadastro_empresa", "destination": "/pages/cadastro_empresa.html" },
-    { "source": "/pages/home_aluno", "destination": "/pages/home_aluno.html" },
-    { "source": "/pages/home_empresa", "destination": "/pages/home_empresa.html" },
-    { "source": "/pages/perfil_aluno", "destination": "/pages/perfil_aluno.html" },
-    { "source": "/pages/perfil_empresa", "destination": "/pages/perfil_empresa.html" },
-    { "source": "/pages/portfolio", "destination": "/pages/portfolio.html" },
-    { "source": "/pages/recuperar_senha", "destination": "/pages/recuperar_senha.html" },
-    { "source": "/pages/vagas", "destination": "/pages/vagas.html" },
-    { "source": "/pages/vagas_empresa", "destination": "/pages/vagas_empresa.html" },
-    { "source": "/pages/detalhes_candidato", "destination": "/pages/detalhes_candidato.html" },
-    { "source": "/pages/editar_vaga", "destination": "/pages/editar_vaga.html" },
-    { "source": "/pages/nova_vaga", "destination": "/pages/nova_vaga.html" },
-    { "source": "/pages/novo_projeto", "destination": "/pages/novo_projeto.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "cleanUrls": true
 }
