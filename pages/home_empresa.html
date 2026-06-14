@@ -31,7 +31,6 @@
       </a>
       <nav class="nav-links" id="navLinks">
         <a href="./home_empresa.html" class="active">Dashboard</a>
-        <a href="./explorar_alunos.html">Banco de Talentos</a>
         <a href="./vagas_empresa.html">Minhas Vagas</a>
         <a href="./perfil_empresa.html">Perfil</a>
         <a href="./login_empresa.html" class="logout"><i data-lucide="log-out"></i> Sair</a>
@@ -51,12 +50,6 @@
         <div class="number" id="statCandidatos">0</div>
         <p>Inscritos totais</p>
       </div>
-      <a href="./explorar_alunos.html" class="card" style="text-decoration:none; color:inherit; border: 2px solid #2563eb;">
-        <div class="icon">🌍</div>
-        <h4>Banco de Talentos</h4>
-        <div class="number" id="statTotalAlunos">0</div>
-        <p>Ver todos os alunos</p>
-      </a>
       <div class="card">
         <div class="icon">💼</div>
         <h4>Vagas Ativas</h4>
@@ -110,7 +103,6 @@
         dataJobs = await db.getCompanyVacancies(empresaLogada.email);
         
         document.getElementById('statCandidatos').innerText = dataApps.length;
-        document.getElementById('statTotalAlunos').innerText = dataStudents.length;
         document.getElementById('statVagasAtivas').innerText = dataJobs.filter(j => j.status === 'Ativa').length;
       }
 
@@ -168,7 +160,7 @@
 
       document.querySelector('.logout').onclick = async (e) => {
         e.preventDefault();
-        if (confirm("Sair?")) { await db.signOut(); window.location.href = 'login_empresa.html'; }
+        if (confirm("Deseja sair?")) { await db.signOut(); window.location.href = 'login_empresa.html'; }
       };
       document.getElementById('menuToggle').onclick = () => document.getElementById('navLinks').classList.toggle('active');
     })();

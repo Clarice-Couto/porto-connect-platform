@@ -1,52 +1,50 @@
 # Porto Connect 🚀
-### Pontes Inteligentes entre Talentos Iniciantes e o Mercado de Trabalho
+### Gestão Inteligente de Talentos e Oportunidades
 
 ---
 
 ## 📌 A Problemática
-O mercado de tecnologia enfrenta um gap crítico: empresas têm dificuldade em validar as competências práticas de candidatos em início de carreira (estagiários e juniores), enquanto estudantes talentosos lutam para ganhar visibilidade em meio a processos seletivos baseados em currículos estáticos que não refletem seu real potencial técnico.
+O mercado de tecnologia enfrenta um desafio constante: a conexão eficiente entre empresas com vagas em aberto e estudantes qualificados em busca da primeira oportunidade. Muitas vezes, o processo de triagem é manual, lento e baseado em currículos estáticos que não demonstram as habilidades práticas do candidato.
 
 **Os principais desafios identificados foram:**
-*   **Triagem Ineficiente:** RHs gastam horas analisando currículos que não atendem aos requisitos técnicos.
-*   **Falta de Evidências:** Portfólios de alunos muitas vezes ficam dispersos, dificultando a análise técnica rápida pela empresa.
-*   **Desconexão de Perfil:** Candidatos se aplicam a vagas sem saber se possuem o perfil técnico desejado, gerando frustração em ambos os lados.
+*   **Gestão Ineficiente de Candidatos:** Dificuldade para acompanhar o status de múltiplos inscritos em diferentes processos.
+*   **Falta de Portfólio Integrado:** Recrutadores precisam navegar por links externos para validar a capacidade técnica do aluno.
+*   **Comunicação Lenta:** Processos seletivos que perdem agilidade por falta de uma plataforma centralizada de acompanhamento.
 
 ## 🎯 O Objetivo
-O **Porto Connect** nasce para transformar essa realidade através de uma plataforma de recrutamento ativa. Nosso objetivo é simplificar a conexão entre a necessidade técnica da empresa e a habilidade prática do aluno, reduzindo o tempo de contratação e aumentando a transparência dos processos.
+O **Porto Connect** tem como objetivo centralizar e simplificar a jornada de recrutamento. Nossa plataforma oferece um ambiente robusto para que empresas gerenciem suas candidaturas de forma transparente e para que alunos apresentem seus projetos de forma profissional, agilizando o fechamento de vagas.
 
-## 💡 A Solução: Recrutamento Ativo e Filtros Dinâmicos
-Nossa solução vai além de um simples portal de vagas. Desenvolvemos um ecossistema onde:
+## 💡 A Solução: Gestão de Candidaturas e Portfólio Digital
+Nossa solução foca na eficiência operacional do recrutamento:
 
-### 1. Banco de Talentos Global (Hunting)
-O Porto Connect permite que as empresas realizem o "Hunting" (prospecção ativa). Recrutadores podem navegar por toda a base de alunos, utilizando filtros por nome e competências técnicas para localizar perfis específicos, mesmo que o aluno ainda não tenha se candidatado.
+### 1. Painel de Controle para Empresas
+As empresas possuem um Dashboard intuitivo para gerenciar todos os alunos inscritos em suas vagas. É possível filtrar candidatos por nome e alterar o status da candidatura (Pendente, Entrevista, Contratado, Recusado) em tempo real, mantendo o processo organizado.
 
-### 2. Gestão Simplificada de Candidaturas
-As empresas possuem um painel de controle para gerenciar inscritos, alterar status de processos seletivos e visualizar o portfólio completo de cada candidato em um clique.
+### 2. Mural de Vagas para Alunos
+Os estudantes têm acesso a um mural atualizado com as oportunidades do ecossistema Porto Connect, podendo se candidatar com apenas um clique e acompanhar o progresso de suas inscrições diretamente no seu perfil.
 
-### 3. Portfólio Integrado
-Centralizamos os projetos e experiências dos alunos em uma visão focada em competências, permitindo que a empresa valide o código e a prática antes mesmo da primeira entrevista.
+### 3. Portfólio Técnico Integrado
+Centralizamos os projetos, links de repositórios e habilidades dos alunos. O recrutador pode acessar o perfil completo do candidato dentro da plataforma, validando competências técnicas de forma rápida e segura.
 
 ---
 
 ## 🏗️ Arquitetura do Projeto
-A aplicação foi estruturada seguindo o modelo de **Navegação Modular** e funções **Serverless**, garantindo alta performance e escalabilidade:
+A aplicação foi estruturada seguindo o modelo de **Navegação Modular** e funções **Serverless**, garantindo alta performance e segurança dos dados:
 
 ```text
 porto-connect/
 ├── 📂 api/                # Backend (Vercel Functions + Integração Redis)
-│   └── db.js              # Lógica Serverless e Persistência de Dados
+│   └── db.js              # Persistência de Dados em Nuvem
 ├── 📂 js/                 # Motor Principal (Core)
-│   └── db.js              # Cliente API e Regras de Negócio
+│   └── db.js              # Lógica de Negócio e Cliente API
 ├── 📂 pages/              # Módulos de Interface (UI)
-│   ├── home_aluno.html    # Dashboard do Aluno
+│   ├── home_aluno.html    # Dashboard de Candidaturas do Aluno
 │   ├── home_empresa.html  # Gestão de Candidatos da Empresa
-│   ├── explorar_alunos.html # Banco de Talentos Global
-│   ├── detalhes_candidato.html # Perfil Detalhado do Aluno
-│   ├── vagas.html         # Mural de Vagas para Alunos
-│   ├── vagas_empresa.html # Mural de Vagas da Empresa
-│   └── portfolio.html     # Vitrine de Competências
-├── 📂 css/                # Identidade Visual e Estilos
-├── 📂 assets/             # Recursos de Marca e Ícones
+│   ├── detalhes_candidato.html # Perfil Detalhado do Candidato
+│   ├── vagas.html         # Mural de Oportunidades
+│   └── portfolio.html     # Vitrine de Projetos do Aluno
+├── 📂 css/                # Estilização e Identidade Visual
+├── 📂 assets/             # Recursos de Marca
 ├── index.html             # Landing Page
 └── login.html             # Portal de Entrada
 ```
