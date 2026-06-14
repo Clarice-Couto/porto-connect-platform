@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="../js/db.js"></script>
 <style>
 .form-container { max-width: 600px; margin: 40px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
 .form-group { margin-bottom: 20px; }
@@ -101,23 +102,19 @@
 
   document.querySelector('form').addEventListener('submit', function(e) {
     e.preventDefault();
-    const empresaRaw = localStorage.getItem('empresa_logado');
-    if (!empresaRaw) {
+    const empresa = db.getCurrentCompany();
+    if (!empresa || !empresa.email) {
       window.location.href = 'login_empresa.html';
       return;
     }
 
-    const empresa = JSON.parse(empresaRaw);
     const titulo = document.getElementById('titulo').value.trim();
     const tipo = document.getElementById('tipo').value;
     const modelo = document.getElementById('modelo').value;
     const descricao = document.getElementById('descricao').value.trim();
     const categoria = document.getElementById('tags').value;
 
-    const vagasKey = `vagas_${empresa.email}`;
-    const vagas = JSON.parse(localStorage.getItem(vagasKey) || '[]');
-
-    vagas.push({
+    db.addCompanyVacancy(empresa.email, {
       id: Date.now(),
       titulo,
       tipo,
@@ -129,6 +126,5 @@
       status: 'Ativa'
     });
 
-    localStorage.setItem(vagasKey, JSON.stringify(vagas));
     window.location.href = 'vagas_empresa.html';
   });

@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="../js/db.js"></script>
 <style>
 .form-container { max-width: 600px; margin: 40px auto; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
 .form-group { margin-bottom: 20px; }
@@ -117,8 +118,7 @@
       window.location.href = 'login_empresa.html';
     } else {
       const empresa = JSON.parse(empresaRaw);
-      const vagasKey = `vagas_${empresa.email}`;
-      const vagas = JSON.parse(localStorage.getItem(vagasKey) || '[]');
+      const vagas = db.getCompanyVacancies(empresa.email);
       const vagaId = Number(getQueryParam('id'));
       const vaga = vagas.find(job => job.id === vagaId);
 
@@ -142,7 +142,7 @@
           vaga.categoria = document.getElementById('tags').value;
           vaga.status = document.getElementById('status').value;
 
-          localStorage.setItem(vagasKey, JSON.stringify(vagas));
+          db.updateCompanyVacancy(empresa.email, vaga.id, vaga);
           window.location.href = 'vagas_empresa.html';
         });
       }

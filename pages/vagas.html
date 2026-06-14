@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="../js/db.js"></script>
 <style>
 .vagas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
 .search-bar { margin-top: 20px; display: flex; gap: 10px; }
@@ -131,51 +132,7 @@
       </div>
     </section>
 
-    <section class="vagas-grid">
-      <article class="card job">
-        <span class="badge" style="background: #dbeafe; color: #1e40af; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; width: max-content; margin-bottom: 12px;">Frontend</span>
-        <h3>Desenvolvedor React Jr.</h3>
-        <p>TechCorp - Porto</p>
-        <p class="small-text" style="color: #6b7280; font-size: 14px; margin-top: 4px;">Remoto • Full-time</p>
-        <div class="job-actions">
-          <button class="btn-apply" onclick="alert('Candidatura enviada com sucesso!')">Candidatar-se</button>
-          <button class="btn-save" onclick="alert('Vaga salva com sucesso!')"><i data-lucide="bookmark" style="width: 18px; height: 18px;"></i></button>
-        </div>
-      </article>
-
-      <article class="card job">
-        <span class="badge" style="background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; width: max-content; margin-bottom: 12px;">Backend</span>
-        <h3>Desenvolvedor Node.js</h3>
-        <p>StartupXYZ - Lisboa</p>
-        <p class="small-text" style="color: #6b7280; font-size: 14px; margin-top: 4px;">Presencial • Full-time</p>
-        <div class="job-actions">
-          <button class="btn-apply" onclick="alert('Candidatura enviada com sucesso!')">Candidatar-se</button>
-          <button class="btn-save" onclick="alert('Vaga salva com sucesso!')"><i data-lucide="bookmark" style="width: 18px; height: 18px;"></i></button>
-        </div>
-      </article>
-
-      <article class="card job">
-        <span class="badge" style="background: #f3e8ff; color: #6b21a8; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; width: max-content; margin-bottom: 12px;">Full Stack</span>
-        <h3>Engenheiro de Software Jr</h3>
-        <p>InovaSys - Coimbra</p>
-        <p class="small-text" style="color: #6b7280; font-size: 14px; margin-top: 4px;">Híbrido • Full-time</p>
-        <div class="job-actions">
-          <button class="btn-apply" onclick="alert('Candidatura enviada com sucesso!')">Candidatar-se</button>
-          <button class="btn-save" onclick="alert('Vaga salva com sucesso!')"><i data-lucide="bookmark" style="width: 18px; height: 18px;"></i></button>
-        </div>
-      </article>
-      
-      <article class="card job">
-        <span class="badge" style="background: #ffedd5; color: #9a3412; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; width: max-content; margin-bottom: 12px;">Data</span>
-        <h3>Analista de Dados</h3>
-        <p>DataInsights - Porto</p>
-        <p class="small-text" style="color: #6b7280; font-size: 14px; margin-top: 4px;">Remoto • Part-time</p>
-        <div class="job-actions">
-          <button class="btn-apply" onclick="alert('Candidatura enviada com sucesso!')">Candidatar-se</button>
-          <button class="btn-save" onclick="alert('Vaga salva com sucesso!')"><i data-lucide="bookmark" style="width: 18px; height: 18px;"></i></button>
-        </div>
-      </article>
-    </section>
+    <section class="vagas-grid" id="jobGrid"></section>
   </main>
 
   <!-- Modal de Sucesso -->
@@ -200,23 +157,85 @@
     const searchBtn = document.getElementById('searchBtn');
     const jobs = document.querySelectorAll('.card.job');
 
+    function renderJobs(jobList) {
+      const grid = document.getElementById('jobGrid');
+      grid.innerHTML = '';
+      if (jobList.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: white; border-radius: 18px; border: 1px dashed #cbd5e1; color: #64748b;">
+            <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Nenhuma vaga publicada pelas empresas ainda.</p>
+            <p style="font-size: 14px; color: #94a3b8;">Aguarde enquanto as empresas publicam oportunidades reais.</p>
+          </div>
+        `;
+        return;
+      }
+
+      jobList.forEach(job => {
+        const article = document.createElement('article');
+        article.className = 'card job';
+        article.innerHTML = `
+          <span class="badge" style="background: #dbeafe; color: #1e40af; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; width: max-content; margin-bottom: 12px;">${job.categoria || 'Geral'}</span>
+          <h3>${job.titulo}</h3>
+          <p>${job.empresa}</p>
+          <p class="small-text" style="color: #6b7280; font-size: 14px; margin-top: 4px;">${job.modelo} • ${job.tipo}</p>
+          <p style="margin-top: 12px; color: #374151; line-height: 1.6;">${job.descricao || 'Descrição não informada.'}</p>
+          <div class="job-actions">
+            <button class="btn-apply"></button>
+            <button class="btn-save"><i class="fa-regular fa-bookmark" style="font-size: 18px;"></i></button>
+          </div>
+        `;
+
+        const btnApply = article.querySelector('.btn-apply');
+        const btnSave = article.querySelector('.btn-save');
+        const alreadyApplied = candidaturas.some(cand => cand.titulo === job.titulo && cand.empresa === job.empresa);
+        if (alreadyApplied) {
+          btnApply.innerText = 'Candidatado';
+          btnApply.classList.add('candidatado');
+          btnApply.disabled = true;
+        } else {
+          btnApply.innerText = 'Candidatar-se';
+          btnApply.addEventListener('click', () => candidatar(job.titulo, job.empresa, btnApply));
+        }
+
+        const alreadySaved = favoritos.some(fav => fav.titulo === job.titulo && fav.empresa === job.empresa);
+        if (alreadySaved) {
+          btnSave.classList.add('favoritado');
+          btnSave.innerHTML = '<i class="fa-solid fa-bookmark" style="font-size: 16px;"></i>';
+        }
+        btnSave.addEventListener('click', () => toggleFavorito(job.titulo, job.empresa, btnSave, job.categoria, job.tipo));
+
+        grid.appendChild(article);
+      });
+    }
+
     function filterJobs() {
       const term = searchInput.value.toLowerCase();
-      jobs.forEach(job => {
-        const text = job.innerText.toLowerCase();
+      document.querySelectorAll('.card.job').forEach(card => {
+        const text = card.innerText.toLowerCase();
         if (text.includes(term)) {
-          job.style.display = 'flex';
+          card.style.display = 'flex';
         } else {
-          job.style.display = 'none';
+          card.style.display = 'none';
         }
       });
     }
 
-    searchBtn.addEventListener('click', filterJobs);
-    searchInput.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') filterJobs();
+    searchBtn.addEventListener('click', () => {
+      renderJobs(getFilteredJobs());
     });
-    searchInput.addEventListener('input', filterJobs);
+    searchInput.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') renderJobs(getFilteredJobs());
+    });
+    searchInput.addEventListener('input', () => renderJobs(getFilteredJobs()));
+
+    function getFilteredJobs() {
+      const term = searchInput.value.toLowerCase();
+      const allJobs = db.getAllCompanyVacancies().filter(job => job.status === 'Ativa');
+      return allJobs.filter(job => {
+        const text = `${job.titulo} ${job.empresa} ${job.categoria} ${job.tipo} ${job.modelo} ${job.descricao}`.toLowerCase();
+        return text.includes(term);
+      });
+    }
 
     // --- LOGICA DE CANDIDATURA COM LOCALSTORAGE ---
     const alunoLogadoRaw = localStorage.getItem('aluno_logado');
@@ -327,6 +346,9 @@
     document.getElementById('closeModalBtn').addEventListener('click', () => {
       document.getElementById('successModal').classList.remove('open');
     });
+
+    // Inicializar com as vagas já publicadas pelas empresas
+    renderJobs(getFilteredJobs());
   </script>
 </body>
 </html>
