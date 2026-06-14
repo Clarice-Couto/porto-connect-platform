@@ -1,0 +1,11 @@
+{
+  "name": "porto-connect-platform",
+  "version": "1.0.0",
+  "description": "Porto Connect - Platform for connecting students and companies",
+  "main": "index.html",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
