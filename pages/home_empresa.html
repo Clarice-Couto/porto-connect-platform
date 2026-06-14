@@ -168,6 +168,33 @@
       return usuarios.find(user => user.email === email) || null;
     }
 
+    function updateApplicationStatus(emailAluno, titulo, novoStatus) {
+      const key = `candidaturas_${emailAluno}`;
+      const apps = JSON.parse(localStorage.getItem(key) || '[]');
+      let changed = false;
+      for (let i = 0; i < apps.length; i++) {
+        const a = apps[i];
+        if (a.titulo === titulo && a.empresa === (window.empresaLogada ? window.empresaLogada.nome : a.empresa)) {
+          a.status = novoStatus;
+          apps[i] = a;
+          changed = true;
+          break;
+        }
+      }
+      if (changed) {
+        localStorage.setItem(key, JSON.stringify(apps));
+        // Re-render dashboard to reflect change
+        renderDashboard(window.empresaLogada ? window.empresaLogada.nome : '', window.empresaLogada ? window.empresaLogada.email : '');
+      }
+    }
+
+    window.updateApplicationStatusFromSelect = function(el) {
+      const email = el.dataset.email;
+      const title = el.dataset.title;
+      const status = el.value;
+      updateApplicationStatus(email, title, status);
+    }
+
     function renderCandidateCards(applications) {
       const container = document.getElementById('candidateGrid');
       container.innerHTML = '';
@@ -191,7 +218,6 @@
         const card = document.createElement('div');
         card.className = 'candidate-card';
         card.style.cursor = 'pointer';
-        card.setAttribute('onclick', "window.location.href='detalhes_candidato.html'");
         card.innerHTML = `
           <div class="candidate-top">
             <div class="profile">
@@ -211,7 +237,17 @@
             <div class="projects">⭐ ${skills.length} habilidade${skills.length !== 1 ? 's' : ''}</div>
             <div class="level">${app.emailAluno || 'E-mail não disponível'}</div>
           </div>
+          <div class="candidate-actions" style="margin-top:12px; display:flex; gap:8px; align-items:center; justify-content:flex-end;">
+            <label style="font-weight:600; font-size:13px; color:#475569; margin-right:8px;">Status:</label>
+            <select class="status-select" data-email="${app.emailAluno}" data-title="${app.titulo}" onchange="window.updateApplicationStatusFromSelect && window.updateApplicationStatusFromSelect(this)" style="padding:6px 10px; border-radius:8px; border:1px solid #cbd5e1; background:white;">
+              <option value="Pendente" ${app.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+              <option value="Entrevista" ${app.status === 'Entrevista' ? 'selected' : ''}>Entrevista</option>
+              <option value="Aceito" ${app.status === 'Aceito' ? 'selected' : ''}>Aceito</option>
+              <option value="Recusado" ${app.status === 'Recusado' ? 'selected' : ''}>Recusado</option>
+            </select>
+          </div>
         `;
+        card.querySelector('.candidate-top').addEventListener('click', () => window.location.href = 'detalhes_candidato.html');
         container.appendChild(card);
       });
     }
@@ -237,12 +273,12 @@
         window.location.href = 'login_empresa.html';
         return;
       }
-      const empresaLogada = JSON.parse(empresaLogadaRaw);
+      window.empresaLogada = JSON.parse(empresaLogadaRaw);
       const subTitle = document.querySelector('.subtitle');
       if (subTitle) {
-        subTitle.innerHTML = `Bem-vindo(a), <strong>${empresaLogada.nome}</strong>! Gerencie suas vagas e encontre os melhores talentos.`;
+        subTitle.innerHTML = `Bem-vindo(a), <strong>${window.empresaLogada.nome}</strong>! Gerencie suas vagas e encontre os melhores talentos.`;
       }
-      renderDashboard(empresaLogada.nome, empresaLogada.email);
+      renderDashboard(window.empresaLogada.nome, window.empresaLogada.email);
       const logoutBtn = document.querySelector('.logout');
       if (logoutBtn) {
         logoutBtn.addEventListener('click', function(e) {

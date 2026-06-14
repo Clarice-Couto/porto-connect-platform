@@ -76,6 +76,16 @@
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(0,0,0,0.04);
     }
+    .status {
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .status-pending { background: #f8fafc; color: #0f172a; border: 1px solid #e2e8f0; }
+    .status-interview { background: #fff7ed; color: #92400e; border: 1px solid #fecaca; }
+    .status-accepted { background: #ecfdf5; color: #065f46; border: 1px solid #bbf7d0; }
+    .status-rejected { background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; }
     .cand-info h3 {
       font-size: 18px;
       color: #1e1b4b;
@@ -472,6 +482,15 @@
       if (confirm("Deseja sair da plataforma?")) {
         localStorage.removeItem('aluno_logado');
         window.location.href = 'login_aluno.html';
+      }
+    });
+
+    // Atualiza automaticamente se outra aba/janela alterar as candidaturas no localStorage
+    window.addEventListener('storage', (evt) => {
+      if (!evt.key) return;
+      if (evt.key === candidaturasKey) {
+        candidaturas = JSON.parse(evt.newValue || '[]');
+        renderCandidaturas();
       }
     });
 
