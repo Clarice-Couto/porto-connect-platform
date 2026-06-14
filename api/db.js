@@ -1,7 +1,14 @@
 const { Redis } = require('@upstash/redis');
 
 const DB_KEY = 'porto-connect:data';
-const redis = Redis.fromEnv();
+
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+
+const redis = new Redis({
+  url: redisUrl,
+  token: redisToken,
+});
 
 const emptyDb = () => ({
   students: [],
@@ -292,7 +299,7 @@ module.exports = async function handler(req, res) {
     console.error('API DB error:', error);
     return res.status(500).json({
       error: {
-        message: 'Banco indisponível. Adicione Upstash Redis em Vercel ? Storage/Marketplace e conecte ao projeto.',
+        message: 'Banco indisponível. Conecte Redis/KV em Vercel Storage e redeploy o projeto.',
       },
     });
   }

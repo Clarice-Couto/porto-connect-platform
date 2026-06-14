@@ -94,9 +94,9 @@ Se já estiver conectado, o push na `main` dispara o deploy automaticamente.
 
 ### 3. Ativar o banco compartilhado (obrigatório para produção)
 
-1. No projeto Vercel: **Storage → Marketplace → Upstash Redis**
-2. Crie o banco e **conecte ao projeto** (a Vercel configura as variáveis sozinha)
-3. Vá em **Deployments → Redeploy** no último deploy
+1. No projeto Vercel: **Storage → Upstash Redis** (ou KV) e conecte ao projeto.
+2. A Vercel cria automaticamente `KV_REST_API_URL` e `KV_REST_API_TOKEN`.
+3. Vá em **Deployments → Redeploy** no último deploy.
 
 Pronto. Sem Supabase, sem SQL, sem variáveis manuais.
 
