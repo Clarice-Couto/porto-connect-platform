@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Porto Connect - Dashboard da Empresa</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,20 +11,29 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="../js/db.js"></script>
   <style>
-
-    .nav-links a {
-      cursor: pointer;
-      padding: 8px 16px;
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+    .tab-btn {
+      padding: 10px 20px;
       border-radius: 8px;
-      transition: background 0.2s;
+      cursor: pointer;
+      font-weight: 600;
+      color: #64748b;
+      transition: 0.2s;
+      border: none;
+      background: transparent;
     }
-    .nav-links a.active {
-      background: rgba(37, 99, 235, 0.1);
-      color: #2563eb;
-      font-weight: 700;
+    .tab-btn.active {
+      background: #2563eb;
+      color: white;
     }
-    .nav-links a:hover {
-      background: rgba(37, 99, 235, 0.05);
+    .tab-btn:hover:not(.active) {
+      background: #f1f5f9;
     }
     .candidate-card {
       background: white;
@@ -35,6 +43,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
       border: 1px solid #e2e8f0;
       transition: transform 0.2s;
+      cursor: pointer;
     }
     .candidate-card:hover {
       transform: translateY(-2px);
@@ -52,21 +61,17 @@
   </style>
 </head>
 <body>
-
   <header class="navbar">
     <div class="nav-inner">
       <a href="./home_empresa.html" class="brand">
         <img src="../assets/images/logo.png" alt="Porto Connect" height="34" class="brand-logo" />
       </a>
-
       <nav class="nav-links" id="navLinks">
-        <a id="tabCandidatos" class="active">Candidatos</a>
-        <a id="tabExplorar">Explorar Alunos</a>
+        <a href="./home_empresa.html" class="active">Início</a>
         <a href="./vagas_empresa.html">Minhas Vagas</a>
         <a href="./perfil_empresa.html">Perfil</a>
         <a href="./login_empresa.html" class="logout"><i data-lucide="log-out"></i> Sair</a>
       </nav>
-
       <button class="menu-toggle" id="menuToggle">
         <i data-lucide="menu"></i>
       </button>
@@ -75,20 +80,20 @@
 
   <main class="container">
     <h1 class="title">Dashboard da Empresa</h1>
-    <p class="subtitle">Bem-vindo(a)!</p>
+    <p class="subtitle" id="welcomeMsg">Bem-vindo(a)!</p>
 
     <section class="stats">
-      <div class="card">
+      <div class="card" id="btnShowCandidates" style="cursor:pointer;">
         <div class="icon">👥</div>
         <h4>Candidatos</h4>
         <div class="number" id="statCandidatos">0</div>
         <p>Inscritos em suas vagas</p>
       </div>
-      <div class="card" id="btnGoExplore" style="cursor:pointer; transition: transform 0.2s;">
+      <div class="card" id="btnShowExplore" style="cursor:pointer;">
         <div class="icon">🌟</div>
         <h4>Banco de Talentos</h4>
         <div class="number" id="statTotalAlunos">0</div>
-        <p>Clique para ver todos os alunos</p>
+        <p>Todos os alunos cadastrados</p>
       </div>
       <div class="card">
         <div class="icon">💼</div>
@@ -98,6 +103,11 @@
       </div>
     </section>
 
+    <div class="nav-tabs">
+      <button class="tab-btn active" id="tabBtnCandidates">Candidatos Inscritos</button>
+      <button class="tab-btn" id="tabBtnExplore">Explorar Banco de Talentos</button>
+    </div>
+
     <section class="filter-box">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2 class="filter-title" id="sectionTitle">Candidatos Inscritos</h2>
@@ -106,7 +116,7 @@
 
       <div class="filters">
         <div class="input-group">
-          <label>Buscar por Nome ou E-mail</label>
+          <label>Buscar Nome ou E-mail</label>
           <input type="text" id="filterName" placeholder="Ex: Lucas..." />
         </div>
         <div class="input-group">
@@ -132,7 +142,7 @@
         </div>
       </div>
 
-      <div class="results" id="resultsCount">Buscando...</div>
+      <div class="results" id="resultsCount">0 encontrado(s)</div>
       <div class="candidate-grid" id="candidateGrid"></div>
     </section>
   </main>
@@ -140,7 +150,7 @@
   <script>
     (async function(){
       lucide.createIcons();
-
+      
       let currentView = 'candidates';
       let allStudents = [];
       let applications = [];
@@ -150,17 +160,17 @@
       const filterSkill = document.getElementById('filterSkill');
       const filterLevel = document.getElementById('filterLevel');
       const container = document.getElementById('candidateGrid');
-
+      
       const empresaLogadaRaw = localStorage.getItem('empresa_logado');
       if (!empresaLogadaRaw) { window.location.href = 'login_empresa.html'; return; }
       const empresa = JSON.parse(empresaLogadaRaw);
-      document.querySelector('.subtitle').innerHTML = `Bem-vindo(a), <strong>${empresa.nome}</strong>!`;
+      document.getElementById('welcomeMsg').innerHTML = `Bem-vindo(a), <strong>${empresa.nome}</strong>!`;
 
       async function loadData() {
         allStudents = await db.getAllStudents();
         vacancies = await db.getCompanyVacancies(empresa.email);
         applications = await db.getApplicationsByCompany(empresa.email);
-
+        
         applications = applications.map(app => {
           const student = allStudents.find(s => s.email === app.emailAluno);
           return { ...app, nomeAluno: student ? student.nome : 'Candidato' };
@@ -182,7 +192,7 @@
         if (currentView === 'explore') {
           list = allStudents.filter(s => (name === "" || s.nome.toLowerCase().includes(name) || s.email.toLowerCase().includes(name)) &&
                                  (skill === "" || (s.skills || "").toLowerCase().includes(skill)));
-
+          
           list.forEach(s => {
             const card = document.createElement('div');
             card.className = 'candidate-card';
@@ -195,14 +205,13 @@
               </div>
               <div class="tags" style="margin-top:10px;">${(s.skills || '').split(',').map(sk => sk.trim() ? `<span class="tag">${sk.trim()}</span>` : '').join('')}</div>
             `;
-            card.style.cursor = 'pointer';
             card.onclick = () => window.location.href = `detalhes_candidato.html?email=${encodeURIComponent(s.email)}`;
             container.appendChild(card);
           });
         } else {
           list = applications.filter(app => (name === "" || app.nomeAluno.toLowerCase().includes(name) || app.emailAluno.toLowerCase().includes(name)) &&
                                            (status === "" || app.status.toLowerCase() === status));
-
+          
           list.forEach(app => {
             const card = document.createElement('div');
             card.className = 'candidate-card';
@@ -218,7 +227,7 @@
               </div>
               <div class="candidate-footer" style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-size:12px; color:#64748b">${app.emailAluno}</span>
-                <select onchange="updateStatus('${app.emailAluno}', '${app.titulo}', this.value)" style="padding:4px; border-radius:5px; border:1px solid #cbd5e1; font-size:12px;">
+                <select id="status_${app.emailAluno.replace(/[@.]/g, '_')}" style="padding:4px; border-radius:5px; border:1px solid #cbd5e1; font-size:12px;">
                   <option value="Pendente" ${app.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
                   <option value="Entrevista" ${app.status === 'Entrevista' ? 'selected' : ''}>Entrevista</option>
                   <option value="Contratado" ${app.status === 'Contratado' ? 'selected' : ''}>Contratado</option>
@@ -226,45 +235,48 @@
                 </select>
               </div>
             `;
-            card.querySelector('.profile').onclick = () => window.location.href = `detalhes_candidato.html?email=${encodeURIComponent(app.emailAluno)}`;
-            card.querySelector('.profile').style.cursor = 'pointer';
+            card.onclick = (e) => { if (e.target.tagName !== 'SELECT') window.location.href = `detalhes_candidato.html?email=${encodeURIComponent(app.emailAluno)}`; };
+            card.querySelector('select').onchange = async (e) => {
+              await db.updateApplicationStatus(app.emailAluno, app.titulo, e.target.value, empresa.email);
+              await loadData();
+              render();
+            };
             container.appendChild(card);
           });
         }
         document.getElementById('resultsCount').innerText = `${list.length} encontrado(s)`;
       }
 
-      window.updateStatus = async (email, title, newStatus) => {
-        await db.updateApplicationStatus(email, title, newStatus, empresa.email);
-        await loadData();
-        render();
-      };
-
       const setView = (view) => {
         currentView = view;
+        const btnCand = document.getElementById('tabBtnCandidates');
+        const btnExp = document.getElementById('tabBtnExplore');
+        const badge = document.getElementById('viewModeBadge');
+        
         if (view === 'candidates') {
-          document.getElementById('tabExplorar').classList.remove('active');
-          document.getElementById('tabCandidatos').classList.add('active');
+          btnCand.classList.add('active');
+          btnExp.classList.remove('active');
           document.getElementById('sectionTitle').innerText = "Candidatos Inscritos";
-          document.getElementById('viewModeBadge').innerText = "Modo: Suas Vagas";
-          document.getElementById('viewModeBadge').style.background = "#eff6ff";
-          document.getElementById('viewModeBadge').style.color = "#2563eb";
+          badge.innerText = "Modo: Suas Vagas";
+          badge.style.background = "#eff6ff";
+          badge.style.color = "#2563eb";
           document.getElementById('statusFilterGroup').style.display = 'block';
         } else {
-          document.getElementById('tabCandidatos').classList.remove('active');
-          document.getElementById('tabExplorar').classList.add('active');
+          btnExp.classList.add('active');
+          btnCand.classList.remove('active');
           document.getElementById('sectionTitle').innerText = "Explorar Banco de Talentos";
-          document.getElementById('viewModeBadge').innerText = "Modo: Todos os Alunos";
-          document.getElementById('viewModeBadge').style.background = "#f0fdf4";
-          document.getElementById('viewModeBadge').style.color = "#16a34a";
+          badge.innerText = "Modo: Todos os Alunos";
+          badge.style.background = "#f0fdf4";
+          badge.style.color = "#16a34a";
           document.getElementById('statusFilterGroup').style.display = 'none';
         }
         render();
       };
 
-      document.getElementById('tabCandidatos').onclick = () => setView('candidates');
-      document.getElementById('tabExplorar').onclick = () => setView('explore');
-      document.getElementById('btnGoExplore').onclick = () => setView('explore');
+      document.getElementById('tabBtnCandidates').onclick = () => setView('candidates');
+      document.getElementById('tabBtnExplore').onclick = () => setView('explore');
+      document.getElementById('btnShowCandidates').onclick = () => setView('candidates');
+      document.getElementById('btnShowExplore').onclick = () => setView('explore');
 
       filterName.oninput = render;
       filterSkill.onchange = render;
@@ -277,7 +289,6 @@
         e.preventDefault();
         if (confirm("Sair?")) { await db.signOut(); window.location.href = 'login_empresa.html'; }
       };
-
       document.getElementById('menuToggle').onclick = () => document.getElementById('navLinks').classList.toggle('active');
     })();
   </script>
