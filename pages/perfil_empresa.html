@@ -210,26 +210,19 @@
     });
 
     function carregarPerfil(){
-      let dados = localStorage.getItem("perfilEmpresa");
       const empresaLogadaRaw = localStorage.getItem("empresa_logado");
-      if (!dados && empresaLogadaRaw) {
-        localStorage.setItem("perfilEmpresa", empresaLogadaRaw);
-        dados = empresaLogadaRaw;
-      }
-      if(!dados){
-        const mockPerfil = {
-          nome: "TechCorp Brasil",
-          email: "contato@techcorp.com.br",
-          cidade: "São Paulo, SP",
-          sobre: "Empresa focada no desenvolvimento de software de ponta para fintechs e saúde. Buscamos inovação constante e profissionais engajados.",
-          skills: "React, Node.js, Python, AWS"
-        };
-        localStorage.setItem("perfilEmpresa", JSON.stringify(mockPerfil));
-        dados = localStorage.getItem("perfilEmpresa");
+      if (!empresaLogadaRaw) {
+        window.location.href = "login_empresa.html";
+        return;
       }
 
-      if(dados){
-        const perfil = JSON.parse(dados);
+      let perfil = JSON.parse(localStorage.getItem("perfilEmpresa") || 'null');
+      if (!perfil) {
+        perfil = JSON.parse(empresaLogadaRaw);
+        localStorage.setItem("perfilEmpresa", JSON.stringify(perfil));
+      }
+
+      if (perfil) {
         nomePerfil.innerText = perfil.nome;
         emailPerfil.innerText = perfil.email;
         cidadePerfil.innerText = perfil.cidade;
@@ -245,13 +238,21 @@
         avatarText.innerText = iniciais.substring(0,2).toUpperCase();
         skillsContainer.innerHTML = "";
 
-        const skills = perfil.skills.split(",");
-        skills.forEach(skill => {
+        const skills = (perfil.skills || '').split(",").map(skill => skill.trim()).filter(Boolean);
+        skillsContainer.innerHTML = '';
+        if (skills.length === 0) {
           const div = document.createElement("div");
           div.classList.add("skill");
-          div.innerText = skill.trim();
+          div.innerText = "Sem habilidades informadas";
           skillsContainer.appendChild(div);
-        });
+        } else {
+          skills.forEach(skill => {
+            const div = document.createElement("div");
+            div.classList.add("skill");
+            div.innerText = skill;
+            skillsContainer.appendChild(div);
+          });
+        }
       }
     }
 

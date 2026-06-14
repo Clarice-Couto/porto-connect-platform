@@ -355,11 +355,19 @@
         card.className = 'card-cand';
 
         let statusClass = 'status-pending';
-        if (cand.status.toLowerCase() === 'aceito') statusClass = 'status-accepted';
-        if (cand.status.toLowerCase() === 'recusado') statusClass = 'status-rejected';
-        if (cand.status.toLowerCase() === 'entrevista') statusClass = 'status-interview';
+        const statusKey = cand.status.toLowerCase();
+        if (statusKey === 'aceito') statusClass = 'status-accepted';
+        if (statusKey === 'recusado' || statusKey === 'rejeitado') statusClass = 'status-rejected';
+        if (statusKey === 'entrevista') statusClass = 'status-interview';
 
-        const dateText = cand.msgExtra || `Enviada em ${cand.data}`;
+        let dateText = `Enviada em ${cand.data}`;
+        if (statusKey === 'entrevista') {
+          dateText = cand.msgExtra || `Entrevista agendada para ${cand.data}`;
+        } else if (statusKey === 'aceito') {
+          dateText = cand.msgExtra || 'Parabéns! Processo seletivo concluído com sucesso.';
+        } else if (statusKey === 'recusado' || statusKey === 'rejeitado') {
+          dateText = cand.msgExtra || 'Infelizmente sua candidatura não foi aprovada.';
+        }
 
         card.innerHTML = `
           <div class="cand-info">

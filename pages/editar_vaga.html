@@ -87,7 +87,15 @@
           </select>
         </div>
 
-        <button type="submit" class="btn-submit" onclick="alert('Alterações salvas com sucesso!')">Salvar Alterações</button>
+        <div class="form-group">
+          <label for="status">Status da Vaga</label>
+          <select id="status">
+            <option value="Ativa">Ativa</option>
+            <option value="Encerrada">Encerrada</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-submit">Salvar Alterações</button>
         <a href="vagas_empresa.html" class="btn-cancel">Cancelar</a>
       </form>
     </div>
@@ -98,6 +106,47 @@
     document.getElementById('menuToggle').addEventListener('click', () => {
       document.getElementById('navLinks').classList.toggle('active');
     });
+
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    const empresaRaw = localStorage.getItem('empresa_logado');
+    if (!empresaRaw) {
+      window.location.href = 'login_empresa.html';
+    } else {
+      const empresa = JSON.parse(empresaRaw);
+      const vagasKey = `vagas_${empresa.email}`;
+      const vagas = JSON.parse(localStorage.getItem(vagasKey) || '[]');
+      const vagaId = Number(getQueryParam('id'));
+      const vaga = vagas.find(job => job.id === vagaId);
+
+      if (!vaga) {
+        alert('Vaga não encontrada.');
+        window.location.href = 'vagas_empresa.html';
+      } else {
+        document.getElementById('titulo').value = vaga.titulo;
+        document.getElementById('tipo').value = vaga.tipo;
+        document.getElementById('modelo').value = vaga.modelo;
+        document.getElementById('descricao').value = vaga.descricao;
+        document.getElementById('tags').value = vaga.categoria;
+        document.getElementById('status').value = vaga.status || 'Ativa';
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+          e.preventDefault();
+          vaga.titulo = document.getElementById('titulo').value.trim();
+          vaga.tipo = document.getElementById('tipo').value;
+          vaga.modelo = document.getElementById('modelo').value;
+          vaga.descricao = document.getElementById('descricao').value.trim();
+          vaga.categoria = document.getElementById('tags').value;
+          vaga.status = document.getElementById('status').value;
+
+          localStorage.setItem(vagasKey, JSON.stringify(vagas));
+          window.location.href = 'vagas_empresa.html';
+        });
+      }
+    }
   </script>
 </body>
 </html>

@@ -232,25 +232,7 @@
     // --- CARREGAR PROJETOS ---
     let projetos = JSON.parse(localStorage.getItem(projetosKey) || '[]');
     
-    if (projetos.length === 0 && localStorage.getItem(`has_initialized_portfolio_${userEmail}`) === null) {
-      // Inicializar com mocks padrão
-      projetos = [
-        {
-          titulo: "Sistema de Gestão de Tarefas",
-          descricao: "Aplicativo web completo para gerenciar tarefas com autenticação de usuários, categorização, filtros de status, ordenação e datas de vencimento. Desenvolvido para melhorar a produtividade pessoal ou de pequenas equipes.",
-          tags: "React, TypeScript, Node.js, MongoDB",
-          link: "https://github.com/usuario/gestao-tarefas"
-        },
-        {
-          titulo: "Landing Page Responsiva",
-          descricao: "Landing page moderna e extremamente responsiva para uma startup de tecnologia, contendo seções de depoimentos, preços dinâmicos, animações fluidas ao rolar a página e formulário de contato integrado.",
-          tags: "React, Tailwind CSS, Framer Motion",
-          link: "https://github.com/usuario/landing-page-startup"
-        }
-      ];
-      localStorage.setItem(projetosKey, JSON.stringify(projetos));
-      localStorage.setItem(`has_initialized_portfolio_${userEmail}`, 'true');
-    }
+    // Não inicializa portfólio automático para novos usuários.
 
     const container = document.getElementById('projectsContainer');
     const projectCountText = document.querySelector('.top-content p');

@@ -98,6 +98,37 @@
     document.getElementById('menuToggle').addEventListener('click', () => {
       document.getElementById('navLinks').classList.toggle('active');
     });
-  </script>
-</body>
-</html>
+
+  document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const empresaRaw = localStorage.getItem('empresa_logado');
+    if (!empresaRaw) {
+      window.location.href = 'login_empresa.html';
+      return;
+    }
+
+    const empresa = JSON.parse(empresaRaw);
+    const titulo = document.getElementById('titulo').value.trim();
+    const tipo = document.getElementById('tipo').value;
+    const modelo = document.getElementById('modelo').value;
+    const descricao = document.getElementById('descricao').value.trim();
+    const categoria = document.getElementById('tags').value;
+
+    const vagasKey = `vagas_${empresa.email}`;
+    const vagas = JSON.parse(localStorage.getItem(vagasKey) || '[]');
+
+    vagas.push({
+      id: Date.now(),
+      titulo,
+      tipo,
+      modelo,
+      descricao,
+      categoria,
+      empresa: empresa.nome,
+      emailEmpresa: empresa.email,
+      status: 'Ativa'
+    });
+
+    localStorage.setItem(vagasKey, JSON.stringify(vagas));
+    window.location.href = 'vagas_empresa.html';
+  });

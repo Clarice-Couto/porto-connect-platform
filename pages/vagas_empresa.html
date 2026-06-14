@@ -55,55 +55,7 @@
       </button>
     </section>
 
-    <section class="vagas-grid">
-      <article class="card job">
-        <span class="status-badge status-active">Ativa</span>
-        <span class="badge" style="background: #dbeafe; color: #1e40af; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; width: max-content; margin-bottom: 12px;">Frontend</span>
-        <h3>Desenvolvedor React Jr.</h3>
-        <p class="small-text" style="color: #6b7280; font-size: 14px; margin-top: 4px;">Remoto • Full-time</p>
-        
-        <div class="candidates-info">
-          <i data-lucide="users" style="width: 16px; height: 16px;"></i> 12 candidaturas
-        </div>
-
-        <div class="job-actions">
-          <button class="btn-edit" onclick="window.location.href='editar_vaga.html'"><i data-lucide="edit-3" style="width: 16px; height: 16px; margin-bottom:-3px"></i> Editar</button>
-          <button class="btn-view" onclick="window.location.href='home_empresa.html'">Ver Candidatos</button>
-        </div>
-      </article>
-
-      <article class="card job">
-        <span class="status-badge status-active">Ativa</span>
-        <span class="badge" style="background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; width: max-content; margin-bottom: 12px;">Backend</span>
-        <h3>Desenvolvedor Node.js</h3>
-        <p class="small-text" style="color: #6b7280; font-size: 14px; margin-top: 4px;">Presencial • Full-time</p>
-        
-        <div class="candidates-info">
-          <i data-lucide="users" style="width: 16px; height: 16px;"></i> 5 candidaturas
-        </div>
-
-        <div class="job-actions">
-          <button class="btn-edit" onclick="window.location.href='editar_vaga.html'"><i data-lucide="edit-3" style="width: 16px; height: 16px; margin-bottom:-3px"></i> Editar</button>
-          <button class="btn-view" onclick="window.location.href='home_empresa.html'">Ver Candidatos</button>
-        </div>
-      </article>
-
-      <article class="card job" style="opacity: 0.7;">
-        <span class="status-badge status-closed">Encerrada</span>
-        <span class="badge" style="background: #f3e8ff; color: #6b21a8; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; width: max-content; margin-bottom: 12px;">Full Stack</span>
-        <h3>Engenheiro de Software Jr</h3>
-        <p class="small-text" style="color: #6b7280; font-size: 14px; margin-top: 4px;">Híbrido • Full-time</p>
-        
-        <div class="candidates-info">
-          <i data-lucide="users" style="width: 16px; height: 16px;"></i> 48 candidaturas
-        </div>
-
-        <div class="job-actions">
-          <button class="btn-edit" style="flex: 1;" onclick="window.location.href='nova_vaga.html'"><i data-lucide="rotate-ccw" style="width: 16px; height: 16px; margin-bottom:-3px"></i> Reabrir</button>
-        </div>
-      </article>
-      
-    </section>
+    <section class="vagas-grid" id="jobGrid"></section>
   </main>
 
   <script>
@@ -111,6 +63,57 @@
     document.getElementById('menuToggle').addEventListener('click', () => {
       document.getElementById('navLinks').classList.toggle('active');
     });
+
+    function getAllApplications() {
+      return Object.keys(localStorage)
+        .filter(key => key.startsWith('candidaturas_'))
+        .flatMap(key => JSON.parse(localStorage.getItem(key) || '[]'));
+    }
+
+    function countApplicationsForJob(titulo, empresa) {
+      return getAllApplications().filter(app => app.titulo === titulo && app.empresa === empresa).length;
+    }
+
+    const empresaRaw = localStorage.getItem('empresa_logado');
+    if (!empresaRaw) {
+      window.location.href = 'login_empresa.html';
+    } else {
+      const empresa = JSON.parse(empresaRaw);
+      const vagasKey = `vagas_${empresa.email}`;
+      const vagas = JSON.parse(localStorage.getItem(vagasKey) || '[]');
+      const container = document.getElementById('jobGrid');
+
+      if (vagas.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px; background: white; border-radius: 18px; border: 1px dashed #cbd5e1; color: #64748b; grid-column: 1 / -1;">
+            <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Você ainda não publicou nenhuma vaga.</p>
+            <a href="nova_vaga.html" style="color: #2563eb; font-weight: 600; text-decoration: none;">Criar sua primeira vaga</a>
+          </div>
+        `;
+      } else {
+        container.innerHTML = vagas.map(vaga => {
+          const isActive = vaga.status === 'Ativa';
+          const appCount = countApplicationsForJob(vaga.titulo, vaga.empresa);
+          return `
+            <article class="card job">
+              <span class="status-badge ${isActive ? 'status-active' : 'status-closed'}">${vaga.status}</span>
+              <span class="badge" style="background: ${isActive ? '#dbeafe' : '#f3e8ff'}; color: ${isActive ? '#1e40af' : '#6b21a8'}; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; width: max-content; margin-bottom: 12px;">${vaga.categoria}</span>
+              <h3>${vaga.titulo}</h3>
+              <p class="small-text" style="color: #6b7280; font-size: 14px; margin-top: 4px;">${vaga.modelo} • ${vaga.tipo}</p>
+              <p style="margin-top: 12px; color: #374151; line-height: 1.6;">${vaga.descricao}</p>
+              <div class="candidates-info">
+                <i data-lucide="users" style="width: 16px; height: 16px;"></i> ${appCount} candidatura${appCount !== 1 ? 's' : ''}
+              </div>
+              <div class="job-actions">
+                <button class="btn-edit" onclick="window.location.href='editar_vaga.html?id=${vaga.id}'"><i data-lucide="edit-3" style="width: 16px; height: 16px; margin-bottom:-3px"></i> Editar</button>
+                <button class="btn-view" onclick="window.location.href='home_empresa.html'"><i data-lucide="eye" style="width: 16px; height: 16px; margin-bottom:-3px"></i> Ver Candidatos</button>
+              </div>
+            </article>
+          `;
+        }).join('');
+        lucide.createIcons();
+      }
+    }
   </script>
 </body>
 </html>

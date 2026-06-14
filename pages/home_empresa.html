@@ -92,130 +92,26 @@
         </div>
 
         <div class="input-group">
-          <label>Nível</label>
+          <label>Status</label>
 
           <select id="filterLevel">
             <option value="">Todos</option>
-            <option value="iniciante">Iniciante</option>
-            <option value="intermediário">Intermediário</option>
-            <option value="avançado">Avançado</option>
+            <option value="pendente">Pendente</option>
+            <option value="entrevista">Entrevista</option>
+            <option value="aceito">Aceito</option>
+            <option value="recusado">Recusado</option>
           </select>
         </div>
 
       </div>
 
       <div class="results" id="resultsCount">
-        3 candidatos encontrados
+        0 candidatos encontrados
       </div>
 
 
-      <div class="candidate-grid">
-
-        <div class="candidate-card" style="cursor: pointer;" onclick="window.location.href='detalhes_candidato.html'">
-
-          <div class="candidate-top">
-
-            <div class="profile">
-              <div class="avatar">AS</div>
-
-              <div class="candidate-info">
-                <h3>Amanda Estephany</h3>
-                <span>Recife, PE</span>
-              </div>
-            </div>
-
-
-
-          </div>
-
-          <p class="description">
-            Estudante de desenvolvimento de software apaixonada por tecnologia.
-          </p>
-
-          <div class="tags">
-            <div class="tag">Java</div>
-            <div class="tag">C#</div>
-            <div class="tag">.NET</div>
-            <div class="tag">Git</div>
-          </div>
-
-          <div class="candidate-footer">
-            <div class="projects">⭐ 4 projetos</div>
-            <div class="level">Intermediário</div>
-          </div>
-
-        </div>
-
-
-        <div class="candidate-card" style="cursor: pointer;" onclick="window.location.href='detalhes_candidato.html'">
-
-          <div class="candidate-top">
-
-            <div class="profile">
-              <div class="avatar">CM</div>
-
-              <div class="candidate-info">
-                <h3>Alycia Maia</h3>
-                <span>Recife, PE</span>
-              </div>
-            </div>
-
-
-
-          </div>
-
-          <p class="description">
-            Profissional com interesse em soluções SAP, análise de processos e gestão empresarial.
-          </p>
-
-          <div class="tags">
-            <div class="tag">SAP</div>
-            <div class="tag">ABAP</div>
-            <div class="tag">SQL</div>
-          </div>
-
-          <div class="candidate-footer">
-            <div class="projects">⭐ 5 projeto</div>
-            <div class="level">Intermediário</div>
-          </div>
-
-        </div>
-
-        <div class="candidate-card" style="cursor: pointer;" onclick="window.location.href='detalhes_candidato.html'">
-
-          <div class="candidate-top">
-
-            <div class="profile">
-              <div class="avatar">BC</div>
-
-              <div class="candidate-info">
-                <h3>Clarice Couto</h3>
-                <span>Recife, PE</span>
-              </div>
-            </div>
-
-
-
-          </div>
-
-          <p class="description">
-            Interessada em transformação digital, dados e inovação.
-          </p>
-
-          <div class="tags">
-            <div class="tag">Python</div>
-            <div class="tag">SQL</div>
-            <div class="tag">Power BI</div>
-            <div class="tag">Azure</div>
-          </div>
-
-          <div class="candidate-footer">
-            <div class="projects">⭐ 3 projeto</div>
-            <div class="level">Intermediário</div>
-          </div>
-
-        </div>
-
+      <div class="candidate-grid" id="candidateGrid">
+        <!-- Candidatos preenchidos dinamicamente -->
       </div>
 
     </section>
@@ -231,24 +127,22 @@
     const filterName = document.getElementById('filterName');
     const filterSkill = document.getElementById('filterSkill');
     const filterLevel = document.getElementById('filterLevel');
-    const candidates = document.querySelectorAll('.candidate-card');
     const resultsCount = document.getElementById('resultsCount');
 
     function filterCandidates() {
       const nameTerm = filterName.value.toLowerCase();
       const skillTerm = filterSkill.value.toLowerCase();
       const levelTerm = filterLevel.value.toLowerCase();
+      const cards = Array.from(document.querySelectorAll('.candidate-card'));
 
       let visibleCount = 0;
 
-      candidates.forEach(card => {
+      cards.forEach(card => {
         const name = card.querySelector('h3').innerText.toLowerCase();
-        
-        // Verifica as tags
-        const tags = Array.from(card.querySelectorAll('.tag')).map(t => t.innerText.toLowerCase());
-        const hasSkill = skillTerm === "" || tags.some(tag => tag.includes(skillTerm));
 
-        // Verifica o nivel
+        const skills = Array.from(card.querySelectorAll('.tag')).map(t => t.innerText.toLowerCase());
+        const hasSkill = skillTerm === "" || skills.some(tag => tag.includes(skillTerm));
+
         const level = card.querySelector('.level').innerText.toLowerCase();
         const hasLevel = levelTerm === "" || level.includes(levelTerm);
 
@@ -263,6 +157,75 @@
       resultsCount.innerText = `${visibleCount} candidato${visibleCount !== 1 ? 's' : ''} encontrado${visibleCount !== 1 ? 's' : ''}`;
     }
 
+    function getAllApplications() {
+      return Object.keys(localStorage)
+        .filter(key => key.startsWith('candidaturas_'))
+        .flatMap(key => JSON.parse(localStorage.getItem(key) || '[]'));
+    }
+
+    function getStudentByEmail(email) {
+      const usuarios = JSON.parse(localStorage.getItem('usuarios_aluno') || '[]');
+      return usuarios.find(user => user.email === email) || null;
+    }
+
+    function renderCandidateCards(applications) {
+      const container = document.getElementById('candidateGrid');
+      container.innerHTML = '';
+
+      if (applications.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; grid-column: 1 / -1; padding: 40px; background: white; border-radius: 18px; border: 1px dashed #cbd5e1; color: #64748b;">
+            <i class="fa-regular fa-user" style="font-size: 40px; margin-bottom: 15px; display: block; color: #94a3b8;"></i>
+            <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Nenhum candidato encontrado para suas vagas.</p>
+            <a href="vagas_empresa.html" style="color: #2563eb; font-weight: 600; text-decoration: none;">Ver minhas vagas</a>
+          </div>
+        `;
+        return;
+      }
+
+      applications.forEach(app => {
+        const student = getStudentByEmail(app.emailAluno) || { nome: 'Candidato anônimo', email: app.emailAluno || '---', cidade: 'Não informado', skills: '' };
+        const skills = (student.skills || '').split(',').map(s => s.trim()).filter(Boolean);
+        const skillsHTML = skills.length > 0 ? skills.map(skill => `<div class="tag">${skill}</div>`).join('') : '<div class="tag">Nenhuma habilidade informada</div>';
+
+        const card = document.createElement('div');
+        card.className = 'candidate-card';
+        card.style.cursor = 'pointer';
+        card.setAttribute('onclick', "window.location.href='detalhes_candidato.html'");
+        card.innerHTML = `
+          <div class="candidate-top">
+            <div class="profile">
+              <div class="avatar">${student.nome.split(' ').map(p => p.charAt(0)).join('').substring(0,2).toUpperCase()}</div>
+              <div class="candidate-info">
+                <h3>${student.nome}</h3>
+                <span>${student.cidade}</span>
+              </div>
+            </div>
+            <div style="text-align: right; min-width: 120px;">
+              <span class="badge" style="background: #eff6ff; color: #2563eb; padding: 6px 14px; border-radius: 12px; font-weight: 700;">${app.status}</span>
+            </div>
+          </div>
+          <p class="description">Candidato inscrito para a vaga de <strong>${app.titulo}</strong>.</p>
+          <div class="tags">${skillsHTML}</div>
+          <div class="candidate-footer">
+            <div class="projects">⭐ ${skills.length} habilidade${skills.length !== 1 ? 's' : ''}</div>
+            <div class="level">${app.emailAluno || 'E-mail não disponível'}</div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderDashboard(companyName, companyEmail) {
+      const jobs = JSON.parse(localStorage.getItem(`vagas_${companyEmail}`) || '[]');
+      const apps = getAllApplications().filter(app => app.empresa === companyName);
+
+      document.querySelector('.stats .card:nth-child(1) .number').innerText = apps.length;
+      document.querySelector('.stats .card:nth-child(2) .number').innerText = jobs.filter(job => job.status === 'Ativa').length;
+      resultsCount.innerText = `${apps.length} candidato${apps.length !== 1 ? 's' : ''} encontrado${apps.length !== 1 ? 's' : ''}`;
+      renderCandidateCards(apps);
+    }
+
     filterName.addEventListener('input', filterCandidates);
     filterSkill.addEventListener('change', filterCandidates);
     filterLevel.addEventListener('change', filterCandidates);
@@ -275,12 +238,11 @@
         return;
       }
       const empresaLogada = JSON.parse(empresaLogadaRaw);
-      
       const subTitle = document.querySelector('.subtitle');
       if (subTitle) {
         subTitle.innerHTML = `Bem-vindo(a), <strong>${empresaLogada.nome}</strong>! Gerencie suas vagas e encontre os melhores talentos.`;
       }
-      
+      renderDashboard(empresaLogada.nome, empresaLogada.email);
       const logoutBtn = document.querySelector('.logout');
       if (logoutBtn) {
         logoutBtn.addEventListener('click', function(e) {

@@ -82,32 +82,7 @@
           <a href="./portfolio.html" class="link">Ver todos</a>
         </div>
 
-        <div class="cards-row">
-          <article class="card project">
-            <div class="project-head">
-              <h3>Sistema de Gestão de Tarefas</h3>
-              <button class="icon-btn" aria-label="Ver no GitHub"
-                onclick="window.open('https://github.com', '_blank')"><i data-lucide="github"></i></button>
-            </div>
-            <p>Aplicativo web para gerenciar tarefas com autenticação de usuários, categorização e filtros avançados.
-            </p>
-            <div class="tags">
-              <span>React</span><span>TypeScript</span><span>Node.js</span><span>MongoDB</span>
-            </div>
-          </article>
-
-          <article class="card project">
-            <div class="project-head">
-              <h3>API RESTful de E-Commerce</h3>
-              <button class="icon-btn" aria-label="Ver no GitHub"><i data-lucide="github"></i></button>
-            </div>
-            <p>Backend escalável para plataforma de e-commerce com suporte a pagamento, avaliações e carrinho de
-              compras.</p>
-            <div class="tags">
-              <span>Node.js</span><span>Express</span><span>PostgreSQL</span>
-            </div>
-          </article>
-        </div>
+        <div class="cards-row"></div>
       </div>
 
       <div class="col sidebar">
@@ -140,29 +115,7 @@
         <a href="./candidaturas.html" class="link">Ver todas</a>
       </div>
 
-      <div class="apps-row">
-        <article class="card application">
-          <div class="app-head">
-            <div>
-              <h3>Desenvolvedor React Jr.</h3>
-              <p>TechCorp • Porto</p>
-            </div>
-            <span class="status status-pending">Pendente</span>
-          </div>
-          <p class="small-text">Candidatura enviada há 5 dias</p>
-        </article>
-
-        <article class="card application">
-          <div class="app-head">
-            <div>
-              <h3>Desenvolvedor Full Stack</h3>
-              <p>WebDev Solutions • Lisboa</p>
-            </div>
-            <span class="status status-accepted">Aceito</span>
-          </div>
-          <p class="small-text">Entrevista agendada para 20 de maio</p>
-        </article>
-      </div>
+      <div class="apps-row"></div>
     </section>
   </main>
 
@@ -185,24 +138,7 @@
         const projetosKey = `projetos_${alunoLogado.email}`;
         let projetos = JSON.parse(localStorage.getItem(projetosKey) || '[]');
 
-        if (projetos.length === 0 && localStorage.getItem(`has_initialized_portfolio_${alunoLogado.email}`) === null) {
-          projetos = [
-            {
-              titulo: "Sistema de Gestão de Tarefas",
-              descricao: "Aplicativo web completo para gerenciar tarefas com autenticação de usuários, categorização, filtros de status, ordenação e datas de vencimento. Desenvolvido para melhorar a produtividade pessoal ou de pequenas equipes.",
-              tags: "React, TypeScript, Node.js, MongoDB",
-              link: "https://github.com/usuario/gestao-tarefas"
-            },
-            {
-              titulo: "Landing Page Responsiva",
-              descricao: "Landing page moderna e extremamente responsiva para uma startup de tecnologia, contendo seções de depoimentos, preços dinâmicos, animações fluidas ao rolar a página e formulário de contato integrado.",
-              tags: "React, Tailwind CSS, Framer Motion",
-              link: "https://github.com/usuario/landing-page-startup"
-            }
-          ];
-          localStorage.setItem(projetosKey, JSON.stringify(projetos));
-          localStorage.setItem(`has_initialized_portfolio_${alunoLogado.email}`, 'true');
-        }
+        // Não inicializa portfólio automático para novos usuários.
 
         projectsRow.innerHTML = '';
 
@@ -261,14 +197,7 @@
         const candidaturasKey = `candidaturas_${alunoLogado.email}`;
         let candidaturas = JSON.parse(localStorage.getItem(candidaturasKey) || '[]');
 
-        if (candidaturas.length === 0) {
-          candidaturas = [
-            { titulo: 'Desenvolvedor React Jr.', empresa: 'TechCorp', status: 'Pendente', data: '10/05/2026', msgExtra: 'Candidatura em análise preliminar' },
-            { titulo: 'Desenvolvedor Full Stack', empresa: 'WebDev Solutions', status: 'Entrevista', data: '15/05/2026', msgExtra: 'Entrevista agendada para 20 de maio' },
-            { titulo: 'Estágio Frontend', empresa: 'DesignStudio', status: 'Aceito', data: '01/05/2026', msgExtra: 'Parabéns! Processo seletivo concluído com sucesso' }
-          ];
-          localStorage.setItem(candidaturasKey, JSON.stringify(candidaturas));
-        }
+        // Usuário novo não recebe candidaturas falsas automaticamente.
 
         appsRow.innerHTML = '';
         candidaturas.forEach(cand => {
@@ -276,11 +205,19 @@
           card.className = 'card application';
 
           let statusClass = 'status-pending';
-          if (cand.status.toLowerCase() === 'aceito') statusClass = 'status-accepted';
-          if (cand.status.toLowerCase() === 'recusado') statusClass = 'status-rejected';
-          if (cand.status.toLowerCase() === 'entrevista') statusClass = 'status-interview';
+          const statusKey = cand.status.toLowerCase();
+          if (statusKey === 'aceito') statusClass = 'status-accepted';
+          if (statusKey === 'recusado' || statusKey === 'rejeitado') statusClass = 'status-rejected';
+          if (statusKey === 'entrevista') statusClass = 'status-interview';
 
-          const subtitleText = cand.msgExtra || `Candidatura enviada em ${cand.data}`;
+          let subtitleText = `Enviada em ${cand.data}`;
+          if (statusKey === 'entrevista') {
+            subtitleText = cand.msgExtra || `Entrevista agendada para ${cand.data}`;
+          } else if (statusKey === 'aceito') {
+            subtitleText = cand.msgExtra || 'Parabéns! Processo seletivo concluído com sucesso.';
+          } else if (statusKey === 'recusado' || statusKey === 'rejeitado') {
+            subtitleText = cand.msgExtra || 'Infelizmente sua candidatura não foi aprovada.';
+          }
 
           card.innerHTML = `
             <div class="app-head">
