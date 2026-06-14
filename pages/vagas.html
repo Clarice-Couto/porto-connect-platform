@@ -169,27 +169,39 @@
         return;
       }
 
+      const alunoLogadoRaw = localStorage.getItem('aluno_logado');
       const alunoLogado = JSON.parse(alunoLogadoRaw || '{}');
       const studentSkills = alunoLogado.skills || '';
 
       jobList.forEach(job => {
         const matchPercent = db.calculateMatch(job.skills || '', studentSkills);
-        const matchClass = matchPercent > 70 ? 'style="color: #16a34a;"' : matchPercent > 40 ? 'style="color: #ca8a04;"' : 'style="color: #64748b;"';
+        const matchColor = matchPercent > 70 ? '#16a34a' : matchPercent > 30 ? '#ca8a04' : '#64748b';
+        
+        const jobSkillsArr = (job.skills || '').split(',').map(s => s.trim()).filter(Boolean);
+        const jobSkillsHTML = jobSkillsArr.map(s => `<span style="font-size: 10px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #475569; margin-right: 4px;">${s}</span>`).join('');
 
         const article = document.createElement('article');
         article.className = 'card job';
+        article.style.borderTop = `4px solid ${matchColor}`;
         article.innerHTML = `
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
             <span class="badge" style="background: #dbeafe; color: #1e40af; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">${job.categoria || 'Geral'}</span>
-            <div style="text-align: right;">
-              <div style="font-size: 9px; font-weight: 700; text-transform: uppercase; color: #94a3b8;">Smart Match</div>
-              <div ${matchClass} style="font-size: 16px; font-weight: 800;">${matchPercent}%</div>
+            <div style="text-align: right; background: ${matchColor}10; padding: 4px 8px; border-radius: 8px;">
+              <div style="font-size: 8px; font-weight: 800; text-transform: uppercase; color: ${matchColor};">Smart Match</div>
+              <div style="font-size: 16px; font-weight: 900; color: ${matchColor};">${matchPercent}%</div>
             </div>
           </div>
-          <h3>${job.titulo}</h3>
-          <p>${job.empresa}</p>
-          <p class="small-text" style="color: #6b7280; font-size: 14px; margin-top: 4px;">${job.modelo} • ${job.tipo}</p>
-          <p style="margin-top: 12px; color: #374151; line-height: 1.6; flex-grow: 1;">${job.descricao || 'Descrição não informada.'}</p>
+          <h3 style="margin-bottom: 4px;">${job.titulo}</h3>
+          <p style="font-weight: 600; color: #2563eb; font-size: 14px;">${job.empresa}</p>
+          <p class="small-text" style="color: #64748b; font-size: 12px; margin-bottom: 8px;">${job.modelo} • ${job.tipo}</p>
+          
+          <div style="margin-bottom: 12px;">
+            <div style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px;">Requisitos:</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 4px;">${jobSkillsHTML || '<span style="font-size: 10px; color: #94a3b8;">Nenhum requisito listado</span>'}</div>
+          </div>
+
+          <p style="color: #374151; line-height: 1.5; font-size: 14px; flex-grow: 1;">${job.descricao || 'Descrição não informada.'}</p>
+          
           <div class="job-actions">
             <button class="btn-apply"></button>
             <button class="btn-save"><i class="fa-regular fa-bookmark" style="font-size: 18px;"></i></button>

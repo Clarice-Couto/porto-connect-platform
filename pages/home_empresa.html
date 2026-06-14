@@ -200,14 +200,17 @@
         }).sort((a, b) => b.matchPercent - a.matchPercent);
 
         studentsWithMatch.forEach(student => {
-          const skills = (student.skills || '').split(',').map(s => s.trim()).filter(Boolean);
-          const skillsHTML = skills.length > 0 ? skills.map(skill => `<div class="tag">${skill}</div>`).join('') : '<div class="tag">Nenhuma habilidade informada</div>';
+          const skillsArr = (student.skills || '').split(',').map(s => s.trim()).filter(Boolean);
+          const skillsHTML = skillsArr.length > 0 ? skillsArr.map(skill => `<div class="tag">${skill}</div>`).join('') : '<div class="tag">Nenhuma habilidade</div>';
 
-          const matchClass = student.matchPercent > 70 ? 'style="color: #16a34a;"' : student.matchPercent > 40 ? 'style="color: #ca8a04;"' : 'style="color: #64748b;"';
+          // Cores baseadas no Match
+          let matchColor = '#64748b'; // Cinza (baixo)
+          if (student.matchPercent > 70) matchColor = '#16a34a'; // Verde (alto)
+          else if (student.matchPercent > 30) matchColor = '#ca8a04'; // Amarelo (médio)
 
           const card = document.createElement('div');
           card.className = 'candidate-card';
-          card.style.cursor = 'pointer';
+          card.style.borderLeft = `5px solid ${matchColor}`;
           card.innerHTML = `
             <div class="candidate-top">
               <div class="profile">
@@ -217,17 +220,13 @@
                   <span>${student.cidade || 'Local não informado'}</span>
                 </div>
               </div>
-              <div class="match-badge" style="text-align: right;">
-                <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: 2px;">Smart Match</div>
-                <div ${matchClass} style="font-size: 18px; font-weight: 800;">${student.matchPercent}%</div>
+              <div class="match-indicator" style="background: ${matchColor}15; padding: 10px; border-radius: 12px; text-align: center; min-width: 80px;">
+                <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: ${matchColor}; letter-spacing: 0.5px;">Smart Match</div>
+                <div style="font-size: 20px; font-weight: 900; color: ${matchColor};">${student.matchPercent}%</div>
               </div>
             </div>
-            <p class="description">${student.sobre || 'Estudante em busca de novas oportunidades e desafios técnicos.'}</p>
+            <p class="description">${student.sobre || 'Estudante focado em desenvolvimento de software.'}</p>
             <div class="tags">${skillsHTML}</div>
-            <div class="candidate-footer">
-              <div class="projects">⭐ ${skills.length} habilidade${skills.length !== 1 ? 's' : ''}</div>
-              <div class="level">${student.email}</div>
-            </div>
           `;
           card.addEventListener('click', () => window.location.href = `detalhes_candidato.html?email=${encodeURIComponent(student.email)}`);
           container.appendChild(card);
