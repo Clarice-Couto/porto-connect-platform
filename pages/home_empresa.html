@@ -141,26 +141,32 @@
       const tabExplorar = document.getElementById('tabExplorar');
 
       function filterCandidates() {
-        const nameTerm = filterName.value.toLowerCase();
-        const skillTerm = filterSkill.value.toLowerCase();
-        const levelTerm = filterLevel.value.toLowerCase();
+        const nameTerm = filterName.value.trim().toLowerCase();
+        const skillTerm = filterSkill.value.trim().toLowerCase();
+        const levelTerm = filterLevel.value.trim().toLowerCase();
         const cards = Array.from(document.querySelectorAll('.candidate-card'));
 
         let visibleCount = 0;
 
         cards.forEach(card => {
+          // Filtro de Nome
           const name = card.querySelector('h3').innerText.toLowerCase();
-          const skills = Array.from(card.querySelectorAll('.tag')).map(t => t.innerText.toLowerCase());
-          const hasSkill = skillTerm === "" || skills.some(tag => tag.includes(skillTerm));
+          const matchName = nameTerm === "" || name.includes(nameTerm);
           
-          let hasLevel = true;
+          // Filtro de Habilidade
+          const tags = Array.from(card.querySelectorAll('.tag')).map(t => t.innerText.toLowerCase());
+          const matchSkill = skillTerm === "" || tags.some(tag => tag.includes(skillTerm));
+          
+          // Filtro de Status (apenas no modo Candidatos)
+          let matchStatus = true;
           if (currentView === 'candidates') {
-            const levelBadge = card.querySelector('.badge');
-            const level = levelBadge ? levelBadge.innerText.toLowerCase() : "";
-            hasLevel = levelTerm === "" || level === levelTerm;
+            const statusBadge = card.querySelector('.badge');
+            const status = statusBadge ? statusBadge.innerText.toLowerCase() : "";
+            matchStatus = levelTerm === "" || status === levelTerm;
           }
 
-          if (name.includes(nameTerm) && hasSkill && hasLevel) {
+          // Só exibe se passar em TODOS os filtros que NÃO estão vazios
+          if (matchName && matchSkill && matchStatus) {
             card.style.display = '';
             visibleCount++;
           } else {
