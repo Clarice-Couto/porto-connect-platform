@@ -135,3 +135,18 @@
     }
     window.location.href = 'vagas_empresa.html';
   });
+
+  const logoutBtn = document.querySelector('.logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async function(e) {
+      e.preventDefault();
+      const confirmar = confirm("Deseja sair da plataforma?");
+      if (confirmar) {
+        await db.signOut();
+        window.location.href = 'login_empresa.html';
+      }
+    });
+  }
+</script>
+</body>
+</html>

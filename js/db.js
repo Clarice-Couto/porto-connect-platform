@@ -4,7 +4,9 @@ const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
 let supabaseClient = null;
 
 const isSupabaseConfigured = () => {
-  return SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_URL.includes('YOUR_') && !SUPABASE_ANON_KEY.includes('YOUR_');
+  return SUPABASE_URL && SUPABASE_ANON_KEY && 
+         !SUPABASE_URL.includes('YOUR_') && !SUPABASE_ANON_KEY.includes('YOUR_') &&
+         !SUPABASE_URL.includes('%%SUPABASE_') && !SUPABASE_ANON_KEY.includes('%%SUPABASE_');
 };
 
 const initSupabaseClient = async () => {
@@ -80,10 +82,10 @@ const db = {
 
     const userId = data.user?.id || null;
     const profile = { user_id: userId, nome, email, cidade, sobre, skills, role: 'student' };
-    const insert = await client.from('students').insert([profile]);
+    const insert = await client.from('students').insert([profile]).select().single();
     if (insert.error) return { error: insert.error };
     cacheStudentProfile({ ...profile, senha: password });
-    return { data: insert.data[0], error: null };
+    return { data: insert.data, error: null };
   },
 
   async signInStudent(email, password) {
@@ -125,10 +127,10 @@ const db = {
     if (error) return { error };
     const userId = data.user?.id || null;
     const profile = { user_id: userId, nome, email, cidade, sobre, role: 'company' };
-    const insert = await client.from('companies').insert([profile]);
+    const insert = await client.from('companies').insert([profile]).select().single();
     if (insert.error) return { error: insert.error };
     cacheCompanyProfile(profile);
-    return { data: insert.data[0], error: null };
+    return { data: insert.data, error: null };
   },
 
   async signInCompany(email, password) {

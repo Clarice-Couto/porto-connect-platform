@@ -319,6 +319,14 @@
 
     // Inicializar com as vagas já publicadas pelas empresas
     initPage();
+
+    document.querySelector('.logout')?.addEventListener('click', async function(e) {
+      e.preventDefault();
+      if (confirm("Deseja sair da plataforma?")) {
+        await db.signOut();
+        window.location.href = 'login_aluno.html';
+      }
+    });
   </script>
 </body>
 </html>

@@ -154,6 +154,14 @@
         }
         window.location.href = 'vagas_empresa.html';
       });
+
+      document.querySelector('.logout')?.addEventListener('click', async function(e) {
+        e.preventDefault();
+        if (confirm("Deseja sair da plataforma?")) {
+          await db.signOut();
+          window.location.href = 'login_empresa.html';
+        }
+      });
     })();
   </script>
 </body>

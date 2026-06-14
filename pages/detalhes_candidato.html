@@ -9,6 +9,8 @@
 <link rel="stylesheet" href="../css/perfil.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="../js/init-supabase.js"></script>
+<script src="../js/db.js"></script>
 <style>
 .contact-actions { display: flex; gap: 16px; margin-top: 24px; }
 .btn-primary { background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 600; text-decoration: none; transition: 0.3s; display: flex; align-items: center; gap: 8px; border: none; cursor: pointer; }
@@ -49,30 +51,29 @@
   <div class="card">
     <div class="profile-top">
       <div class="profile-left">
-        <div class="avatar">
-          AE
+        <div class="avatar" id="avatarText">
+          --
         </div>
         <div class="profile-info">
-          <h1>Amanda Estephany</h1>
+          <h1 id="candidatoNome">Carregando...</h1>
           <div class="info-item">
             <i class="fa-regular fa-envelope"></i>
-            <span>amanda.estephany@email.com</span>
+            <span id="candidatoEmail">--</span>
           </div>
           <div class="info-item">
             <i class="fa-solid fa-location-dot"></i>
-            <span>Recife, PE</span>
+            <span id="candidatoCidade">--</span>
           </div>
         </div>
       </div>
       
       <div style="text-align: right;">
-        <span class="badge" style="background: #eff6ff; color: #2563eb; padding: 6px 14px; border-radius: 12px; font-weight: 700;">Intermediário</span>
+        <span class="badge" id="candidatoLevel" style="background: #eff6ff; color: #2563eb; padding: 6px 14px; border-radius: 12px; font-weight: 700;">--</span>
       </div>
     </div>
 
-
     <div class="contact-actions">
-      <button class="btn-primary" onclick="alert('Mensagem enviada com sucesso!')">
+      <button class="btn-primary" onclick="window.location.href='mailto:' + document.getElementById('candidatoEmail').innerText">
         <i data-lucide="mail"></i> Entrar em contato
       </button>
       <button class="btn-secondary" onclick="alert('Convite para processo seletivo enviado!')">
@@ -83,49 +84,143 @@
 
   <div class="card">
     <div class="section-title">Sobre o Candidato</div>
-    <p>Estudante de desenvolvimento de software apaixonada por tecnologia. Focada em soluções robustas usando o ecossistema .NET e Java. Tenho facilidade para aprender rápido e trabalhar em equipe, buscando sempre as melhores práticas de Clean Code.</p>
+    <p id="candidatoSobre">Carregando informações...</p>
   </div>
 
   <div class="card">
     <div class="section-title">Habilidades</div>
-    <div class="skills">
-      <div class="skill">Java</div>
-      <div class="skill">C#</div>
-      <div class="skill">.NET</div>
-      <div class="skill">SQL Server</div>
-      <div class="skill">Git</div>
+    <div class="skills" id="candidatoSkills">
+      <!-- Preenchido dinamicamente -->
     </div>
   </div>
 
   <div class="card">
     <div class="section-title">Projetos em Destaque</div>
-    
-    <div class="project-card">
-      <h3>API de Gestão Financeira</h3>
-      <p>API REST desenvolvida em C# com .NET Core 8, implementando autenticação JWT, Entity Framework e arquitetura em camadas. Cobertura de testes unitários com xUnit.</p>
-      <div class="tags" style="margin-top: 10px;">
-        <div class="tag" style="background: #f3f4f6; color: #374151; font-size: 12px;">C#</div>
-        <div class="tag" style="background: #f3f4f6; color: #374151; font-size: 12px;">.NET</div>
-        <div class="tag" style="background: #f3f4f6; color: #374151; font-size: 12px;">SQL</div>
-      </div>
-    </div>
-
-    <div class="project-card">
-      <h3>Sistema de Reservas</h3>
-      <p>Aplicação full-stack com backend em Java (Spring Boot) e front-end básico em HTML/CSS para gerenciamento de reservas de salas comerciais.</p>
-      <div class="tags" style="margin-top: 10px;">
-        <div class="tag" style="background: #f3f4f6; color: #374151; font-size: 12px;">Java</div>
-        <div class="tag" style="background: #f3f4f6; color: #374151; font-size: 12px;">Spring Boot</div>
-      </div>
+    <div id="candidatoProjetos">
+      <!-- Preenchido dinamicamente -->
     </div>
   </div>
  </div>
 
  <script>
-  lucide.createIcons();
-  document.getElementById('menuToggle').addEventListener('click', () => {
-    document.getElementById('navLinks').classList.toggle('active');
-  });
+  (async function() {
+    lucide.createIcons();
+    document.getElementById('menuToggle').addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
+    });
+
+    const empresaLogadaRaw = localStorage.getItem('empresa_logado');
+    if (!empresaLogadaRaw) {
+      window.location.href = 'login_empresa.html';
+      return;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const email = urlParams.get('email');
+    if (!email) {
+      alert('E-mail do candidato não fornecido.');
+      window.location.href = 'home_empresa.html';
+      return;
+    }
+
+    const student = await db.getStudentByEmail(email);
+    if (!student) {
+      alert('Candidato não encontrado.');
+      window.location.href = 'home_empresa.html';
+      return;
+    }
+
+    document.title = `Porto Connect - Candidato ${student.nome}`;
+    document.getElementById('candidatoNome').innerText = student.nome;
+    document.getElementById('candidatoEmail').innerText = student.email;
+    document.getElementById('candidatoCidade').innerText = student.cidade || 'Não informado';
+    document.getElementById('candidatoSobre').innerText = student.sobre || 'Nenhuma descrição fornecida.';
+
+    const partesNome = (student.nome || '').split(' ');
+    let iniciais = '';
+    partesNome.forEach(n => { iniciais += (n.charAt(0) || ''); });
+    document.getElementById('avatarText').innerText = iniciais.substring(0, 2).toUpperCase() || '--';
+
+    const skills = (student.skills || '').split(',').map(s => s.trim()).filter(Boolean);
+    const skillsContainer = document.getElementById('candidatoSkills');
+    skillsContainer.innerHTML = '';
+    if (skills.length === 0) {
+      skillsContainer.innerHTML = '<div class="skill">Nenhuma habilidade informada</div>';
+    } else {
+      skills.forEach(skill => {
+        const div = document.createElement('div');
+        div.classList.add('skill');
+        div.innerText = skill;
+        skillsContainer.appendChild(div);
+      });
+    }
+
+    // Calcular nível com base no número de habilidades
+    const levelBadge = document.getElementById('candidatoLevel');
+    if (skills.length < 3) {
+      levelBadge.innerText = 'Iniciante';
+      levelBadge.style.background = '#f1f5f9';
+      levelBadge.style.color = '#475569';
+    } else if (skills.length <= 5) {
+      levelBadge.innerText = 'Intermediário';
+      levelBadge.style.background = '#eff6ff';
+      levelBadge.style.color = '#2563eb';
+    } else {
+      levelBadge.innerText = 'Avançado';
+      levelBadge.style.background = '#ecfdf5';
+      levelBadge.style.color = '#059669';
+    }
+
+    const projectsContainer = document.getElementById('candidatoProjetos');
+    projectsContainer.innerHTML = '';
+    const projects = await db.getStudentProjects(email);
+    if (projects.length === 0) {
+      projectsContainer.innerHTML = `
+        <div style="padding: 20px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1;">
+          Nenhum projeto cadastrado no portfólio deste candidato.
+        </div>
+      `;
+    } else {
+      projects.forEach(proj => {
+        const tagsArr = (proj.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+        const tagsHTML = tagsArr.map(tag => `
+          <div class="tag" style="background: #f3f4f6; color: #374151; font-size: 12px; padding: 4px 8px; border-radius: 6px; display: inline-block; margin-right: 6px; margin-top: 4px;">
+            ${tag}
+          </div>
+        `).join('');
+
+        const projectLinkHTML = proj.link 
+          ? `<a href="${proj.link}" target="_blank" style="display:inline-flex; align-items:center; gap:6px; color:#2563eb; text-decoration:none; font-weight:600; font-size:14px; margin-top:12px;">
+               <i class="fa-brands fa-github"></i> Ver repositório
+             </a>`
+          : '';
+
+        const div = document.createElement('div');
+        div.className = 'project-card';
+        div.innerHTML = `
+          <h3>${proj.titulo}</h3>
+          <p>${proj.descricao}</p>
+          <div class="tags" style="margin-top: 10px; display: flex; flex-wrap: wrap;">
+            ${tagsHTML}
+          </div>
+          ${projectLinkHTML}
+        `;
+        projectsContainer.appendChild(div);
+      });
+    }
+
+    const logoutBtn = document.querySelector('.logout');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        const confirmar = confirm("Deseja sair da plataforma?");
+        if (confirmar) {
+          await db.signOut();
+          window.location.href = 'login_empresa.html';
+        }
+      });
+    }
+  })();
  </script>
 </body>
 </html>

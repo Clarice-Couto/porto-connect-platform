@@ -279,14 +279,16 @@
 
     carregarPerfil();
 
-    document.getElementById("logoutBtn").addEventListener("click", (e) => {
+    const handleLogout = async (e) => {
       e.preventDefault();
       const confirmar = confirm("Deseja sair da plataforma?");
       if(confirmar){
-        localStorage.removeItem("aluno_logado");
+        await db.signOut();
         window.location.href = "login_aluno.html";
       }
-    });
+    };
+    document.getElementById("logoutBtn")?.addEventListener("click", handleLogout);
+    document.querySelector(".logout")?.addEventListener("click", handleLogout);
     
     lucide.createIcons();
     document.getElementById('menuToggle')?.addEventListener('click', () => {

@@ -271,7 +271,7 @@
           <div class="tags">${tagsHTML}</div>
           <div class="card-actions">
             <a href="#" class="view" onclick="verDetalhes(${idx}); event.preventDefault();"><i class="fa-solid fa-eye"></i> Ver mais</a>
-            <a href="novo_projeto.html?edit=${idx}" class="edit"><i class="fa-solid fa-pen"></i> Editar</a>
+            <a href="novo_projeto.html?edit=${proj.id}" class="edit"><i class="fa-solid fa-pen"></i> Editar</a>
             <a href="#" class="delete" onclick="excluirProjeto(${idx}); event.preventDefault();"><i class="fa-solid fa-trash"></i> Excluir</a>
           </div>
         `;
@@ -336,7 +336,7 @@
       }
     });
 
-    await initProjects();
+    initProjects();
   </script>
 </body>
 </html>
