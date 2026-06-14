@@ -1,4 +1,5 @@
 const { Redis } = require('@upstash/redis');
+const crypto = require('crypto');
 
 const DB_KEY = 'porto-connect:data';
 
@@ -57,7 +58,7 @@ function runOperation(db, op, payload = {}) {
     case 'signUpStudent': {
       const { nome, email, password, cidade = '', sobre = '', skills = '' } = payload;
       if (db.students.some((user) => user.email === email)) {
-        return { data: null, error: { message: 'Este e-mail já está cadastrado!' } };
+        return { data: null, error: { message: 'Este e-mail jï¿½ estï¿½ cadastrado!' } };
       }
       const profile = { id: crypto.randomUUID(), nome, email, senha: password, cidade, sobre, skills, role: 'student' };
       db.students.push(profile);
@@ -74,7 +75,7 @@ function runOperation(db, op, payload = {}) {
     case 'signUpCompany': {
       const { nome, email, password, cidade = '', sobre = '' } = payload;
       if (db.companies.some((user) => user.email === email)) {
-        return { data: null, error: { message: 'Este e-mail corporativo já está cadastrado!' } };
+        return { data: null, error: { message: 'Este e-mail corporativo jï¿½ estï¿½ cadastrado!' } };
       }
       const profile = { id: crypto.randomUUID(), nome, email, senha: password, cidade, sobre, role: 'company' };
       db.companies.push(profile);
@@ -100,14 +101,14 @@ function runOperation(db, op, payload = {}) {
 
     case 'updateStudentProfile': {
       const idx = db.students.findIndex((item) => item.email === payload.email);
-      if (idx < 0) return { data: null, error: { message: 'Aluno não encontrado' } };
+      if (idx < 0) return { data: null, error: { message: 'Aluno nï¿½o encontrado' } };
       db.students[idx] = { ...db.students[idx], ...payload };
       return { data: db.students[idx], error: null };
     }
 
     case 'updateCompanyProfile': {
       const idx = db.companies.findIndex((item) => item.email === payload.email);
-      if (idx < 0) return { data: null, error: { message: 'Empresa não encontrada' } };
+      if (idx < 0) return { data: null, error: { message: 'Empresa nï¿½o encontrada' } };
       db.companies[idx] = { ...db.companies[idx], ...payload };
       return { data: db.companies[idx], error: null };
     }
@@ -145,7 +146,7 @@ function runOperation(db, op, payload = {}) {
       const idx = db.vacancies.findIndex(
         (item) => item.id === payload.vacancyId && item.company_email === payload.companyEmail
       );
-      if (idx < 0) return { data: null, error: { message: 'Vaga não encontrada' } };
+      if (idx < 0) return { data: null, error: { message: 'Vaga nï¿½o encontrada' } };
       db.vacancies[idx] = { ...db.vacancies[idx], ...payload.vacancy };
       return { data: mapVacancy(db.vacancies[idx]), error: null };
     }
@@ -258,13 +259,13 @@ function runOperation(db, op, payload = {}) {
           item.vacancy_title === payload.titulo &&
           item.company_email === payload.companyEmail
       );
-      if (idx < 0) return { data: null, error: { message: 'Candidatura não encontrada' } };
+      if (idx < 0) return { data: null, error: { message: 'Candidatura nï¿½o encontrada' } };
       db.applications[idx].status = payload.novoStatus;
       return { data: mapApplication(db.applications[idx]), error: null };
     }
 
     default:
-      return { data: null, error: { message: `Operação desconhecida: ${op}` } };
+      return { data: null, error: { message: `Operaï¿½ï¿½o desconhecida: ${op}` } };
   }
 }
 
@@ -282,13 +283,13 @@ module.exports = async function handler(req, res) {
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: { message: 'Método não permitido' } });
+    return res.status(405).json({ error: { message: 'Mï¿½todo nï¿½o permitido' } });
   }
 
   try {
     const { op, payload } = req.body || {};
     if (!op) {
-      return res.status(400).json({ error: { message: 'Operação não informada' } });
+      return res.status(400).json({ error: { message: 'Operaï¿½ï¿½o nï¿½o informada' } });
     }
 
     const db = await loadDb();
@@ -299,7 +300,7 @@ module.exports = async function handler(req, res) {
     console.error('API DB error:', error);
     return res.status(500).json({
       error: {
-        message: 'Banco indisponível. Conecte Redis/KV em Vercel Storage e redeploy o projeto.',
+        message: 'Banco indisponï¿½vel. Conecte Redis/KV em Vercel Storage e redeploy o projeto.',
       },
     });
   }
