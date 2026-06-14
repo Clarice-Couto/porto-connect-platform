@@ -266,6 +266,33 @@
     filterName.addEventListener('input', filterCandidates);
     filterSkill.addEventListener('change', filterCandidates);
     filterLevel.addEventListener('change', filterCandidates);
+
+    // Verificar se a empresa está logada
+    (function() {
+      const empresaLogadaRaw = localStorage.getItem('empresa_logado');
+      if (!empresaLogadaRaw) {
+        window.location.href = 'login_empresa.html';
+        return;
+      }
+      const empresaLogada = JSON.parse(empresaLogadaRaw);
+      
+      const subTitle = document.querySelector('.subtitle');
+      if (subTitle) {
+        subTitle.innerHTML = `Bem-vindo(a), <strong>${empresaLogada.nome}</strong>! Gerencie suas vagas e encontre os melhores talentos.`;
+      }
+      
+      const logoutBtn = document.querySelector('.logout');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const confirmar = confirm("Deseja sair da plataforma?");
+          if (confirmar) {
+            localStorage.removeItem('empresa_logado');
+            window.location.href = 'login_empresa.html';
+          }
+        });
+      }
+    })();
   </script>
 </body>
 </html>

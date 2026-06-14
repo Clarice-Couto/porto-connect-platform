@@ -56,6 +56,26 @@
             </form>
         </div>
     </main>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const senha = document.getElementById('senha').value;
+
+            let usuarios = JSON.parse(localStorage.getItem('usuarios_aluno') || '[]');
+
+            const usuario = usuarios.find(user => user.email === email && user.senha === senha);
+
+            if (usuario) {
+                localStorage.setItem('aluno_logado', JSON.stringify(usuario));
+                localStorage.setItem('perfilAluno', JSON.stringify(usuario));
+                window.location.href = 'home_aluno.html';
+            } else {
+                alert('E-mail ou senha incorretos!');
+            }
+        });
+    </script>
 </body>
 
 </html>

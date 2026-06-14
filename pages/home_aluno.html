@@ -161,5 +161,30 @@
   </main>
 
   <script src="../js/script_dashboard.js"></script>
+  <script>
+    (function() {
+      const alunoLogadoRaw = localStorage.getItem('aluno_logado');
+      if (!alunoLogadoRaw) {
+        window.location.href = 'login_aluno.html';
+        return;
+      }
+      const alunoLogado = JSON.parse(alunoLogadoRaw);
+      const h1Greeting = document.querySelector('.hero h1');
+      if (h1Greeting) {
+        h1Greeting.innerHTML = `Olá, ${alunoLogado.nome}! <span class="wave">👋</span>`;
+      }
+      const logoutBtn = document.querySelector('.logout');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const confirmar = confirm("Deseja sair da plataforma?");
+          if (confirmar) {
+            localStorage.removeItem('aluno_logado');
+            window.location.href = 'login_aluno.html';
+          }
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

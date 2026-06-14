@@ -219,6 +219,21 @@
 
       localStorage.setItem("perfilAluno", JSON.stringify(perfil));
 
+      const alunoLogadoRaw = localStorage.getItem("aluno_logado");
+      if (alunoLogadoRaw) {
+        const alunoLogado = JSON.parse(alunoLogadoRaw);
+        const oldEmail = alunoLogado.email;
+        const updatedAluno = { ...alunoLogado, ...perfil };
+        localStorage.setItem("aluno_logado", JSON.stringify(updatedAluno));
+
+        let usuarios = JSON.parse(localStorage.getItem("usuarios_aluno") || "[]");
+        const idx = usuarios.findIndex(u => u.email === oldEmail);
+        if (idx !== -1) {
+          usuarios[idx] = { ...usuarios[idx], ...perfil };
+          localStorage.setItem("usuarios_aluno", JSON.stringify(usuarios));
+        }
+      }
+
       alert("Perfil atualizado com sucesso!");
 
       modal.style.display = "none";
@@ -226,6 +241,11 @@
 
     function carregarPerfil(){
       let dados = localStorage.getItem("perfilAluno");
+      const alunoLogadoRaw = localStorage.getItem("aluno_logado");
+      if (!dados && alunoLogadoRaw) {
+        localStorage.setItem("perfilAluno", alunoLogadoRaw);
+        dados = alunoLogadoRaw;
+      }
       if(!dados){
         const mockPerfil = {
           nome: "João da Silva",
@@ -271,6 +291,7 @@
       e.preventDefault();
       const confirmar = confirm("Deseja sair da plataforma?");
       if(confirmar){
+        localStorage.removeItem("aluno_logado");
         window.location.href = "login_aluno.html";
       }
     });

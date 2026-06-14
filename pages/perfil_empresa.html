@@ -189,12 +189,33 @@
       };
 
       localStorage.setItem("perfilEmpresa", JSON.stringify(perfil));
+
+      const empresaLogadaRaw = localStorage.getItem("empresa_logado");
+      if (empresaLogadaRaw) {
+        const empresaLogada = JSON.parse(empresaLogadaRaw);
+        const oldEmail = empresaLogada.email;
+        const updatedEmpresa = { ...empresaLogada, ...perfil };
+        localStorage.setItem("empresa_logado", JSON.stringify(updatedEmpresa));
+
+        let usuarios = JSON.parse(localStorage.getItem("usuarios_empresa") || "[]");
+        const idx = usuarios.findIndex(u => u.email === oldEmail);
+        if (idx !== -1) {
+          usuarios[idx] = { ...usuarios[idx], ...perfil };
+          localStorage.setItem("usuarios_empresa", JSON.stringify(usuarios));
+        }
+      }
+
       alert("Perfil atualizado com sucesso!");
       modal.style.display = "none";
     });
 
     function carregarPerfil(){
       let dados = localStorage.getItem("perfilEmpresa");
+      const empresaLogadaRaw = localStorage.getItem("empresa_logado");
+      if (!dados && empresaLogadaRaw) {
+        localStorage.setItem("perfilEmpresa", empresaLogadaRaw);
+        dados = empresaLogadaRaw;
+      }
       if(!dados){
         const mockPerfil = {
           nome: "TechCorp Brasil",
@@ -240,6 +261,7 @@
       e.preventDefault();
       const confirmar = confirm("Deseja sair da plataforma?");
       if(confirmar){
+        localStorage.removeItem("empresa_logado");
         window.location.href = "login_empresa.html";
       }
     });
