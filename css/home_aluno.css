@@ -141,6 +141,8 @@ a{color:inherit;text-decoration:none}
 }
 .status-pending{background:#fef9c3;color:var(--yellow)}
 .status-accepted{background:var(--green-soft);color:var(--green)}
+.status-interview{background:#f3e8ff;color:#6b21a8}
+.status-rejected{background:var(--red-soft);color:var(--red)}
 
 /* Jobs */
 .job{padding:20px}

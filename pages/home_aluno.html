@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Porto Connect - Dashboard do Aluno</title>
-<link rel="stylesheet" href="../css/home_aluno.css"/>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Porto Connect - Dashboard do Aluno</title>
+  <link rel="stylesheet" href="../css/home_aluno.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body>
   <header class="navbar">
     <div class="nav-inner">
@@ -38,7 +40,7 @@
 
   <main class="container">
     <section class="hero">
-      <h1>Olá, Ana! <span class="wave">👋</span></h1>
+      <h1>Olá! <span class="wave">👋</span></h1>
       <p>Aqui está um resumo da sua jornada</p>
     </section>
 
@@ -84,9 +86,11 @@
           <article class="card project">
             <div class="project-head">
               <h3>Sistema de Gestão de Tarefas</h3>
-              <button class="icon-btn" aria-label="Ver no GitHub" onclick="window.open('https://github.com', '_blank')"><i data-lucide="github"></i></button>
+              <button class="icon-btn" aria-label="Ver no GitHub"
+                onclick="window.open('https://github.com', '_blank')"><i data-lucide="github"></i></button>
             </div>
-            <p>Aplicativo web para gerenciar tarefas com autenticação de usuários, categorização e filtros avançados.</p>
+            <p>Aplicativo web para gerenciar tarefas com autenticação de usuários, categorização e filtros avançados.
+            </p>
             <div class="tags">
               <span>React</span><span>TypeScript</span><span>Node.js</span><span>MongoDB</span>
             </div>
@@ -97,7 +101,8 @@
               <h3>API RESTful de E-Commerce</h3>
               <button class="icon-btn" aria-label="Ver no GitHub"><i data-lucide="github"></i></button>
             </div>
-            <p>Backend escalável para plataforma de e-commerce com suporte a pagamento, avaliações e carrinho de compras.</p>
+            <p>Backend escalável para plataforma de e-commerce com suporte a pagamento, avaliações e carrinho de
+              compras.</p>
             <div class="tags">
               <span>Node.js</span><span>Express</span><span>PostgreSQL</span>
             </div>
@@ -132,7 +137,7 @@
     <section class="applications">
       <div class="section-head">
         <h2>Minhas Candidaturas</h2>
-        <a href="./vagas.html" class="link">Ver todas</a>
+        <a href="./candidaturas.html" class="link">Ver todas</a>
       </div>
 
       <div class="apps-row">
@@ -163,7 +168,7 @@
 
   <script src="../js/script_dashboard.js"></script>
   <script>
-    (function() {
+    (function () {
       const alunoLogadoRaw = localStorage.getItem('aluno_logado');
       if (!alunoLogadoRaw) {
         window.location.href = 'login_aluno.html';
@@ -179,7 +184,7 @@
       if (projectsRow) {
         const projetosKey = `projetos_${alunoLogado.email}`;
         let projetos = JSON.parse(localStorage.getItem(projetosKey) || '[]');
-        
+
         if (projetos.length === 0 && localStorage.getItem(`has_initialized_portfolio_${alunoLogado.email}`) === null) {
           projetos = [
             {
@@ -200,7 +205,7 @@
         }
 
         projectsRow.innerHTML = '';
-        
+
         if (projetos.length === 0) {
           projectsRow.innerHTML = `
             <div style="grid-column: 1 / -1; padding: 30px; background: white; border-radius: 18px; border: 1px dashed #cbd5e1; text-align: center; color: #64748b; width: 100%;">
@@ -213,11 +218,11 @@
           dashboardProjetos.forEach(proj => {
             const article = document.createElement('article');
             article.className = 'card project';
-            
+
             const tagsArr = proj.tags.split(',').map(t => t.trim()).filter(Boolean);
             const tagsHTML = tagsArr.map(tag => `<span>${tag}</span>`).join('');
-            
-            const repoBtn = proj.link 
+
+            const repoBtn = proj.link
               ? `<button class="icon-btn" aria-label="Ver no GitHub" onclick="window.open('${proj.link}', '_blank')"><i data-lucide="github"></i></button>`
               : '';
 
@@ -255,11 +260,12 @@
       if (appsRow) {
         const candidaturasKey = `candidaturas_${alunoLogado.email}`;
         let candidaturas = JSON.parse(localStorage.getItem(candidaturasKey) || '[]');
-        
+
         if (candidaturas.length === 0) {
           candidaturas = [
-            { titulo: 'Desenvolvedor React Jr.', empresa: 'TechCorp', status: 'Pendente', data: '10/05/2026', msgExtra: 'Candidatura enviada há 5 dias' },
-            { titulo: 'Desenvolvedor Full Stack', empresa: 'WebDev Solutions', status: 'Aceito', data: '15/05/2026', msgExtra: 'Entrevista agendada para 20 de maio' }
+            { titulo: 'Desenvolvedor React Jr.', empresa: 'TechCorp', status: 'Pendente', data: '10/05/2026', msgExtra: 'Candidatura em análise preliminar' },
+            { titulo: 'Desenvolvedor Full Stack', empresa: 'WebDev Solutions', status: 'Entrevista', data: '15/05/2026', msgExtra: 'Entrevista agendada para 20 de maio' },
+            { titulo: 'Estágio Frontend', empresa: 'DesignStudio', status: 'Aceito', data: '01/05/2026', msgExtra: 'Parabéns! Processo seletivo concluído com sucesso' }
           ];
           localStorage.setItem(candidaturasKey, JSON.stringify(candidaturas));
         }
@@ -268,10 +274,11 @@
         candidaturas.forEach(cand => {
           const card = document.createElement('article');
           card.className = 'card application';
-          
+
           let statusClass = 'status-pending';
           if (cand.status.toLowerCase() === 'aceito') statusClass = 'status-accepted';
           if (cand.status.toLowerCase() === 'recusado') statusClass = 'status-rejected';
+          if (cand.status.toLowerCase() === 'entrevista') statusClass = 'status-interview';
 
           const subtitleText = cand.msgExtra || `Candidatura enviada em ${cand.data}`;
 
@@ -296,7 +303,7 @@
 
       const logoutBtn = document.querySelector('.logout');
       if (logoutBtn) {
-        logoutBtn.addEventListener('click', function(e) {
+        logoutBtn.addEventListener('click', function (e) {
           e.preventDefault();
           const confirmar = confirm("Deseja sair da plataforma?");
           if (confirmar) {
@@ -308,4 +315,5 @@
     })();
   </script>
 </body>
+
 </html>

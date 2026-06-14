@@ -357,6 +357,7 @@
         let statusClass = 'status-pending';
         if (cand.status.toLowerCase() === 'aceito') statusClass = 'status-accepted';
         if (cand.status.toLowerCase() === 'recusado') statusClass = 'status-rejected';
+        if (cand.status.toLowerCase() === 'entrevista') statusClass = 'status-interview';
 
         const dateText = cand.msgExtra || `Enviada em ${cand.data}`;
 
